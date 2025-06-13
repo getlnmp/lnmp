@@ -19,7 +19,7 @@ Install_ImageMagic()
             yum -y install epel-release
         fi
         Get_Dist_Version
-        Get_Country
+  #      Get_Country
         if [ "${country}" = "CN" ]; then
             sed -e 's!^metalink=!#metalink=!g' \
                 -e 's!^#baseurl=!baseurl=!g' \
@@ -40,10 +40,10 @@ Install_ImageMagic()
         echo "ImageMagick already exists."
     else
         if echo "${Cur_PHP_Version}" | grep -Eqi '^5.2.';then
-            Download_Files ${Download_Mirror}/web/imagemagick/ImageMagick-6.9.9-27.tar.gz ImageMagick-6.9.9-27.tar.gz
-            Tar_Cd ImageMagick-6.9.9-27.tar.gz ImageMagick-6.9.9-27
+            Download_Files ${ImageMagickold_DL} ImageMagick-6.9.9-51.tar.gz
+            Tar_Cd ImageMagick-6.9.9-51.tar.gz ImageMagick-6.9.9-51
         else
-            Download_Files ${Download_Mirror}/web/imagemagick/${ImageMagick_Ver}.tar.xz ${ImageMagick_Ver}.tar.xz
+            Download_Files ${ImageMagick_DL} ${ImageMagick_Ver}.tar.xz
             Tar_Cd ${ImageMagick_Ver}.tar.xz ${ImageMagick_Ver}
         fi
 
@@ -54,10 +54,10 @@ Install_ImageMagic()
     fi
 
     if echo "${Cur_PHP_Version}" | grep -Eqi '^5.2.';then
-        Download_Files ${Download_Mirror}/web/imagick/imagick-3.1.2.tgz imagick-3.1.2.tgz
+        Download_Files ${Imagickold_DL} imagick-3.1.2.tgz
         Tar_Cd imagick-3.1.2.tgz imagick-3.1.2
     else
-        Download_Files ${Download_Mirror}/web/imagick/${Imagick_Ver}.tgz ${Imagick_Ver}.tgz
+        Download_Files ${Imagick_DL} ${Imagick_Ver}.tgz
         Tar_Cd ${Imagick_Ver}.tgz ${Imagick_Ver}
     fi
     ${PHP_Path}/bin/phpize
