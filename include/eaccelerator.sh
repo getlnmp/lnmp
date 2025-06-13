@@ -56,8 +56,8 @@ Install_Dev_eA()
         exit 1
     fi
 
-    Download_Files ${eaccelerator42067_DL} eaccelerator-42067.zip
-    unzip eaccelerator-42067.zip
+    Download_Files ${eaccelerator42067_DL} 42067ac7e2d55caa5d060580489f5043357ffbe2.zip
+    unzip 42067ac7e2d55caa5d060580489f5043357ffbe2.zip
     cd eaccelerator-42067ac7e2d55caa5d060580489f5043357ffbe2
     ${PHP_Path}/bin/phpize
     ./configure --enable-eaccelerator=shared --with-php-config=${PHP_Path}/bin/php-config
