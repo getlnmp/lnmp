@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
 
-#Install eaccelerator 0.9.5.3
+#Install eaccelerator 0.9.5.2
 Install_Old_eA()
 {
-    if [ -s eaccelerator-0.9.5.3 ]; then
-        rm -rf eaccelerator-0.9.5.3/
+    if [ -s eaccelerator-0.9.5.2 ]; then
+        rm -rf eaccelerator-0.9.5.2/
     fi
 
     if echo "${Cur_PHP_Version}" | grep -Eqi '^5.[345].';then
-        echo "PHP 5.3.* and higher version Can't install eaccelerator 0.9.5.3!"
+        echo "PHP 5.3.* and higher version Can't install eaccelerator 0.9.5.2!"
         echo "PHP 5.3.* please enter 2 or 3 !"
         echo "PHP 5.4.* please enter 3 !"
         exit 1
     fi
 
-    Download_Files ${Download_Mirror}/web/eaccelerator/eaccelerator-0.9.5.3.tar.bz2 eaccelerator-0.9.5.3.tar.bz2
-    Tar_Cd eaccelerator-0.9.5.3.tar.bz2 eaccelerator-0.9.5.3
+    Download_Files ${eaccelerator0952_DL} eaccelerator-0.9.5.2.tar.bz2
+    Tar_Cd eaccelerator-0.9.5.2.tar.bz2 eaccelerator-0.9.5.2
     ${PHP_Path}/bin/phpize
     ./configure --enable-eaccelerator=shared --with-php-config=${PHP_Path}/bin/php-config --with-eaccelerator-shared-memory
     make
@@ -35,7 +35,7 @@ Install_New_eA()
         exit 1
     fi
 
-    Download_Files ${Download_Mirror}/web/eaccelerator/eaccelerator-0.9.6.1.tar.bz2 eaccelerator-0.9.6.1.tar.bz2
+    Download_Files ${eaccelerator0961_DL} eaccelerator-0.9.6.1.tar.bz2
     Tar_Cd eaccelerator-0.9.6.1.tar.bz2 eaccelerator-0.9.6.1
     ${PHP_Path}/bin/phpize
     ./configure --enable-eaccelerator=shared --with-php-config=${PHP_Path}/bin/php-config
@@ -47,8 +47,8 @@ Install_New_eA()
 #Install eaccelerator git master branch 42067ac
 Install_Dev_eA()
 {
-    if [ -s eaccelerator-eaccelerator-42067ac ]; then
-        rm -rf eaccelerator-eaccelerator-42067ac/
+    if [ -s eaccelerator-42067ac7e2d55caa5d060580489f5043357ffbe2 ]; then
+        rm -rf eaccelerator-42067ac7e2d55caa5d060580489f5043357ffbe2/
     fi
 
     if echo "${Cur_PHP_Version}" | grep -Eqi '^5.[56].';then
@@ -56,8 +56,9 @@ Install_Dev_eA()
         exit 1
     fi
 
-    Download_Files ${Download_Mirror}/web/eaccelerator/eaccelerator-eaccelerator-42067ac.tar.gz eaccelerator-eaccelerator-42067ac.tar.gz
-    Tar_Cd eaccelerator-eaccelerator-42067ac.tar.gz eaccelerator-eaccelerator-42067ac
+    Download_Files ${eaccelerator42067_DL} eaccelerator-42067.zip
+    unzip eaccelerator-42067.zip
+    cd eaccelerator-42067ac7e2d55caa5d060580489f5043357ffbe2
     ${PHP_Path}/bin/phpize
     ./configure --enable-eaccelerator=shared --with-php-config=${PHP_Path}/bin/php-config
     make
@@ -69,7 +70,7 @@ Install_eAccelerator()
 {
     ver="3"
     echo "Which version do you want to install:"
-    echo "Install eaccelerator 0.9.5.3 please enter: 1"
+    echo "Install eaccelerator 0.9.5.2 please enter: 1"
     echo "Install eaccelerator 0.9.6.1 please enter: 2"
     echo "Install eaccelerator 1.0-dev please enter: 3"
     read -p "Enter 1, 2 or 3 (Default version 3): " ver
@@ -78,7 +79,7 @@ Install_eAccelerator()
     fi
 
     if [ "${ver}" = "1" ]; then
-        echo "You will install eaccelerator 0.9.5.3"
+        echo "You will install eaccelerator 0.9.5.2"
     elif  [ "${ver}" = "2" ]; then
         echo "You will install eaccelerator 0.9.6.1"
     elif [ "${ver}" = "3" ]; then
