@@ -18,6 +18,13 @@ if [ "${Use_Official}" = "y" ]; then
     uw-imap-devel-2007f-24_el9_DL="https://rpmfind.net/linux/remi/enterprise/9/remi/${ARCH}/uw-imap-devel-2007f-30.el9.remi.${ARCH}.rpm"
     PHPSodium_DL="https://pecl.php.net/get/${PHPSodium_Ver}.tgz"
     PHPSodiumOld_DL="https://pecl.php.net/get/libsodium-1.0.7.tgz"
+    PHPSwoole_DL="https://pecl.php.net/get/${PHPSwoole_Ver}.tgz"
+    PHPSwoole4813_DL="https://pecl.php.net/get/swoole-4.8.13.tgz"
+    PHPSwoole4511_DL="https://pecl.php.net/get/swoole-4.5.11.tgz"
+    PHPSwoole436_DL="https://pecl.php.net/get/swoole-4.3.6.tgz"
+    PHPSwoole1105_DL="https://pecl.php.net/get/swoole-1.10.5.tgz"
+    PHPSwoole1610_DL="https://pecl.php.net/get/swoole-1.6.10.tgz"
+
 else
     Acmesh_DL="${Download_Mirror}/lib/acme.sh/${Acmesh_Ver}.tar.gz";
     APR_DL="${Download_Mirror}/web/apache/${APR_Ver}.tar.bz2"
@@ -38,4 +45,10 @@ else
     uw-imap-devel-2007f-24_el9_DL="${Download_Mirror}/lib/uw-imap/uw-imap-devel-2007f-24.el9.remi.${ARCH}.rpm"
     PHPSodium_DL="${Download_Mirror}/web/sodium/${PHPSodium_Ver}.tgz"
     PHPSodiumOld_DL="${Download_Mirror}/web/sodium/libsodium-1.0.7.tgz"
+    PHPSwoole_DL="${Download_Mirror}/web/swoole/${PHPSwoole_Ver}.tgz"
+    PHPSwoole4813_DL="${Download_Mirror}/web/swoole/swoole-4.8.13.tgz"
+    PHPSwoole4511_DL="${Download_Mirror}/web/swoole/swoole-4.5.11.tgz"
+    PHPSwoole436_DL="${Download_Mirror}/web/swoole/swoole-4.3.6.tgz"
+    PHPSwoole1105_DL="${Download_Mirror}/web/swoole/swoole-1.10.5.tgz"
+    PHPSwoole1610_DL="${Download_Mirror}/web/swoole/swoole-1.6.10.tgz"
 fi
