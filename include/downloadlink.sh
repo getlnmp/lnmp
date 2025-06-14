@@ -14,6 +14,8 @@ if [ "${Use_Official}" = "y" ]; then
     Imagickold_DL="https://pecl.php.net/get/imagick-3.1.2.tgz"
     XCache_DL="${Download_Mirror}/web/xcache/${XCache_Ver}.tar.gz"
     ZendOpcache_DL="https://pecl.php.net/get/${ZendOpcache_Ver}.tgz"
+    libc-client-2007f-24_el9_DL="https://rpmfind.net/linux/remi/enterprise/9/remi/${ARCH}/libc-client-2007f-30.el9.remi.${ARCH}.rpm"
+    uw-imap-devel-2007f-24_el9_DL="https://rpmfind.net/linux/remi/enterprise/9/remi/${ARCH}/uw-imap-devel-2007f-30.el9.remi.${ARCH}.rpm"
 else
     Acmesh_DL="${Download_Mirror}/lib/acme.sh/${Acmesh_Ver}.tar.gz";
     APR_DL="${Download_Mirror}/web/apache/${APR_Ver}.tar.bz2"
@@ -30,4 +32,6 @@ else
     Imagickold_DL="${Download_Mirror}/web/imagick/imagick-3.1.2.tgz"
     XCache_DL="${Download_Mirror}/web/xcache/${XCache_Ver}.tar.gz"
     ZendOpcache_DL="${Download_Mirror}/web/opcache/${ZendOpcache_Ver}.tgz"
+    libc-client-2007f-24_el9_DL="${Download_Mirror}/lib/uw-imap/libc-client-2007f-24.el9.remi.${ARCH}.rpm"
+    uw-imap-devel-2007f-24_el9_DL="${Download_Mirror}/lib/uw-imap/uw-imap-devel-2007f-24.el9.remi.${ARCH}.rpm"
 fi
