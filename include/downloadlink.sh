@@ -12,6 +12,7 @@ if [ "${Use_Official}" = "y" ]; then
     ImageMagickold_DL="https://imagemagick.org/archive/releases/ImageMagick-6.9.9-51.tar.xz"
     Imagick_DL="https://pecl.php.net/get/${Imagick_Ver}.tgz"
     Imagickold_DL="https://pecl.php.net/get/imagick-3.1.2.tgz"
+    XCache_DL="${Download_Mirror}/web/xcache/${XCache_Ver}.tar.gz"
 else
     Acmesh_DL="${Download_Mirror}/lib/acme.sh/${Acmesh_Ver}.tar.gz";
     APR_DL="${Download_Mirror}/web/apache/${APR_Ver}.tar.bz2"
@@ -26,4 +27,5 @@ else
     ImageMagickold_DL="${Download_Mirror}/web/imagemagick/ImageMagick-6.9.9-51.tar.gz"
     Imagick_DL="${Download_Mirror}/web/imagick/${Imagick_Ver}.tgz"
     Imagickold_DL="${Download_Mirror}/web/imagick/imagick-3.1.2.tgz"
+    XCache_DL="${Download_Mirror}/web/xcache/${XCache_Ver}.tar.gz"
 fi
