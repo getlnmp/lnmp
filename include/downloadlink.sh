@@ -13,6 +13,7 @@ if [ "${Use_Official}" = "y" ]; then
     Imagick_DL="https://pecl.php.net/get/${Imagick_Ver}.tgz"
     Imagickold_DL="https://pecl.php.net/get/imagick-3.1.2.tgz"
     XCache_DL="${Download_Mirror}/web/xcache/${XCache_Ver}.tar.gz"
+    ZendOpcache_DL="https://pecl.php.net/get/${ZendOpcache_Ver}.tgz"
 else
     Acmesh_DL="${Download_Mirror}/lib/acme.sh/${Acmesh_Ver}.tar.gz";
     APR_DL="${Download_Mirror}/web/apache/${APR_Ver}.tar.bz2"
@@ -28,4 +29,5 @@ else
     Imagick_DL="${Download_Mirror}/web/imagick/${Imagick_Ver}.tgz"
     Imagickold_DL="${Download_Mirror}/web/imagick/imagick-3.1.2.tgz"
     XCache_DL="${Download_Mirror}/web/xcache/${XCache_Ver}.tar.gz"
+    ZendOpcache_DL="${Download_Mirror}/web/opcache/${ZendOpcache_Ver}.tgz"
 fi
