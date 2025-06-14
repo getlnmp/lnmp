@@ -861,7 +861,7 @@ Print_Sys_Info()
     Check_WSL
     Check_Docker
     if [ "${CheckMirror}" != "n" ]; then
-        Get_Country
+#        Get_Country
         echo "Server Location: ${country}"
     fi
 }
