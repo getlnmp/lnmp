@@ -31,22 +31,23 @@ Start_Upgrade_PHP()
         echo "php-${php_version}.tar.bz2 [found]"
     else
         echo "Notice: php-$php_version.tar.bz2 not found!!!download now..."
-        Get_Country
-        if [ "${country}" = "CN" ]; then
-            Download_Files http://php.vpszt.com/php-${php_version}.tar.bz2 php-${php_version}.tar.bz2
-            if [ $? -ne 0 ]; then
-                Download_Files https://www.php.net/distributions/php-${php_version}.tar.bz2 php-${php_version}.tar.bz2
-            fi
-        else
-            Download_Files https://www.php.net/distributions/php-${php_version}.tar.bz2 php-${php_version}.tar.bz2
-            if [ $? -ne 0 ]; then
-                Download_Files http://php.vpszt.com/php-${php_version}.tar.bz2 php-${php_version}.tar.bz2
-            fi
-        fi
+#        Get_Country
+#        if [ "${country}" = "CN" ]; then
+#            Download_Files http://php.vpszt.com/php-${php_version}.tar.bz2 php-${php_version}.tar.bz2
+#            if [ $? -ne 0 ]; then
+#                Download_Files https://www.php.net/distributions/php-${php_version}.tar.bz2 php-${php_version}.tar.bz2
+#            fi
+#        else
+#            Download_Files https://www.php.net/distributions/php-${php_version}.tar.bz2 php-${php_version}.tar.bz2
+#            if [ $? -ne 0 ]; then
+#                Download_Files http://php.vpszt.com/php-${php_version}.tar.bz2 php-${php_version}.tar.bz2
+#            fi
+#        fi
+        Download_Files https://www.php.net/distributions/php-${php_version}.tar.bz2 php-${php_version}.tar.bz2
         if [ $? -eq 0 ]; then
             echo "Download php-${php_version}.tar.bz2 successfully!"
         else
-            Download_Files http://museum.php.net/php5/php-${php_version}.tar.bz2 php-${php_version}.tar.bz2
+            Download_Files https://museum.php.net/php5/php-${php_version}.tar.bz2 php-${php_version}.tar.bz2
             if [ $? -eq 0 ]; then
                 echo "Download php-${php_version}.tar.bz2 successfully!"
             else
@@ -58,7 +59,8 @@ Start_Upgrade_PHP()
     fi
 
     if echo "${php_version}" | grep -Eqi '^5.2.';then
-        Download_Files ${Download_Mirror}/web/phpfpm/php-${php_version}-fpm-0.5.14.diff.gz php-${php_version}-fpm-0.5.14.diff.gz
+ #       Download_Files ${Download_Mirror}/web/phpfpm/php-${php_version}-fpm-0.5.14.diff.gz php-${php_version}-fpm-0.5.14.diff.gz
+         Download_Files https://php-fpm.org/downloads/php-${php_version}-fpm-0.5.14.diff.gz php-${php_version}-fpm-0.5.14.diff.gz
     fi
     lnmp stop
 
