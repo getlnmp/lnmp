@@ -24,6 +24,15 @@ if [ "${Use_Official}" = "y" ]; then
     PHPSwoole436_DL="https://pecl.php.net/get/swoole-4.3.6.tgz"
     PHPSwoole1105_DL="https://pecl.php.net/get/swoole-1.10.5.tgz"
     PHPSwoole1610_DL="https://pecl.php.net/get/swoole-1.6.10.tgz"
+    Openssl_DL="https://www.openssl.org/source/${Openssl_Ver}.tar.gz"
+    Openssl_New_DL="https://www.openssl.org/source/${Openssl_New_Ver}.tar.gz"
+    Luajit_DL="${Download_Mirror}/lib/lua/${Luajit_Ver}.tar.gz"
+    LuaNginxModule_DL="${Download_Mirror}/lib/lua/${LuaNginxModule}.tar.gz"
+    NgxDevelKit_DL="${Download_Mirror}/lib/lua/${NgxDevelKit}.tar.gz"
+    LuaRestyCore_DL="${Download_Mirror}/lib/lua/${LuaRestyCore}.tar.gz"
+    LuaRestyLrucache_DL="${Download_Mirror}/lib/lua/${LuaRestyLrucache}.tar.gz"
+    Pcre_DL="https://sourceforge.net/projects/pcre/files/pcre/8.45/${Pcre_Ver}.tar.bz2"
+    NgxFancyIndex_DL="https://github.com/aperezdc/ngx-fancyindex/releases/download/v0.5.2/${NgxFancyIndex_Ver}.tar.xz"
 
 else
     Acmesh_DL="${Download_Mirror}/lib/acme.sh/${Acmesh_Ver}.tar.gz";
@@ -51,4 +60,13 @@ else
     PHPSwoole436_DL="${Download_Mirror}/web/swoole/swoole-4.3.6.tgz"
     PHPSwoole1105_DL="${Download_Mirror}/web/swoole/swoole-1.10.5.tgz"
     PHPSwoole1610_DL="${Download_Mirror}/web/swoole/swoole-1.6.10.tgz"
+    Openssl_DL="${Download_Mirror}/lib/openssl/${Openssl_Ver}.tar.gz"
+    Openssl_New_DL="${Download_Mirror}/lib/openssl/${Openssl_New_Ver}.tar.gz"
+    Luajit_DL="${Download_Mirror}/lib/lua/${Luajit_Ver}.tar.gz"
+    LuaNginxModule_DL="${Download_Mirror}/lib/lua/${LuaNginxModule}.tar.gz"
+    NgxDevelKit_DL="${Download_Mirror}/lib/lua/${NgxDevelKit}.tar.gz"
+    LuaRestyCore_DL="${Download_Mirror}/lib/lua/${LuaRestyCore}.tar.gz"
+    LuaRestyLrucache_DL="${Download_Mirror}/lib/lua/${LuaRestyLrucache}.tar.gz"
+    Pcre_DL="${Download_Mirror}/web/pcre/${Pcre_Ver}.tar.bz2"
+    NgxFancyIndex_DL="${Download_Mirror}/web/nginx/${NgxFancyIndex_Ver}.tar.xz"
 fi
