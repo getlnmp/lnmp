@@ -33,6 +33,14 @@ if [ "${Use_Official}" = "y" ]; then
     LuaRestyLrucache_DL="${Download_Mirror}/lib/lua/${LuaRestyLrucache}.tar.gz"
     Pcre_DL="https://sourceforge.net/projects/pcre/files/pcre/8.45/${Pcre_Ver}.tar.bz2"
     NgxFancyIndex_DL="https://github.com/aperezdc/ngx-fancyindex/releases/download/v0.5.2/${NgxFancyIndex_Ver}.tar.xz"
+    PHP8Memcache_DL="https://pecl.php.net/get/${PHP8Memcache_Ver}.tgz"
+    PHP7Memcache_DL="https://pecl.php.net/get/${PHP7Memcache_Ver}.tgz"
+    PHPMemcache_DL="https://pecl.php.net/get/${PHPMemcache_Ver}.tgz"
+    PHP8Memcached_DL="https://pecl.php.net/get/${PHP8Memcached_Ver}.tgz"
+    PHP7Memcached_DL="https://pecl.php.net/get/${PHP7Memcached_Ver}.tgz"
+    PHPMemcached_DL="https://pecl.php.net/get/${PHPMemcached_Ver}.tgz"
+    Memcached_DL="https://www.memcached.org/files/${Memcached_Ver}.tar.gz"
+    Libmemcached_DL="https://launchpad.net/libmemcached/1.0/1.0.18/+download/${Libmemcached_Ver}.tar.gz"
 
 else
     Acmesh_DL="${Download_Mirror}/lib/acme.sh/${Acmesh_Ver}.tar.gz";
@@ -69,4 +77,12 @@ else
     LuaRestyLrucache_DL="${Download_Mirror}/lib/lua/${LuaRestyLrucache}.tar.gz"
     Pcre_DL="${Download_Mirror}/web/pcre/${Pcre_Ver}.tar.bz2"
     NgxFancyIndex_DL="${Download_Mirror}/web/nginx/${NgxFancyIndex_Ver}.tar.xz"
+    PHP8Memcache_DL="${Download_Mirror}/web/memcache/${PHP8Memcache_Ver}.tgz"
+    PHP7Memcache_DL="${Download_Mirror}/web/memcache/${PHP7Memcache_Ver}.tgz"
+    PHPMemcache_DL="${Download_Mirror}/web/memcache/${PHPMemcache_Ver}.tgz"
+    PHP8Memcached_DL="${Download_Mirror}/web/php-memcached/${PHP8Memcached_Ver}.tgz"
+    PHP7Memcached_DL="${Download_Mirror}/web/php-memcached/${PHP7Memcached_Ver}.tgz"
+    PHPMemcached_DL="${Download_Mirror}/web/php-memcached/${PHPMemcached_Ver}.tgz"
+    Memcached_DL="${Download_Mirror}/web/memcached/${Memcached_Ver}.tar.gz"
+    Libmemcached_DL="${Download_Mirror}/web/libmemcached/${Libmemcached_Ver}.tar.gz"
 fi
