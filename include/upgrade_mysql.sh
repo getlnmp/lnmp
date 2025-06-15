@@ -866,7 +866,7 @@ Upgrade_MySQL()
     if [ -s "${mysql_src}" ]; then
         echo "${mysql_src} [found]"
     else
-        Download_Files http://cdn.mysql.com/Downloads/MySQL-${mysql_short_version}/${mysql_src} ${mysql_src}
+        Download_Files https://cdn.mysql.com/Downloads/MySQL-${mysql_short_version}/${mysql_src} ${mysql_src}
         if [ $? -eq 0 ]; then
             echo "Download ${mysql_src} successfully!"
         else
