@@ -906,12 +906,12 @@ Remove_StartUp()
 Get_Country()
 {
     if command -v curl >/dev/null 2>&1; then
-        country=`curl -sSk --connect-timeout 30 -m 60 http://ip.vpszt.com/country`
+        country=$(curl -sSk --connect-timeout 30 -m 60 "https://ipinfo.io/country")
         if [ $? -ne 0 ]; then
-            country=`curl -sSk --connect-timeout 30 -m 60 https://ip.vpser.net/country`
+            country=$(curl -sSk --connect-timeout 30 -m 60 "https://ipinfo.io/country")
         fi
     else
-        country=`wget --timeout=5 --no-check-certificate -q -O - http://ip.vpszt.com/country`
+        country=$(wget --timeout=5 --no-check-certificate -q -O - "http://ipinfo.io/country")
     fi
 }
 
