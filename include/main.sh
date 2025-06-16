@@ -861,7 +861,7 @@ Print_Sys_Info()
     Check_WSL
     Check_Docker
     if [ "${CheckMirror}" != "n" ]; then
-#        Get_Country
+        Get_Country
         echo "Server Location: ${country}"
     fi
 }
@@ -928,7 +928,7 @@ Check_Mirror()
     fi
     if [ "${Download_Mirror}" = "https://soft.vpser.net" ]; then
         echo "Try http://soft.vpser.net ..."
-        mirror_code=`curl -o /dev/null -m 20 --connect-timeout 20 -sk -w %{http_code} http://soft.vpser.net`
+        mirror_code=$(curl -o /dev/null -m 20 --connect-timeout 20 -sk -w %{http_code} http://soft.vpser.net)
         if [[ "${mirror_code}" = "200" || "${mirror_code}" = "302" ]]; then
             echo "http://soft.vpser.net http code: ${mirror_code}"
             ping -c 3 soft.vpser.net
@@ -936,13 +936,13 @@ Check_Mirror()
             ping -c 3 soft.vpser.net
             if [ "${country}" = "CN" ]; then
                 echo "Try http://soft1.vpser.net ..."
-                mirror_code=`curl -o /dev/null -m 20 --connect-timeout 20 -sk -w %{http_code} http://soft1.vpser.net`
+                mirror_code=$(curl -o /dev/null -m 20 --connect-timeout 20 -sk -w %{http_code} http://soft1.vpser.net)
                 if [[ "${mirror_code}" = "200" || "${mirror_code}" = "302" ]]; then
                     echo "Change to mirror http://soft1.vpser.net"
                     Download_Mirror='http://soft1.vpser.net'
                 else
                     echo "Try http://soft2.vpser.net ..."
-                    mirror_code=`curl -o /dev/null -m 20 --connect-timeout 20 -sk -w %{http_code} http://soft2.vpser.net`
+                    mirror_code=$(curl -o /dev/null -m 20 --connect-timeout 20 -sk -w %{http_code} http://soft2.vpser.net)
                     if [[ "${mirror_code}" = "200" || "${mirror_code}" = "302" ]]; then
                         echo "Change to mirror http://soft2.vpser.net"
                         Download_Mirror='http://soft2.vpser.net'
@@ -954,13 +954,13 @@ Check_Mirror()
                 fi
             else
                 echo "Try http://soft2.vpser.net ..."
-                mirror_code=`curl -o /dev/null -m 20 --connect-timeout 20 -sk -w %{http_code} http://soft2.vpser.net`
+                mirror_code=$(curl -o /dev/null -m 20 --connect-timeout 20 -sk -w %{http_code} http://soft2.vpser.net)
                 if [[ "${mirror_code}" = "200" || "${mirror_code}" = "302" ]]; then
                     echo "Change to mirror http://soft2.vpser.net"
                     Download_Mirror='http://soft2.vpser.net'
                 else
                     echo "Try http://soft1.vpser.net ..."
-                    mirror_code=`curl -o /dev/null -m 20 --connect-timeout 20 -sk -w %{http_code} http://soft1.vpser.net`
+                    mirror_code=$(curl -o /dev/null -m 20 --connect-timeout 20 -sk -w %{http_code} http://soft1.vpser.net)
                     if [[ "${mirror_code}" = "200" || "${mirror_code}" = "302" ]]; then
                         echo "Change to mirror http://soft1.vpser.net"
                         Download_Mirror='http://soft1.vpser.net'
@@ -1024,8 +1024,8 @@ Echo_Blue()
 
 Get_PHP_Ext_Dir()
 {
-    Cur_PHP_Version="`/usr/local/php/bin/php-config --version`"
-    zend_ext_dir="`/usr/local/php/bin/php-config --extension-dir`/"
+    Cur_PHP_Version="$(/usr/local/php/bin/php-config --version)"
+    zend_ext_dir="$(/usr/local/php/bin/php-config --extension-dir)/"
 }
 
 Check_Stack()
