@@ -1,7 +1,5 @@
 if [ "${Use_Official}" = "y" ]; then
     Acmesh_DL="https://github.com/acmesh-official/acme.sh/archive/refs/tags/${Acmesh_Ver}.tar.gz";
-    APR_DL="https://archive.apache.org/dist/apr/${APR_Ver}.tar.bz2"
-    APR_Util_DL="https://archive.apache.org/dist/apr/${APR_Util_Ver}.tar.bz2"
     PHPNewApcu_DL="https://pecl.php.net/get/${PHPNewApcu_Ver}.tgz"
     PHPOldApcu_DL="https://pecl.php.net/get/${PHPOldApcu_Ver}.tgz"
     PHPApcu_Bc_DL="https://pecl.php.net/get/${PHPApcu_Bc_Ver}.tgz"
@@ -51,11 +49,21 @@ if [ "${Use_Official}" = "y" ]; then
     Nginx_DL="https://nginx.org/download/${Nginx_Ver}.tar.gz"
  #  Mysql_DL=""
     Php_DL="https://www.php.net/distributions/${Php_Ver}.tar.bz2"
+    Apache_DL="https://archive.apache.org/dist/httpd/${Apache_Ver}.tar.bz2"
+    APR_DL="https://archive.apache.org/dist/apr/${APR_Ver}.tar.bz2"
+    APR_Util_DL="https://archive.apache.org/dist/apr/${APR_Util_Ver}.tar.bz2"
+    Autoconf_DL="https://ftp.gnu.org/gnu/autoconf/${Autoconf_Ver}.tar.gz"
+    Freetype_New_DL="https://sourceforge.net/projects/freetype/files/freetype2/2.13.0/${Freetype_New_Ver}tar.xz"
+    Freetype_DL="https://sourceforge.net/projects/freetype/files/freetype2/2.7/${Freetype_Ver}.tar.bz2"
+    Curl_DL="https://curl.se/download/${Curl_Ver}.tar.bz2"
+    Libicu4c_DL="https://github.com/unicode-org/icu/releases/download/release-58-3/${Libicu4c_Ver}-src.tgz"
+    Libicu4c-60_3_DL="https://github.com/unicode-org/icu/releases/download/release-60-3/icu4c-60_3-src.tgz"
+    Boost_DL="https://archives.boost.io/release/1.59.0/source/${Boost_Ver}.tar.bz2"
+    Nghttp2_DL="https://github.com/nghttp2/nghttp2/releases/download/v1.52.0/${Nghttp2_Ver}.tar.xz"
+    Libzip_DL="https://libzip.org/download/${Libzip_Ver}.tar.xz"
 
 else
     Acmesh_DL="${Download_Mirror}/lib/acme.sh/${Acmesh_Ver}.tar.gz";
-    APR_DL="${Download_Mirror}/web/apache/${APR_Ver}.tar.bz2"
-    APR_Util_DL="${Download_Mirror}/web/apache/${APR_Util_Ver}.tar.bz2"
     PHPNewApcu_DL="${Download_Mirror}/web/apcu/${PHPNewApcu_Ver}.tgz"
     PHPOldApcu_DL="${Download_Mirror}/web/apcu/${PHPOldApcu_Ver}.tgz"
     PHPApcu_Bc_DL="${Download_Mirror}/web/apcu_bc/${PHPApcu_Bc_Ver}.tgz"
@@ -105,4 +113,16 @@ else
     Nginx_DL="${Download_Mirror}/web/nginx/${Nginx_Ver}.tar.gz"
  #  Mysql_DL=""
     Php_DL="${Download_Mirror}/web/php/${Php_Ver}.tar.bz2"
+    Apache_DL="${Download_Mirror}/web/apache/${Apache_Ver}.tar.bz2"
+    APR_DL="${Download_Mirror}/web/apache/${APR_Ver}.tar.bz2"
+    APR_Util_DL="${Download_Mirror}/web/apache/${APR_Util_Ver}.tar.bz2"
+    Autoconf_DL="${Download_Mirror}/lib/autoconf/${Autoconf_Ver}.tar.gz"
+    Freetype_New_DL="${Download_Mirror}/lib/freetype/${Freetype_New_Ver}.tar.xz"
+    Freetype_DL="${Download_Mirror}/lib/freetype/${Freetype_Ver}.tar.bz2"
+    Curl_DL="${Download_Mirror}/lib/curl/${Curl_Ver}.tar.bz2"
+    Libicu4c_DL="${Download_Mirror}/lib/icu4c/${Libicu4c_Ver}-src.tgz"
+    Libicu4c-60_3_DL="${Download_Mirror}/lib/icu4c/icu4c-60_3-src.tgz"
+    Boost_DL="${Download_Mirror}/lib/boost/${Boost_Ver}.tar.bz2"
+    Nghttp2_DL="${Download_Mirror}/lib/nghttp2/${Nghttp2_Ver}.tar.xz"
+    Libzip_DL="${Download_Mirror}/lib/libzip/${Libzip_Ver}.tar.xz"
 fi

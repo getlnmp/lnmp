@@ -115,3 +115,7 @@ PHPNewApcu_Ver='apcu-5.1.22'
 PHPApcu_Bc_Ver='apcu_bc-1.0.5'
 PHPSodium_Ver='libsodium-2.0.23'
 PHPSwoole_Ver='swoole-5.1.1'
+
+Mysql_Ver_Short=$(echo ${Mysql_Ver} | sed 's/mysql-//' | cut -d. -f1-2)
+Mariadb_Version=$(echo ${Mariadb_Ver} | cut -d- -f2)
+PhpMyAdmin_Ver_Short=$(echo ${PhpMyAdmin_Ver} | cut -d- -f2)
