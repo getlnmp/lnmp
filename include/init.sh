@@ -121,12 +121,12 @@ Check_Hosts()
         echo "127.0.0.1 localhost.localdomain localhost" >> /etc/hosts
     fi
     if [ "${CheckMirror}" != "n" ]; then
-        pingresult=`ping -c1 lnmp.org 2>&1`
+        pingresult=$(ping -c1 www.cloudflare.com 2>&1)
         echo "${pingresult}"
         if echo "${pingresult}" | grep -q "unknown host"; then
             echo "DNS...fail"
             echo "Writing nameserver to /etc/resolv.conf ..."
-            echo -e "nameserver 208.67.220.220\nnameserver 114.114.114.114" > /etc/resolv.conf
+            echo -e "nameserver 8.8.8.8\nnameserver 1.1.1.1\nnameserver 8.8.4.4" > /etc/resolv.conf
         else
             echo "DNS...ok"
         fi
@@ -246,7 +246,7 @@ EOF
 
 Check_Old_Releases_URL()
 {
-    OR_Status=`wget --spider --server-response ${OldReleasesURL}/dists/$1/Release 2>&1 | awk '/^  HTTP/{print $2}'`
+    OR_Status=$(wget --spider --server-response ${OldReleasesURL}/dists/$1/Release 2>&1 | awk '/^  HTTP/{print $2}')
     if [ "${OR_Status}" = "200" ]; then
         echo "Ubuntu old-releases status: ${OR_Status}";
         CodeName="$1"
@@ -255,11 +255,11 @@ Check_Old_Releases_URL()
 
 Ubuntu_Deadline()
 {
-    trusty_deadline=`date -d "2024-4-30 00:00:00" +%s`
-    xenial_deadline=`date -d "2026-4-30 00:00:00" +%s`
-    bionic_deadline=`date -d "2028-7-30 00:00:00" +%s`
-    mantic_deadline=`date -d "2024-7-30 00:00:00" +%s`
-    cur_time=`date  +%s`
+    trusty_deadline=$(date -d "2024-4-30 00:00:00" +%s)
+    xenial_deadline=$(date -d "2026-4-30 00:00:00" +%s)
+    bionic_deadline=$(date -d "2028-7-30 00:00:00" +%s)
+    mantic_deadline=$(date -d "2024-7-30 00:00:00" +%s)
+    cur_time=$(date  +%s)
     case "$1" in
         trusty)
             if [ ${cur_time} -gt ${trusty_deadline} ]; then
@@ -352,7 +352,7 @@ CentOS_Dependent()
     fi
 
     Echo_Blue "[+] Yum installing dependent packages..."
-    for packages in make cmake gcc gcc-c++ gcc-g77 kernel-headers glibc-headers flex bison file libtool libtool-libs autoconf patch wget crontabs libjpeg libjpeg-devel libjpeg-turbo-devel libpng libpng-devel libpng10 libpng10-devel gd gd-devel libxml2 libxml2-devel zlib zlib-devel glib2 glib2-devel unzip tar bzip2 bzip2-devel libzip-devel libevent libevent-devel ncurses ncurses-devel curl curl-devel libcurl libcurl-devel e2fsprogs e2fsprogs-devel krb5 krb5-devel libidn libidn-devel openssl openssl-devel pcre-devel gettext gettext-devel ncurses-devel gmp-devel pspell-devel unzip libcap diffutils ca-certificates net-tools libc-client-devel psmisc libXpm-devel git-core c-ares-devel libicu-devel libxslt libxslt-devel xz expat-devel libaio-devel rpcgen libtirpc-devel perl cyrus-sasl-devel sqlite-devel oniguruma-devel lsof re2c pkg-config libarchive hostname ncurses-libs numactl-devel libxcrypt libwebp-devel gnutls-devel initscripts iproute libxcrypt-compat;
+    for packages in make cmake gcc gcc-c++ gcc-g77 kernel-headers glibc-headers flex bison file libtool libtool-libs autoconf patch wget crontabs libjpeg libjpeg-devel libjpeg-turbo-devel libpng libpng-devel libpng10 libpng10-devel gd gd-devel libxml2 libxml2-devel zlib zlib-devel glib2 glib2-devel unzip tar bzip2 bzip2-devel libzip-devel libevent libevent-devel ncurses ncurses-devel curl curl-devel libcurl libcurl-devel e2fsprogs e2fsprogs-devel krb5 krb5-devel libidn libidn-devel openssl openssl-devel pcre-devel gettext gettext-devel ncurses-devel gmp-devel pspell-devel unzip libcap diffutils ca-certificates net-tools libc-client-devel psmisc libXpm-devel git-core c-ares-devel libicu-devel libxslt libxslt-devel xz expat-devel libaio-devel rpcgen libtirpc-devel perl cyrus-sasl-devel sqlite-devel oniguruma-devel lsof re2c pkg-config libarchive hostname ncurses-libs numactl-devel libxcrypt libwebp-devel gnutls-devel initscripts iproute libxcrypt-compat git;
     do yum -y install $packages; done
 
     yum -y update nss
@@ -462,22 +462,22 @@ Check_Download()
 {
     Echo_Blue "[+] Downloading files..."
     cd ${cur_dir}/src
-    Download_Files ${Download_Mirror}/web/libiconv/${Libiconv_Ver}.tar.gz ${Libiconv_Ver}.tar.gz
-    Download_Files ${Download_Mirror}/web/libmcrypt/${LibMcrypt_Ver}.tar.gz ${LibMcrypt_Ver}.tar.gz
-    Download_Files ${Download_Mirror}/web/mcrypt/${Mcypt_Ver}.tar.gz ${Mcypt_Ver}.tar.gz
-    Download_Files ${Download_Mirror}/web/mhash/${Mhash_Ver}.tar.bz2 ${Mhash_Ver}.tar.bz2
+    Download_Files ${Libiconv_DL}.tar.gz ${Libiconv_Ver}.tar.gz
+    Download_Files ${LibMcrypt_DL}.tar.gz ${LibMcrypt_Ver}.tar.gz
+    Download_Files ${Mcypt_DL} ${Mcypt_Ver}.tar.gz
+    Download_Files ${Mhash_DL} ${Mhash_Ver}.tar.bz2
     if [ "${SelectMalloc}" = "2" ]; then
-        Download_Files ${Download_Mirror}/lib/jemalloc/${Jemalloc_Ver}.tar.bz2 ${Jemalloc_Ver}.tar.bz2
+        Download_Files ${Jemalloc_DL} ${Jemalloc_Ver}.tar.bz2
     elif [ "${SelectMalloc}" = "3" ]; then
-        Download_Files ${Download_Mirror}/lib/tcmalloc/${TCMalloc_Ver}.tar.gz ${TCMalloc_Ver}.tar.gz
-        Download_Files ${Download_Mirror}/lib/libunwind/${Libunwind_Ver}.tar.gz ${Libunwind_Ver}.tar.gz
+        Download_Files ${TCMalloc_DL} ${TCMalloc_Ver}.tar.gz
+        Download_Files ${Libunwind_DL} ${Libunwind_Ver}.tar.gz
     fi
     if [ "${Stack}" != "lamp" ]; then
-        Download_Files ${Download_Mirror}/web/nginx/${Nginx_Ver}.tar.gz ${Nginx_Ver}.tar.gz
+        Download_Files ${Nginx_DL} ${Nginx_Ver}.tar.gz
     fi
     if [[ "${DBSelect}" =~ ^[12345]|11$ ]]; then
+        Mysql_Ver_Short=$(echo ${Mysql_Ver} | sed 's/mysql-//' | cut -d. -f1-2)
         if [[ "${Bin}" = "y" && "${DBSelect}" =~ ^[2-4]$ ]]; then
-            Mysql_Ver_Short=$(echo ${Mysql_Ver} | sed 's/mysql-//' | cut -d. -f1-2)
             Download_Files https://cdn.mysql.com/Downloads/MySQL-${Mysql_Ver_Short}/${Mysql_Ver}-linux-glibc2.12-${DB_ARCH}.tar.gz ${Mysql_Ver}-linux-glibc2.12-${DB_ARCH}.tar.gz
             if [ $? -ne 0 ]; then
                 Download_Files https://cdn.mysql.com/archives/mysql-${Mysql_Ver_Short}/${Mysql_Ver}-linux-glibc2.12-${DB_ARCH}.tar.gz ${Mysql_Ver}-linux-glibc2.12-${DB_ARCH}.tar.gz
@@ -494,7 +494,10 @@ Check_Download()
                 Download_Files https://cdn.mysql.com/archives/mysql-8.4/${Mysql_Ver}-linux-glibc2.17-${DB_ARCH}.tar.xz ${Mysql_Ver}-linux-glibc2.17-${DB_ARCH}.tar.xz
             fi
         else
-            Download_Files ${Download_Mirror}/datebase/mysql/${Mysql_Ver}.tar.gz ${Mysql_Ver}.tar.gz
+            Download_Files https://cdn.mysql.com/Downloads/MySQL-${Mysql_Ver_Short}/${Mysql_Ver}.tar.gz ${Mysql_Ver}.tar.gz
+            if [ $? -ne 0 ]; then
+                Download_Files https://cdn.mysql.com/archives/mysql-${Mysql_Ver_Short}/${Mysql_Ver}.tar.gz ${Mysql_Ver}.tar.gz
+            fi
         fi
     elif [[ "${DBSelect}" =~ ^[6789]|10$ ]]; then
         Mariadb_Version=$(echo ${Mariadb_Ver} | cut -d- -f2)
@@ -506,11 +509,17 @@ Check_Download()
         Download_Files https://downloads.mariadb.org/rest-api/mariadb/${Mariadb_Version}/${MariaDB_FileName}.tar.gz ${MariaDB_FileName}.tar.gz
     fi
     Download_Files ${Download_Mirror}/web/php/${Php_Ver}.tar.bz2 ${Php_Ver}.tar.bz2
-    if [ ${PHPSelect} = "1" ]; then
-        Download_Files ${Download_Mirror}/web/phpfpm/${Php_Ver}-fpm-0.5.14.diff.gz ${Php_Ver}-fpm-0.5.14.diff.gz
+    if [ $? -ne 0 ]; then
+        Download_Files https://museum.php.net/php5/${Php_Ver}.tar.bz2 ${Php_Ver}.tar.bz2
     fi
-    Download_Files ${Download_Mirror}/datebase/phpmyadmin/${PhpMyAdmin_Ver}.tar.xz ${PhpMyAdmin_Ver}.tar.xz
-    Download_Files ${Download_Mirror}/prober/p.tar.gz p.tar.gz
+
+    if [ ${PHPSelect} = "1" ]; then
+    #    Download_Files ${Download_Mirror}/web/phpfpm/${Php_Ver}-fpm-0.5.14.diff.gz ${Php_Ver}-fpm-0.5.14.diff.gz
+         Download_Files https://php-fpm.org/downloads/${Php_Ver}-fpm-0.5.14.diff.gz ${Php_Ver}-fpm-0.5.14.diff.gz
+    fi
+    PhpMyAdmin_Ver_Short=$(echo ${PhpMyAdmin_Ver} | cut -d- -f2)
+    Download_Files https://files.phpmyadmin.net/phpMyAdmin/${PhpMyAdmin_Ver_Short}/${PhpMyAdmin_Ver}.tar.xz ${PhpMyAdmin_Ver}.tar.xz
+#    Download_Files ${Download_Mirror}/prober/p.tar.gz p.tar.gz
     if [ "${Stack}" != "lnmp" ]; then
         Download_Files ${Download_Mirror}/web/apache/${Apache_Ver}.tar.bz2 ${Apache_Ver}.tar.bz2
         Download_Files ${Download_Mirror}/web/apache/${APR_Ver}.tar.bz2 ${APR_Ver}.tar.bz2

@@ -41,6 +41,16 @@ if [ "${Use_Official}" = "y" ]; then
     PHPMemcached_DL="https://pecl.php.net/get/${PHPMemcached_Ver}.tgz"
     Memcached_DL="https://www.memcached.org/files/${Memcached_Ver}.tar.gz"
     Libmemcached_DL="https://launchpad.net/libmemcached/1.0/1.0.18/+download/${Libmemcached_Ver}.tar.gz"
+    Libiconv_DL="https://ftp.gnu.org/pub/gnu/libiconv/${Libiconv_Ver}.tar.gz"
+    LibMcrypt_DL="https://sourceforge.net/projects/mcrypt/files/Libmcrypt/2.5.8/${LibMcrypt_Ver}.tar.gz"
+    Mcypt_DL="https://sourceforge.net/projects/mcrypt/files/MCrypt/2.6.8/${Mcypt_Ver}.tar.gz"
+    Mhash_DL="https://sourceforge.net/projects/mhash/files/mhash/0.9.9.9/${Mhash_Ver}.tar.bz2"
+    Jemalloc_DL="https://github.com/jemalloc/jemalloc/releases/download/5.3.0/${Jemalloc_Ver}.tar.bz2"
+    TCMalloc_DL="https://github.com/gperftools/gperftools/releases/download/gperftools-2.9.1/${TCMalloc_Ver}.tar.gz"
+    Libunwind_DL="https://github.com/libunwind/libunwind/releases/download/v1.2.1/${Libunwind_Ver}.tar.gz"
+    Nginx_DL="https://nginx.org/download/${Nginx_Ver}.tar.gz"
+ #  Mysql_DL=""
+    Php_DL="https://www.php.net/distributions/${Php_Ver}.tar.bz2"
 
 else
     Acmesh_DL="${Download_Mirror}/lib/acme.sh/${Acmesh_Ver}.tar.gz";
@@ -85,4 +95,14 @@ else
     PHPMemcached_DL="${Download_Mirror}/web/php-memcached/${PHPMemcached_Ver}.tgz"
     Memcached_DL="${Download_Mirror}/web/memcached/${Memcached_Ver}.tar.gz"
     Libmemcached_DL="${Download_Mirror}/web/libmemcached/${Libmemcached_Ver}.tar.gz"
+    Libiconv_DL="${Download_Mirror}/web/libiconv/${Libiconv_Ver}.tar.gz"
+    LibMcrypt_DL="${Download_Mirror}/web/libmcrypt/${LibMcrypt_Ver}.tar.gz"
+    Mcypt_DL="${Download_Mirror}/web/mcrypt/${Mcypt_Ver}.tar.gz"
+    Mhash_DL="${Download_Mirror}/web/mhash/${Mhash_Ver}.tar.bz2"
+    Jemalloc_DL="${Download_Mirror}/lib/jemalloc/${Jemalloc_Ver}.tar.bz2"
+    TCMalloc_DL="${Download_Mirror}/lib/tcmalloc/${TCMalloc_Ver}.tar.gz"
+    Libunwind_DL="${Download_Mirror}/lib/libunwind/${Libunwind_Ver}.tar.gz"
+    Nginx_DL="${Download_Mirror}/web/nginx/${Nginx_Ver}.tar.gz"
+ #  Mysql_DL=""
+    Php_DL="${Download_Mirror}/web/php/${Php_Ver}.tar.bz2"
 fi
