@@ -4,7 +4,7 @@ Set_Timezone()
 {
     Echo_Blue "Setting timezone..."
     rm -rf /etc/localtime
-    ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+    ln -sf /usr/share/zoneinfo/America/New_York /etc/localtime
 }
 
 CentOS_InstallNTP()
