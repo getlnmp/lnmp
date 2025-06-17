@@ -21,7 +21,9 @@ LNMP一键安装包是一个用Linux Shell编写的可以为CentOS/RHEL/Fedora/D
 
 ## LNMP安装
 
-安装前确认已经安装wget命令，如提示wget: command not found ，使用`yum install wget` 或 `apt-get install wget` 命令安装。
+安装前确认已经安装wget和git命令
+如提示wget: command not found ，使用`yum install wget` 或 `apt-get install wget` 命令安装。
+如提示git: command not found ，使用`yum install git` 或 `apt-get install git` 命令安装。
 为防止掉线等情况，建议使用screen，可以先执行：screen -S lnmp 命令后，再执行LNMP安装命令：
 `wget http://soft.lnmp.com/lnmp/lnmp2.1.tar.gz -cO lnmp2.1.tar.gz && tar zxf lnmp2.1.tar.gz && cd lnmp2.1 && ./install.sh {lnmp|lnmpa|lamp}`
 
