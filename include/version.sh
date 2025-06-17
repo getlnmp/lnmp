@@ -94,7 +94,7 @@ elif [ "${ApacheSelect}" = "2" ]; then
     Apache_Ver='httpd-2.4.57'
 fi
 
-Pureftpd_Ver='pure-ftpd-1.0.49'
+Pureftpd_Ver='pure-ftpd-1.0.50'
 
 XCache_Ver='xcache-3.2.0'
 ImageMagick_Ver='ImageMagick-7.1.1-8'
@@ -119,3 +119,4 @@ PHPSwoole_Ver='swoole-5.1.1'
 Mysql_Ver_Short=$(echo ${Mysql_Ver} | sed 's/mysql-//' | cut -d. -f1-2)
 Mariadb_Version=$(echo ${Mariadb_Ver} | cut -d- -f2)
 PhpMyAdmin_Ver_Short=$(echo ${PhpMyAdmin_Ver} | cut -d- -f2)
+Pureftpd_Ver_Short=$(echo ${Pureftpd_Ver} | cut -d- -f3)

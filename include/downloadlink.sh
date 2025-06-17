@@ -61,6 +61,7 @@ if [ "${Use_Official}" = "y" ]; then
     Boost_DL="https://archives.boost.io/release/1.59.0/source/${Boost_Ver}.tar.bz2"
     Nghttp2_DL="https://github.com/nghttp2/nghttp2/releases/download/v1.52.0/${Nghttp2_Ver}.tar.xz"
     Libzip_DL="https://libzip.org/download/${Libzip_Ver}.tar.xz"
+    Pureftpd_DL="https://download.pureftpd.org/pub/pure-ftpd/releases/${Pureftpd_Ver}.tar.bz2"
 
 else
     Acmesh_DL="${Download_Mirror}/lib/acme.sh/${Acmesh_Ver}.tar.gz";
@@ -125,4 +126,5 @@ else
     Boost_DL="${Download_Mirror}/lib/boost/${Boost_Ver}.tar.bz2"
     Nghttp2_DL="${Download_Mirror}/lib/nghttp2/${Nghttp2_Ver}.tar.xz"
     Libzip_DL="${Download_Mirror}/lib/libzip/${Libzip_Ver}.tar.xz"
+    Pureftpd_DL="${Download_Mirror}/ftp/pure-ftpd/${Pureftpd_Ver}.tar.bz2"
 fi

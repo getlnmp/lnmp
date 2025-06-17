@@ -12,7 +12,7 @@ echo "|          Pureftpd for LNMP,  Written by Licess           |"
 echo "+----------------------------------------------------------+"
 echo "|This script is a tool to install pureftpd for LNMP        |"
 echo "+----------------------------------------------------------+"
-echo "|For more information please visit https://lnmp.org        |"
+echo "|For more information please visit https://www.getlnmp.com |"
 echo "+----------------------------------------------------------+"
 echo "|Usage: ./pureftpd.sh                                      |"
 echo "+----------------------------------------------------------+"
@@ -41,11 +41,11 @@ Install_Pureftpd()
     fi
     Echo_Blue "Download files..."
     cd ${cur_dir}/src
-    Download_Files ${Download_Mirror}/ftp/pure-ftpd/${Pureftpd_Ver}.tar.bz2 ${Pureftpd_Ver}.tar.bz2
+    Download_Files ${Pureftpd_DL} ${Pureftpd_Ver}.tar.bz2
     if [ $? -eq 0 ]; then
         echo "Download ${Pureftpd_Ver}.tar.bz2 successfully!"
     else
-        Download_Files https://download.pureftpd.org/pub/pure-ftpd/releases/${Pureftpd_Ver}.tar.bz2 ${Pureftpd_Ver}.tar.bz2
+        Download_Files https://github.com/jedisct1/pure-ftpd/releases/download/${Pureftpd_Ver_Short}/${Pureftpd_Ver}.tar.bz2 ${Pureftpd_Ver}.tar.bz2
     fi
 
     Echo_Blue "Installing pure-ftpd..."
