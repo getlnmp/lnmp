@@ -12,6 +12,14 @@ fi
 Get_Dist_Name
 Get_Dist_Version
 
+DenyHosts_Ver="DenyHosts-3.1.2"
+
+if [ "${Use_Official}" = "y" ]; then
+    denyhosts_DL="https://github.com/denyhosts/denyhosts/releases/download/v3.1/DenyHosts-3.1.2.tar.gz"
+else
+    denyhosts_DL="${Download_Mirror}/security/denyhosts/DenyHosts-3.1.2.tar.gz"
+fi
+
 Press_Start
 
 if [ "${PM}" = "yum" ]; then
@@ -34,8 +42,8 @@ fi
 
 echo "Downloading..."
 cd ../src
-Download_Files ${Download_Mirror}/security/denyhosts/denyhosts-3.1.tar.gz denyhosts-3.1.tar.gz
-Tar_Cd denyhosts-3.1.tar.gz denyhosts-3.1
+Download_Files ${denyhosts_DL} ${DenyHosts_Ver}.tar.gz
+Tar_Cd ${DenyHosts_Ver}.tar.gz ${DenyHosts_Ver}
 echo "Installing..."
 python setup.py install
 
@@ -82,7 +90,7 @@ sed -i 's#^DENY_THRESHOLD_ROOT =.*#DENY_THRESHOLD_ROOT = 3#g' /etc/denyhosts.con
 
 sed -i '/STATE_LOCK_EXISTS\ \=\ \-2/aif not os.path.exists("/var/lock/subsys"): os.makedirs("/var/lock/subsys")' /etc/init.d/denyhosts
 cd ..
-rm -rf denyhosts-3.1
+rm -rf ${DenyHosts_Ver}
 
 StartUp denyhosts
 echo "Start DenyHosts..."
