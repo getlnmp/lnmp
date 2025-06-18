@@ -12,6 +12,15 @@ fi
 Get_Dist_Name
 Get_Dist_Version
 
+fail2ban_Ver="fail2ban-1.0.2"
+fail2ban_Ver_Short=$(echo ${fail2ban_Ver} | cut -d- -f2)
+
+if [ "${Use_Official}" = "y" ]; then
+    fail2ban_DL="https://github.com/fail2ban/fail2ban/archive/refs/tags/${fail2ban_Ver_Short}.tar.gz"
+else
+    fail2ban_DL="${Download_Mirror}/security/fail2ban/${fail2ban_Ver_Short}.tar.gz"
+fi
+
 Press_Start
 
 if [ "${PM}" = "yum" ]; then
@@ -30,9 +39,10 @@ elif [ "${PM}" = "apt" ]; then
 fi
 
 echo "Downloading..."
-cd ../src
-Download_Files ${Download_Mirror}/security/fail2ban/fail2ban-1.0.3.tar.gz fail2ban-1.0.3.tar.gz
-tar zxf fail2ban-1.0.3.tar.gz && cd fail2ban-1.0.3
+mkdir ../src/fail2ban -p
+cd ../src/fail2ban
+Download_Files ${fail2ban_DL} ${fail2ban_Ver_Short}.tar.gz 
+tar zxf ${fail2ban_Ver_Short}.tar.gz && cd ${fail2ban_Ver}
 echo "Installing fail2ban..."
 python3 setup.py install
 
@@ -63,8 +73,8 @@ elif [ "${PM}" = "apt" ]; then
 fi
 
 chmod +x /etc/init.d/fail2ban
-cd ..
-rm -rf fail2ban-1.0.3
+cd ../..
+rm -rf ${fail2ban_Ver}
 
 StartUp fail2ban
 
