@@ -34,7 +34,7 @@ Upgrade_MariaDB()
 
     Verify_DB_Password
 
-    cur_mariadb_version=`/usr/local/mariadb/bin/mysql_config --version`
+    cur_mariadb_version=$(/usr/local/mariadb/bin/mysql_config --version)
     mariadb_version=""
     echo "Current MariaDB Version:${cur_mariadb_version}"
     echo "You can get version number from https://downloads.mariadb.org/"
@@ -137,10 +137,19 @@ Upgrade_MariaDB()
         if [ $? -eq 0 ]; then
             echo "Download ${MariaDB_FileName}.tar.gz successfully!"
         else
-            echo "You enter MariaDB Version was:"${mariadb_version}
-            Echo_Red "Error! You entered a wrong version number or can't download from mariadb mirror, please check!"
-            sleep 5
-            exit 1
+			if [ "${Bin}" = "y" ]; then
+			    Download_Files https://archive.mariadb.org/mariadb-${mariadb_version}/bintar-linux-systemd-x86_64/${MariaDB_FileName}.tar.gz ${MariaDB_FileName}.tar.gz
+			else
+			    Download_Files https://archive.mariadb.org/mariadb-${mariadb_version}/source/${MariaDB_FileName}.tar.gz ${MariaDB_FileName}.tar.gz
+			fi
+			if [ $? -eq 0 ]; then
+			    echo "Download ${MariaDB_FileName}.tar.gz successfully!"
+			else
+                echo "You enter MariaDB Version was:"${mariadb_version}
+                Echo_Red "Error! You entered a wrong version number or can't download from mariadb mirror, please check!"
+                sleep 5
+                exit 1
+			fi
         fi
     fi
     echo "============================check files=================================="
@@ -148,12 +157,12 @@ Upgrade_MariaDB()
     Backup_MariaDB
 
     if [ "${Bin}" = "y" ]; then
-        Echo_Blue "[+] Starting upgrade mariadb-${Mariadb_Ver} Using Generic Binaries..."
+        Echo_Blue "[+] Starting upgrade mariadb-${mariadb_version} Using Generic Binaries..."
         Tar_Cd ${MariaDB_FileName}.tar.gz
         mkdir /usr/local/mariadb
         mv ${MariaDB_FileName}/* /usr/local/mariadb/
     else
-        Echo_Blue "[+] Starting upgrade ${Mariadb_Ver} Using Source code..."
+        Echo_Blue "[+] Starting upgrade mariadb-${mariadb_version} Using Source code..."
         Tar_Cd mariadb-${mariadb_version}.tar.gz mariadb-${mariadb_version}
         MariaDB_WITHSSL
         if echo "${mariadb_version}" | grep -Eqi '^10.[5-9]|1[01].';then
