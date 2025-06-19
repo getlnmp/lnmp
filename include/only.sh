@@ -187,13 +187,13 @@ Install_Database()
             MariaDB_FileName="${Mariadb_Ver}"
         fi
         Download_Files https://downloads.mariadb.org/rest-api/mariadb/${Mariadb_Version}/${MariaDB_FileName}.tar.gz ${MariaDB_FileName}.tar.gz
-        if [ ! -s ${MariaDB_FileName}.tar.gz ]; then
+        if [ $? -ne 0 ]; then
             if [ "${Bin}" = "y" ]; then
                 Download_Files https://archive.mariadb.org/mariadb-${Mariadb_Version}/bintar-linux-systemd-x86_64/${MariaDB_FileName}.tar.gz ${MariaDB_FileName}.tar.gz
             else
                 Download_Files https://archive.mariadb.org/mariadb-${Mariadb_Version}/source/${MariaDB_FileName}.tar.gz ${MariaDB_FileName}.tar.gz
             fi
-            if [ $? -eq 0 ]; then
+            if [ -s ${MariaDB_FileName}.tar.gz ]; then
                 echo "Download ${MariaDB_FileName}.tar.gz successfully!"
             else
                 Echo_Red "Error! Unable to download MariaDB, please download it to src directory manually."
