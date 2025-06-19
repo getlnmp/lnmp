@@ -23,7 +23,7 @@ Upgrade_Dependent()
     if [ "$PM" = "yum" ]; then
         Echo_Blue "[+] Yum installing dependent packages..."
         Get_Dist_Version
-        for packages in patch wget crontabs unzip tar ca-certificates net-tools libc-client-devel psmisc libXpm-devel git-core c-ares-devel libicu-devel libxslt libxslt-devel xz expat-devel bzip2 bzip2-devel libaio-devel rpcgen libtirpc-devel perl cyrus-sasl-devel sqlite-devel oniguruma-devel re2c pkg-config libarchive hostname ncurses-libs numactl-devel libxcrypt libwebp-devel gnutls-devel initscripts iproute libxcrypt-compat;
+        for packages in patch wget crontabs unzip tar ca-certificates net-tools libc-client-devel psmisc libXpm-devel git-core c-ares-devel libicu-devel libxslt libxslt-devel xz expat-devel bzip2 bzip2-devel libaio-devel rpcgen libtirpc-devel perl cyrus-sasl-devel sqlite-devel oniguruma-devel re2c pkg-config libarchive hostname ncurses-libs numactl-devel libxcrypt libwebp-devel gnutls-devel initscripts iproute libxcrypt-compat git;
         do yum -y install $packages; done
         yum -y update nss
 
@@ -71,7 +71,7 @@ EOF
                 yum -y install oracle-epel-release
             else
                 yum -y install epel-release
-                Get_Country
+#                Get_Country
                 if [ "${country}" = "CN" ]; then
                     sed -e 's!^metalink=!#metalink=!g' \
                         -e 's!^#baseurl=!baseurl=!g' \
@@ -195,14 +195,18 @@ if [ "${isSSL}" == "ssl" ]; then
             echo "/usr/local/acme.sh/acme.sh [found]"
         else
             cd /tmp
-            [[ -f latest.tar.gz ]] && rm -f latest.tar.gz
-            wget https://soft.vpser.net/lib/acme.sh/latest.tar.gz --prefer-family=IPv4 --no-check-certificate
-            tar zxf latest.tar.gz
-            cd acme.sh-*
+#            [[ -f latest.tar.gz ]] && rm -f latest.tar.gz
+#            wget https://soft.vpser.net/lib/acme.sh/latest.tar.gz --prefer-family=IPv4 --no-check-certificate
+#            tar zxf latest.tar.gz
+#            cd acme.sh-*
+            [[ -d "acme.sh" ]] && rm -f "acme.sh"
+            git clone https://github.com/acmesh-official/acme.sh.git
+            cd acme.sh
             ./acme.sh --install --log --home /usr/local/acme.sh --certhome /usr/local/nginx/conf/ssl -m ${email_address}
-            cd ..
-            rm -f latest.tar.gz
-            rm -rf acme.sh-*
+            cd ..            
+ #           rm -f latest.tar.gz
+ #           rm -rf acme.sh-*
+            rm -rf acme.sh
             sed -i 's/cat "\$CERT_PATH"$/#cat "\$CERT_PATH"/g' /usr/local/acme.sh/acme.sh
             if command -v yum >/dev/null 2>&1; then
                 yum -y update nss
@@ -311,14 +315,18 @@ if [ "${isSSL}" == "ssl" ]; then
             echo "/usr/local/acme.sh/acme.sh [found]"
         else
             cd /tmp
-            [[ -s latest.tar.gz ]] && rm -f latest.tar.gz
-            wget https://soft.vpser.net/lib/acme.sh/latest.tar.gz --prefer-family=IPv4 --no-check-certificate
-            tar zxf latest.tar.gz
-            cd acme.sh-*
+#            [[ -s latest.tar.gz ]] && rm -f latest.tar.gz
+#            wget https://soft.vpser.net/lib/acme.sh/latest.tar.gz --prefer-family=IPv4 --no-check-certificate
+#            tar zxf latest.tar.gz
+#            cd acme.sh-*
+            [[ -d "acme.sh" ]] && rm -f "acme.sh"
+            git clone https://github.com/acmesh-official/acme.sh.git
+            cd acme.sh
             ./acme.sh --install --log --home /usr/local/acme.sh --certhome /usr/local/apache/conf/ssl -m ${email_address}
             cd ..
-            rm -f latest.tar.gz
-            rm -rf acme.sh-*
+#            rm -f latest.tar.gz
+#            rm -rf acme.sh-*
+            rm -rf acme.sh
             sed -i 's/cat "\$CERT_PATH"$/#cat "\$CERT_PATH"/g' /usr/local/acme.sh/acme.sh
             if command -v yum >/dev/null 2>&1; then
                 yum -y update nss
@@ -365,11 +373,11 @@ if [ "${isSSL}" == "ssl" ]; then
         Echo_Red "Can't get stack info and will not be able to upgrade."
     fi
 else
-    echo "+--------------------------------------------------+"
-    echo "|  A tool to upgrade lnmp manager from 1.x to 2.0  |"
-    echo "+--------------------------------------------------+"
-    echo "|For more information please visit https://lnmp.org|"
-    echo "+--------------------------------------------------+"
+    echo "+------------------------------------------------------------+"
+    echo "|  A tool to upgrade lnmp manager from 1.x to 2.0            |"
+    echo "+------------------------------------------------------------+"
+    echo "|For more information please visit https://www.getlnmp.com   |"
+    echo "+------------------------------------------------------------+"
     Press_Start
     if [ "${Get_Stack}" == "unknow" ]; then
         Echo_Red "Can't get stack info."
