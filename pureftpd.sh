@@ -22,6 +22,7 @@ action=$1
 . lnmp.conf
 . include/main.sh
 . include/init.sh
+. include/downloadlink.sh
 
 Get_Dist_Name
 

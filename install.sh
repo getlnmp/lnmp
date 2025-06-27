@@ -27,6 +27,7 @@ LNMP_Ver='2.1'
 . include/end.sh
 . include/only.sh
 . include/multiplephp.sh
+. include/downloadlink.sh
 
 Get_Dist_Name
 

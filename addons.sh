@@ -31,6 +31,7 @@ action2=$2
 . include/php_imap.sh
 . include/php_swoole.sh
 . include/php_SourceGuardian.sh
+. include/downloadlink.sh
 
 Display_Addons_Menu()
 {
