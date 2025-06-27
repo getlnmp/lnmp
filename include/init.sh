@@ -462,8 +462,8 @@ Check_Download()
 {
     Echo_Blue "[+] Downloading files..."
     cd ${cur_dir}/src
-    Download_Files ${Libiconv_DL}.tar.gz ${Libiconv_Ver}.tar.gz
-    Download_Files ${LibMcrypt_DL}.tar.gz ${LibMcrypt_Ver}.tar.gz
+    Download_Files ${Libiconv_DL} ${Libiconv_Ver}.tar.gz
+    Download_Files ${LibMcrypt_DL} ${LibMcrypt_Ver}.tar.gz
     Download_Files ${Mcypt_DL} ${Mcypt_Ver}.tar.gz
     Download_Files ${Mhash_DL} ${Mhash_Ver}.tar.bz2
     if [ "${SelectMalloc}" = "2" ]; then
