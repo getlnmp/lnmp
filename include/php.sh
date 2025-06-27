@@ -217,10 +217,10 @@ Install_Composer()
 #                chmod +x /usr/local/bin/composer
 #            else
 #                echo "Composer install failed, try to from composer official website..."
-                curl -sS --connect-timeout 30 -m 60 https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer --2.2.25
-                if [ $? -eq 0 ]; then
-                    echo "Composer install successfully."
-                fi
+            curl -sS --connect-timeout 30 -m 60 https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer --2.2.25
+            if [ $? -eq 0 ]; then
+                echo "Composer install successfully."
+            fi
 
         else
             wget --progress=dot:giga --prefer-family=IPv4 --no-check-certificate -T 120 -t3 ${Download_Mirror}/web/php/composer/composer-2.2.25.phar -O /usr/local/bin/composer
