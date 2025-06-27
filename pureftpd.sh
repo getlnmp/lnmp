@@ -46,7 +46,7 @@ Install_Pureftpd()
     if [ $? -eq 0 ]; then
         echo "Download ${Pureftpd_Ver}.tar.bz2 successfully!"
     else
-        Download_Files https://github.com/jedisct1/pure-ftpd/releases/download/${Pureftpd_Ver_Short}/${Pureftpd_Ver}.tar.bz2 ${Pureftpd_Ver}.tar.bz2
+        Download_Files https://download.pureftpd.org/pure-ftpd/releases/obsolete/${Pureftpd_Ver}.tar.bz2 ${Pureftpd_Ver}.tar.bz2
     fi
 
     Echo_Blue "Installing pure-ftpd..."
