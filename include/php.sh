@@ -221,7 +221,7 @@ Install_Composer()
                 if [ $? -eq 0 ]; then
                     echo "Composer install successfully."
                 fi
-            fi
+
         else
             wget --progress=dot:giga --prefer-family=IPv4 --no-check-certificate -T 120 -t3 ${Download_Mirror}/web/php/composer/composer-2.2.25.phar -O /usr/local/bin/composer
             if [ $? -eq 0 ]; then
