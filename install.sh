@@ -47,11 +47,11 @@ Check_LNMPConf
 
 clear
 echo "+------------------------------------------------------------------------+"
-echo "|          LNMP V${LNMP_Ver} for ${DISTRO} Linux Server, Written by Licess          |"
+echo "|     LNMP V${LNMP_Ver} for ${DISTRO} Linux Server, Written by Licess    |"
 echo "+------------------------------------------------------------------------+"
 echo "|        A tool to auto-compile & install LNMP/LNMPA/LAMP on Linux       |"
 echo "+------------------------------------------------------------------------+"
-echo "|           For more information please visit https://www.getlnmp.com    |"
+echo "|        For more information please visit https://www.getlnmp.com       |"
 echo "+------------------------------------------------------------------------+"
 
 Init_Install()
@@ -64,7 +64,7 @@ Init_Install()
     Check_CMPT
     if [ "${CheckMirror}" != "n" ]; then
         Modify_Source
-        Check_Mirror
+#       Check_Mirror
     fi
     Add_Swap
     Set_Timezone
