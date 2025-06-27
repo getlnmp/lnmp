@@ -573,6 +573,7 @@ Press_Install()
         stty ${OLDCONFIG}
     fi
     . include/version.sh
+    . include/downloadlink.sh
     Kill_PM
 }
 
