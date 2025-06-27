@@ -725,7 +725,7 @@ Install_Icu60()
     if [ ! -s /usr/local/icu/bin/icu-config ]; then
         Echo_Blue "[+] Installing icu4c-60_3..."
         cd ${cur_dir}/src
-        Download_Files ${Libicu4c-60_3_DL} icu4c-60_3-src.tgz
+        Download_Files ${Libicu4c_60_3_DL} icu4c-60_3-src.tgz
         Tar_Cd icu4c-60_3-src.tgz icu/source
         ./configure --prefix=/usr/local/icu
         Make_Install

@@ -27,8 +27,8 @@ Install_PHP_Imap()
                 if [ "${CheckMirror}" = "n" ]; then
                     rpm -ivh ${cur_dir}/src/libc-client-2007f-24.el9.${ARCH}.rpm ${cur_dir}/src/uw-imap-devel-2007f-24.el9.${ARCH}.rpm
                 else
-                    rpm -ivh ${libc-client-2007f-24_el9_DL}
-                    rpm -ivh ${uw-imap-devel-2007f-24_el9_DL}
+                    rpm -ivh ${libc_client_2007f_24_el9_DL}
+                    rpm -ivh ${uw_imap_devel_2007f_24_el9_DL}
                 fi
             fi
         fi
