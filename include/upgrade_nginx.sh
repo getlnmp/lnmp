@@ -2,7 +2,7 @@
 
 Upgrade_Nginx()
 {
-    Cur_Nginx_Version=`/usr/local/nginx/sbin/nginx -v 2>&1 | cut -c22-`
+    Cur_Nginx_Version=$(/usr/local/nginx/sbin/nginx -v 2>&1 | cut -c22-)
 
     if [ -s /usr/local/include/jemalloc/jemalloc.h ] && /usr/local/nginx/sbin/nginx -V 2>&1|grep -Eqi 'ljemalloc'; then
         NginxMAOpt="--with-ld-opt='-ljemalloc'"

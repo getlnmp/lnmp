@@ -16,7 +16,7 @@ Install_Nginx_Openssl()
             Download_Files ${Openssl_New_DL} ${Openssl_New_Ver}.tar.gz
             [[ -d "${Openssl_New_Ver}" ]] && rm -rf ${Openssl_New_Ver}
             tar zxf ${Openssl_New_Ver}.tar.gz
-            Nginx_With_Openssl="--with-openssl=${cur_dir}/src/${Openssl_New_Ver} --with-openssl-opt='enable-weak-ssl-ciphers'"
+            Nginx_With_Openssl="--with-openssl=${cur_dir}/src/${Openssl_New_Ver} --with-openssl-opt=enable-weak-ssl-ciphers"
         fi
     fi
 }
