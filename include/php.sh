@@ -22,7 +22,7 @@ Check_Curl()
 
 PHP_with_curl()
 {
-    if [[ "${DISTRO}" = "CentOS" && "${Is_ARM}" = "y" ]] || [ "${UseOldOpenssl}" = "y" ];then
+    if [[ "${DISTRO}" = "CentOS" && "${Is_ARM}" = "y" ]] || [[ "${UseOldOpenssl}" = "y" ]];then
         Check_Curl
         with_curl='--with-curl=/usr/local/curl'
     else
