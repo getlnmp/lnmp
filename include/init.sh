@@ -518,7 +518,7 @@ Check_Download()
          Download_Files https://php-fpm.org/downloads/${Php_Ver}-fpm-0.5.14.diff.gz ${Php_Ver}-fpm-0.5.14.diff.gz
     fi
     Download_Files https://files.phpmyadmin.net/phpMyAdmin/${PhpMyAdmin_Ver_Short}/${PhpMyAdmin_Ver}.tar.xz ${PhpMyAdmin_Ver}.tar.xz
-#    Download_Files ${Download_Mirror}/prober/p.tar.gz p.tar.gz
+    Download_Files https://github.com/kmvan/x-prober/releases/download/8.20/prober.php prober.php
     if [ "${Stack}" != "lnmp" ]; then
         Download_Files ${Apache_DL} ${Apache_Ver}.tar.bz2
         Download_Files ${APR_DL} ${APR_Ver}.tar.bz2
