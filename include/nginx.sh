@@ -26,20 +26,21 @@ Install_Nginx_Lua()
     if [ "${Enable_Nginx_Lua}" = 'y' ]; then
         echo "Installing Lua for Nginx..."
         cd ${cur_dir}/src
-        Download_Files ${Luajit_DL} ${Luajit_Ver}.tar.gz
-        Download_Files ${LuaNginxModule_DL} ${LuaNginxModule}.tar.gz
-        Download_Files ${NgxDevelKit_DL} ${NgxDevelKit}.tar.gz
-        Download_Files ${LuaRestyCore_DL} ${LuaRestyCore}.tar.gz
-        Download_Files ${LuaRestyLrucache_DL} ${LuaRestyLrucache}.tar.gz
+ #      Download_Files ${Luajit_DL} ${Luajit_Ver}.tar.gz
+        git clone https://luajit.org/git/luajit.git
+        Download_O_Files ${LuaNginxModule_DL} ${LuaNginxModule}.tar.gz
+        Download_O_Files ${NgxDevelKit_DL} ${NgxDevelKit}.tar.gz
+        Download_O_Files ${LuaRestyCore_DL} ${LuaRestyCore}.tar.gz
+        Download_O_Files ${LuaRestyLrucache_DL} ${LuaRestyLrucache}.tar.gz
 
         Echo_Blue "[+] Installing ${Luajit_Ver}... "
         tar zxf ${LuaNginxModule}.tar.gz
         tar zxf ${NgxDevelKit}.tar.gz
-        Tar_Cd ${Luajit_Ver}.tar.gz ${Luajit_Ver}
+        cd luajit
         make
         make install PREFIX=/usr/local/luajit
         cd ${cur_dir}/src
-        rm -rf ${cur_dir}/src/${Luajit_Ver}
+        rm -rf ${cur_dir}/src/luajit
 
         cat > /etc/ld.so.conf.d/luajit.conf<<EOF
 /usr/local/luajit/lib

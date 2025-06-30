@@ -764,6 +764,18 @@ Download_Files()
     fi
 }
 
+Download_O_Files()
+{
+    local URL=$1
+    local FileName=$2
+    if [ -s "${FileName}" ]; then
+        echo "${FileName} [found]"
+    else
+        echo "Notice: ${FileName} not found!!!download now..."
+        wget -c --progress=dot -e dotbytes=20M --prefer-family=IPv4 --no-check-certificate ${URL} -O ${FileName}
+    fi
+}
+
 Tar_Cd()
 {
     local FileName=$1
