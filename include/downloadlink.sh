@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 if [ "${Use_Official}" = "y" ]; then
     Acmesh_DL="https://github.com/acmesh-official/acme.sh/archive/refs/tags/${Acmesh_Ver}.tar.gz";
     PHPNewApcu_DL="https://pecl.php.net/get/${PHPNewApcu_Ver}.tgz"
