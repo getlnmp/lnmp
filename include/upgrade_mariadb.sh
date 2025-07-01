@@ -19,7 +19,7 @@ Backup_MariaDB()
     if [ "${MariaDB_Data_Dir}" != "/usr/local/mariadb/var" ]; then
         mv ${MariaDB_Data_Dir} ${MariaDB_Data_Dir}${Upgrade_Date}
     fi
-    if echo "${mariadb_version}" | grep -Eqi '^5.5.' &&  echo "${cur_mariadb_version}" | grep -Eqi '^10.';then
+    if echo "${mariadb_version}" | grep -Eqi '^5\.5\.' &&  echo "${cur_mariadb_version}" | grep -Eqi '^10\.';then
         sed -i 's/STATS_PERSISTENT=0//g' /root/mariadb_all_backup${Upgrade_Date}.sql
     fi
 }
@@ -45,7 +45,7 @@ Upgrade_MariaDB()
         exit 1
     fi
 
-    if echo "${mariadb_version}" | grep -Eqi '^10.6.';then
+    if echo "${mariadb_version}" | grep -Eqi '^10\.6\.';then
         if [[ "${DB_ARCH}" = "x86_64" ]]; then
             read -p "Using Generic Binaries [y/n]: " Bin
             case "${Bin}" in
@@ -165,12 +165,12 @@ Upgrade_MariaDB()
         Echo_Blue "[+] Starting upgrade mariadb-${mariadb_version} Using Source code..."
         Tar_Cd mariadb-${mariadb_version}.tar.gz mariadb-${mariadb_version}
         MariaDB_WITHSSL
-        if echo "${mariadb_version}" | grep -Eqi '^10.[5-9]|1[01].';then
+        if echo "${mariadb_version}" | grep -Eqi '^(10\.[5-9]|1[01]\.)';then
             cmake -DCMAKE_INSTALL_PREFIX=/usr/local/mariadb -DMYSQL_UNIX_ADDR=/tmp/mysql.sock -DEXTRA_CHARSETS=all -DDEFAULT_CHARSET=utf8mb4 -DDEFAULT_COLLATION=utf8mb4_general_ci -DWITH_READLINE=1 -DWITH_EMBEDDED_SERVER=1 -DENABLED_LOCAL_INFILE=1 -DWITHOUT_TOKUDB=1
-        elif echo "${mariadb_version}" | grep -Eqi '^10.4.';then
+        elif echo "${mariadb_version}" | grep -Eqi '^10\.4.';then
             patch -p1 < ${cur_dir}/src/patch/mariadb_10.4_install_db.patch
             cmake -DCMAKE_INSTALL_PREFIX=/usr/local/mariadb -DMYSQL_UNIX_ADDR=/tmp/mysql.sock -DEXTRA_CHARSETS=all -DDEFAULT_CHARSET=utf8mb4 -DDEFAULT_COLLATION=utf8mb4_general_ci -DWITH_READLINE=1 -DWITH_EMBEDDED_SERVER=1 -DENABLED_LOCAL_INFILE=1 -DWITHOUT_TOKUDB=1
-        elif echo "${mariadb_version}" | grep -Eqi '^10.[123].';then
+        elif echo "${mariadb_version}" | grep -Eqi '^10\.[123].';then
             cmake -DCMAKE_INSTALL_PREFIX=/usr/local/mariadb -DWITH_ARIA_STORAGE_ENGINE=1 -DWITH_XTRADB_STORAGE_ENGINE=1 -DWITH_INNOBASE_STORAGE_ENGINE=1 -DWITH_PARTITION_STORAGE_ENGINE=1 -DWITH_MYISAM_STORAGE_ENGINE=1 -DWITH_FEDERATED_STORAGE_ENGINE=1 -DEXTRA_CHARSETS=all -DDEFAULT_CHARSET=utf8mb4 -DDEFAULT_COLLATION=utf8mb4_general_ci -DWITH_READLINE=1 -DWITH_EMBEDDED_SERVER=1 -DENABLED_LOCAL_INFILE=1 -DWITHOUT_TOKUDB=1 ${MariaDBWITHSSL}
         else
             cmake -DCMAKE_INSTALL_PREFIX=/usr/local/mariadb -DWITH_ARIA_STORAGE_ENGINE=1 -DWITH_XTRADB_STORAGE_ENGINE=1 -DWITH_INNOBASE_STORAGE_ENGINE=1 -DWITH_PARTITION_STORAGE_ENGINE=1 -DWITH_MYISAM_STORAGE_ENGINE=1 -DWITH_FEDERATED_STORAGE_ENGINE=1 -DEXTRA_CHARSETS=all -DDEFAULT_CHARSET=utf8mb4 -DDEFAULT_COLLATION=utf8mb4_general_ci -DWITH_READLINE=1 -DWITH_EMBEDDED_SERVER=1 -DENABLED_LOCAL_INFILE=1 ${MariaDBWITHSSL}

@@ -7,7 +7,7 @@ Install_PHP_Sodium()
     Press_Start
 
     Addons_Get_PHP_Ext_Dir
-    if echo "${Cur_PHP_Version}" | grep -Eqi '^5.[2-6].'; then
+    if echo "${Cur_PHP_Version}" | grep -Eqi '^5\.[2-6].'; then
         zend_ext="${zend_ext_dir}libsodium.so"
     else
         zend_ext="${zend_ext_dir}sodium.so"
@@ -30,7 +30,7 @@ Install_PHP_Sodium()
         apt-get install -y libsodium-dev
     fi
 
-    if echo "${Cur_PHP_Version}" | grep -Eqi '^7.[234].|8.[0-3].'; then
+    if echo "${Cur_PHP_Version}" | grep -Eqi '^7\.[234]\.|8\.[0-4]\.'; then
         Download_PHP_Src
 
         Tar_Cd php-${Cur_PHP_Version}.tar.bz2 php-${Cur_PHP_Version}/ext/sodium
@@ -39,7 +39,7 @@ Install_PHP_Sodium()
         make && make install
         cd -
         rm -rf php-${Cur_PHP_Version}
-    elif echo "${Cur_PHP_Version}" | grep -Eqi '^7.[01].'; then
+    elif echo "${Cur_PHP_Version}" | grep -Eqi '^7\.[01].'; then
         Download_Files ${PHPSodium_DL} ${PHPSodium_Ver}.tgz
         Tar_Cd ${PHPSodium_Ver}.tgz ${PHPSodium_Ver}
         ${PHP_Path}/bin/phpize
@@ -47,7 +47,7 @@ Install_PHP_Sodium()
         make && make install
         cd -
         rm -rf ${PHPSodium_Ver}
-    elif echo "${Cur_PHP_Version}" | grep -Eqi '^5.[3-6].'; then
+    elif echo "${Cur_PHP_Version}" | grep -Eqi '^5\.[3-6].'; then
         Download_Files ${PHPSodiumOld_DL} libsodium-1.0.7.tgz
         Tar_Cd libsodium-1.0.7.tgz libsodium-1.0.7
         ${PHP_Path}/bin/phpize
@@ -55,12 +55,12 @@ Install_PHP_Sodium()
         make && make install
         cd -
         rm -rf libsodium-1.0.7
-    elif echo "${Cur_PHP_Version}" | grep -Eqi '^5.2.'; then
+    elif echo "${Cur_PHP_Version}" | grep -Eqi '^5\.2\.'; then
         Echo_Red "PHP Sodium does not support PHP 5.2!"
         exit 1
     fi
 
-    if echo "${Cur_PHP_Version}" | grep -Eqi '^5.[3-6].'; then
+    if echo "${Cur_PHP_Version}" | grep -Eqi '^5\.[3-6]\.'; then
         echo 'extension = "libsodium.so"' > ${PHP_Path}/conf.d/009-sodium.ini
     else
         echo 'extension = "sodium.so"' > ${PHP_Path}/conf.d/009-sodium.ini

@@ -58,7 +58,7 @@ Start_Upgrade_PHP()
         fi
     fi
 
-    if echo "${php_version}" | grep -Eqi '^5.2.';then
+    if echo "${php_version}" | grep -Eqi '^5\.2\.';then
  #       Download_Files ${Download_Mirror}/web/phpfpm/php-${php_version}-fpm-0.5.14.diff.gz php-${php_version}-fpm-0.5.14.diff.gz
          Download_Files https://php-fpm.org/downloads/php-${php_version}-fpm-0.5.14.diff.gz php-${php_version}-fpm-0.5.14.diff.gz
     fi
@@ -68,14 +68,14 @@ Start_Upgrade_PHP()
         mv /usr/local/php /usr/local/oldphp${Upgrade_Date}
         mv /etc/init.d/php-fpm /usr/local/oldphp${Upgrade_Date}/init.d.php-fpm.bak.${Upgrade_Date}
     else
-        if echo "${Cur_PHP_Version}" | grep -Eqi '^7.';then
+        if echo "${Cur_PHP_Version}" | grep -Eqi '^7\.';then
             mv /usr/local/apache/modules/libphp7.so /usr/local/apache/modules/libphp7.so.bak.${Upgrade_Date}
         else
             mv /usr/local/apache/modules/libphp5.so /usr/local/apache/modules/libphp5.so.bak.${Upgrade_Date}
         fi
         mv /usr/local/php /usr/local/oldphp${Upgrade_Date}
         \cp /usr/local/apache/conf/httpd.conf /usr/local/apache/conf/httpd.conf.bak.${Upgrade_Date}
-        if echo "${Cur_PHP_Version}" | grep -Eqi '^7.' && echo "${php_version}" | grep -Eqi '^5.';then
+        if echo "${Cur_PHP_Version}" | grep -Eqi '^7\.' && echo "${php_version}" | grep -Eqi '^5\.';then
             sed -i '/libphp7.so/d' /usr/local/apache/conf/httpd.conf
         fi
     fi
@@ -187,13 +187,13 @@ Check_PHP_Upgrade_Files()
             echo "You upload upgrade_lnmp_php.log to LNMP Forum for help."
         fi
     else
-        if echo "${php_version}" | grep -Eqi '^7.';then
+        if echo "${php_version}" | grep -Eqi '^7\.';then
             if [[ -s /usr/local/apache/bin/httpd && -s /usr/local/apache/modules/libphp7.so && -s /usr/local/apache/conf/httpd.conf ]]; then
                 Echo_Green "======== upgrade php completed ======"
             else
                 Echo_LNMPA_Upgrade_PHP_Failed
             fi
-        elif echo "${php_version}" | grep -Eqi '^8.';then
+        elif echo "${php_version}" | grep -Eqi '^8\.';then
             if [[ -s /usr/local/apache/bin/httpd && -s /usr/local/apache/modules/libphp.so && -s /usr/local/apache/conf/httpd.conf ]]; then
                 Echo_Green "======== upgrade php completed ======"
             else
@@ -503,13 +503,13 @@ Upgrade_PHP_556()
 
     cd ${cur_dir}/src
     if [ "${Is_ARM}" != "y" ]; then
-        if echo "${php_version}" | grep -Eqi '^5.5.';then
+        if echo "${php_version}" | grep -Eqi '^5\.5\.';then
             echo "Install ZendGuardLoader for PHP 5.5..."
             Download_Files ${Download_Mirror}/web/zend/zend-loader-php5.5-linux-${ARCH}.tar.gz zend-loader-php5.5-linux-${ARCH}.tar.gz
             Tar_Cd zend-loader-php5.5-linux-${ARCH}.tar.gz
             mkdir -p /usr/local/zend/
             \cp zend-loader-php5.5-linux-${ARCH}/ZendGuardLoader.so /usr/local/zend/
-        elif echo "${php_version}" | grep -Eqi '^5.6.';then
+        elif echo "${php_version}" | grep -Eqi '^5\.6\.';then
             echo "Install ZendGuardLoader for PHP 5.6..."
             Download_Files ${Download_Mirror}/web/zend/zend-loader-php5.6-linux-${ARCH}.tar.gz zend-loader-php5.6-linux-${ARCH}.tar.gz
             Tar_Cd zend-loader-php5.6-linux-${ARCH}.tar.gz
@@ -578,7 +578,7 @@ Upgrade_PHP_7()
 {
     Echo_Blue "[+] Installing ${php_version}"
     Tar_Cd php-${php_version}.tar.bz2 php-${php_version}
-    if echo "${php_version}" | grep -Eqi '^7.1.';then
+    if echo "${php_version}" | grep -Eqi '^7\.1\.';then
    #    PHP_Openssl3_Patch
    #    PHP_ICU70_Patch
     fi
@@ -1199,29 +1199,29 @@ fi
 Upgrade_PHP()
 {
     Start_Upgrade_PHP
-    if echo "${php_version}" | grep -Eqi '^5.2.';then
+    if echo "${php_version}" | grep -Eqi '^5\.2\.';then
         Upgrade_PHP_52
-    elif echo "${php_version}" | grep -Eqi '^5.3.';then
+    elif echo "${php_version}" | grep -Eqi '^5\.3\.';then
         Upgrade_PHP_53
-    elif echo "${php_version}" | grep -Eqi '^5.4.';then
+    elif echo "${php_version}" | grep -Eqi '^5\.4\.';then
         Upgrade_PHP_54
-    elif echo "${php_version}" | grep -Eqi '^5.[56].';then
+    elif echo "${php_version}" | grep -Eqi '^5\.[56]\.';then
         Upgrade_PHP_556
-    elif echo "${php_version}" | grep -Eqi '^7.[01].';then
+    elif echo "${php_version}" | grep -Eqi '^7\.[01]\.';then
         Upgrade_PHP_7
-    elif echo "${php_version}" | grep -Eqi '^7.2.';then
+    elif echo "${php_version}" | grep -Eqi '^7\.2\.';then
         Upgrade_PHP_72
-    elif echo "${php_version}" | grep -Eqi '^7.3.';then
+    elif echo "${php_version}" | grep -Eqi '^7\.3\.';then
         Upgrade_PHP_73
-    elif echo "${php_version}" | grep -Eqi '^7.4.';then
+    elif echo "${php_version}" | grep -Eqi '^7\.4\.';then
         Upgrade_PHP_74
-    elif echo "${php_version}" | grep -Eqi '^8.0.';then
+    elif echo "${php_version}" | grep -Eqi '^8\.0\.';then
         Upgrade_PHP_80
-    elif echo "${php_version}" | grep -Eqi '^8.1.';then
+    elif echo "${php_version}" | grep -Eqi '^8\.1\.';then
         Upgrade_PHP_81
-    elif echo "${php_version}" | grep -Eqi '^8.2.';then
+    elif echo "${php_version}" | grep -Eqi '^8\.2\.';then
         Upgrade_PHP_82
-    elif echo "${php_version}" | grep -Eqi '^8.3.';then
+    elif echo "${php_version}" | grep -Eqi '^8\.3\.';then
         Upgrade_PHP_83
     else
         Echo_Red "PHP version: ${php_version} is not supported."

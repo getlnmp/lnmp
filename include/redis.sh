@@ -65,10 +65,10 @@ Install_Redis()
         rm -rf ${PHPRedis_Ver}
     fi
 
-    if echo "${Cur_PHP_Version}" | grep -Eqi '^5.2.';then
+    if echo "${Cur_PHP_Version}" | grep -Eqi '^5\.2\.';then
         Download_Files https://pecl.php.net/get/redis-2.2.7.tgz redis-2.2.7.tgz
         Tar_Cd redis-2.2.7.tgz redis-2.2.7
-    elif echo "${Cur_PHP_Version}" | grep -Eqi '^5.[3456].';then
+    elif echo "${Cur_PHP_Version}" | grep -Eqi '^5\.[3456].';then
         Download_Files https://pecl.php.net/get/redis-4.3.0.tgz redis-4.3.0.tgz
         Tar_Cd redis-4.3.0.tgz redis-4.3.0
     else

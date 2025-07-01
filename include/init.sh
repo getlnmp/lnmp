@@ -475,7 +475,7 @@ Check_Download()
     if [ "${Stack}" != "lamp" ]; then
         Download_Files ${Nginx_DL} ${Nginx_Ver}.tar.gz
     fi
-    if [[ "${DBSelect}" =~ ^[12345]|11$ ]]; then
+    if [[ "${DBSelect}" =~ ^([12345]|11)$ ]]; then
  #       Mysql_Ver_Short=$(echo ${Mysql_Ver} | sed 's/mysql-//' | cut -d. -f1-2)
         if [[ "${Bin}" = "y" && "${DBSelect}" =~ ^[2-4]$ ]]; then
             Download_Files https://cdn.mysql.com/Downloads/MySQL-${Mysql_Ver_Short}/${Mysql_Ver}-linux-glibc2.12-${DB_ARCH}.tar.gz ${Mysql_Ver}-linux-glibc2.12-${DB_ARCH}.tar.gz
@@ -499,7 +499,7 @@ Check_Download()
                 Download_Files https://cdn.mysql.com/archives/mysql-${Mysql_Ver_Short}/${Mysql_Ver}.tar.gz ${Mysql_Ver}.tar.gz
             fi
         fi
-    elif [[ "${DBSelect}" =~ ^[6789]|10$ ]]; then
+    elif [[ "${DBSelect}" =~ ^([6789]|10)$ ]]; then
     #    Mariadb_Version=$(echo ${Mariadb_Ver} | cut -d- -f2)
         if [ "${Bin}" = "y" ]; then
             MariaDB_FileName="${Mariadb_Ver}-linux-systemd-${DB_ARCH}"
@@ -613,7 +613,7 @@ Install_Mhash()
 
 Install_Freetype()
 {
-    if echo "${Ubuntu_Version}" | grep -Eqi "^1[89]\.|2[0-9]\." || echo "${Mint_Version}" | grep -Eqi "^19|2[0-9]" || echo "${Deepin_Version}" | grep -Eqi "^15\.[7-9]|15.1[0-9]|1[6-9]|2[0-9]" || echo "${Debian_Version}" | grep -Eqi "^9|1[0-9]" || echo "${Raspbian_Version}" | grep -Eqi "^9|1[0-9]" || echo "${Kali_Version}" | grep -Eqi "^202[0-9]" || echo "${UOS_Version}" | grep -Eqi "^2[0-9]" || echo "${CentOS_Version}" | grep -Eqi "^8|9" || echo "${RHEL_Version}" | grep -Eqi "^8|9" || echo "${Oracle_Version}" | grep -Eqi "^8|9" || echo "${Fedora_Version}" | grep -Eqi "^3[0-9]|29" || echo "${Rocky_Version}" | grep -Eqi "^8|9" || echo "${Alma_Version}" | grep -Eqi "^8|9" || echo "${openEuler_Version}" | grep -Eqi "^2[0-9]" || echo "${Anolis_Version}" | grep -Eqi "^8|9" || echo "${Kylin_Version}" | grep -Eqi "^V1[0-9]" || echo "${Amazon_Version}" | grep -Eqi "^202[3-9]" || echo "${OpenCloudOS_Version}" | grep -Eqi "^8|9|23" || echo "${HCE_Version}" | grep -Eqi "^2\.[0-9]"; then
+    if echo "${Ubuntu_Version}" | grep -Eqi "^(1[89]\.|2[0-9]\.)" || echo "${Mint_Version}" | grep -Eqi "^(19|2[0-9])" || echo "${Deepin_Version}" | grep -Eqi "^(15\.[7-9]|15.1[0-9]|1[6-9]|2[0-9])" || echo "${Debian_Version}" | grep -Eqi "^(9|1[0-9])" || echo "${Raspbian_Version}" | grep -Eqi "^(9|1[0-9])" || echo "${Kali_Version}" | grep -Eqi "^202[0-9]" || echo "${UOS_Version}" | grep -Eqi "^2[0-9]" || echo "${CentOS_Version}" | grep -Eqi "^(8|9)" || echo "${RHEL_Version}" | grep -Eqi "^(8|9)" || echo "${Oracle_Version}" | grep -Eqi "^(8|9)" || echo "${Fedora_Version}" | grep -Eqi "^(3[0-9]|29)" || echo "${Rocky_Version}" | grep -Eqi "^(8|9)" || echo "${Alma_Version}" | grep -Eqi "^(8|9)" || echo "${openEuler_Version}" | grep -Eqi "^2[0-9]" || echo "${Anolis_Version}" | grep -Eqi "^(8|9)" || echo "${Kylin_Version}" | grep -Eqi "^V1[0-9]" || echo "${Amazon_Version}" | grep -Eqi "^202[3-9]" || echo "${OpenCloudOS_Version}" | grep -Eqi "^(8|9|23)" || echo "${HCE_Version}" | grep -Eqi "^2\.[0-9]"; then
         Download_Files ${Freetype_New_DL} ${Freetype_New_Ver}.tar.xz
         Echo_Blue "[+] Installing ${Freetype_New_Ver}"
         Tar_Cd ${Freetype_New_Ver}.tar.xz ${Freetype_New_Ver}
@@ -843,7 +843,7 @@ Install_Icu721()
 Download_Boost()
 {
     Echo_Blue "[+] Download or use exist boost..."
-    if [ "${DBSelect}" = "4" ] || echo "${mysql_version}" | grep -Eqi '^5.7.'; then
+    if [ "${DBSelect}" = "4" ] || echo "${mysql_version}" | grep -Eqi '^5\.7\.'; then
         if [ -s "${cur_dir}/src/${Boost_Ver}.tar.bz2" ]; then
             [[ -d "${cur_dir}/src/${Boost_Ver}" ]] && rm -rf "${cur_dir}/src/${Boost_Ver}"
             tar jxf ${cur_dir}/src/${Boost_Ver}.tar.bz2 -C ${cur_dir}/src
@@ -855,7 +855,7 @@ Download_Boost()
             cd -
             MySQL_WITH_BOOST="-DWITH_BOOST=${cur_dir}/src/${Boost_Ver}"
         fi
-    elif [ "${DBSelect}" = "5" ] || echo "${mysql_version}" | grep -Eqi '^8.'; then
+    elif [ "${DBSelect}" = "5" ] || echo "${mysql_version}" | grep -Eqi '^8\.'; then
         Get_Boost_Ver=$(grep 'SET(BOOST_PACKAGE_NAME' cmake/boost.cmake |grep -oP '\d+(\_\d+){2}')
         if [ -s "${cur_dir}/src/boost_${Get_Boost_Ver}.tar.bz2" ]; then
             [[ -d "${cur_dir}/src/boost_${Get_Boost_Ver}" ]] && rm -rf "${cur_dir}/src/boost_${Get_Boost_Ver}"
@@ -876,7 +876,7 @@ Install_Boost()
         else
             Download_Boost
         fi
-    elif echo "${mysql_version}" | grep -Eqi '^5.7.' || echo "${mysql_version}" | grep -Eqi '^8.'; then
+    elif echo "${mysql_version}" | grep -Eqi '^5\.7\.' || echo "${mysql_version}" | grep -Eqi '^8\.'; then
         if [ -d "${cur_dir}/src/mysql-${mysql_version}/boost" ]; then
             MySQL_WITH_BOOST="-DWITH_BOOST=${cur_dir}/src/mysql-${mysql_version}/boost"
         else

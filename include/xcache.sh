@@ -16,7 +16,7 @@ Install_XCache()
             Echo_Red "Password cannot be empty!"
         fi
     done
-    xmd5pass=`echo -n "${xadmin_pass}" |md5sum |awk '{print $1}'`
+    xmd5pass=$(echo -n "${xadmin_pass}" |md5sum |awk '{print $1}')
     echo "====== Installing XCache ======"
     Press_Start
 
@@ -27,7 +27,7 @@ Install_XCache()
         rm -f "${zend_ext}"
     fi
 
-    cpu_count=`cat /proc/cpuinfo |grep -c processor`
+    cpu_count=$(cat /proc/cpuinfo |grep -c processor)
 
     cd ${cur_dir}/src
     Download_Files ${XCache_DL} ${XCache_Ver}.tar.gz

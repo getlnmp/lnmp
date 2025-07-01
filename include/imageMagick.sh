@@ -39,7 +39,7 @@ Install_ImageMagic()
     if [ -s /usr/local/imagemagick/bin/convert ]; then
         echo "ImageMagick already exists."
     else
-        if echo "${Cur_PHP_Version}" | grep -Eqi '^5.2.';then
+        if echo "${Cur_PHP_Version}" | grep -Eqi '^5\.2.';then
             Download_Files ${ImageMagickold_DL} ImageMagick-6.9.9-51.tar.gz
             Tar_Cd ImageMagick-6.9.9-51.tar.gz ImageMagick-6.9.9-51
         else
@@ -53,7 +53,7 @@ Install_ImageMagic()
         rm -rf ${cur_dir}/src/${ImageMagick_Ver}
     fi
 
-    if echo "${Cur_PHP_Version}" | grep -Eqi '^5.2.';then
+    if echo "${Cur_PHP_Version}" | grep -Eqi '^5\.2.';then
         Download_Files ${Imagickold_DL} imagick-3.1.2.tgz
         Tar_Cd imagick-3.1.2.tgz imagick-3.1.2
     else

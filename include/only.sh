@@ -132,7 +132,7 @@ Install_Database()
     echo "============================check files=================================="
     cd ${cur_dir}/src
 #    Mysql_Ver_Short=$(echo ${Mysql_Ver} | sed 's/mysql-//' | cut -d. -f1-2)
-    if [[ "${DBSelect}" =~ ^[12345]|11$ ]]; then
+    if [[ "${DBSelect}" =~ ^([12345]|11)$ ]]; then
         if [[ "${Bin}" = "y" && "${DBSelect}" =~ ^[2-4]$ ]]; then
             Download_Files https://cdn.mysql.com/Downloads/MySQL-${Mysql_Ver_Short}/${Mysql_Ver}-linux-glibc2.12-${DB_ARCH}.tar.gz ${Mysql_Ver}-linux-glibc2.12-${DB_ARCH}.tar.gz
 #            [[ $? -ne 0 ]] && Download_Files https://cdn.mysql.com/archives/mysql-${Mysql_Ver_Short}/${Mysql_Ver}-linux-glibc2.12-${DB_ARCH}.tar.gz ${Mysql_Ver}-linux-glibc2.12-${DB_ARCH}.tar.gz
@@ -179,7 +179,7 @@ Install_Database()
                 exit 1
             fi
         fi
-    elif [[ "${DBSelect}" =~ ^[6789]|10$ ]]; then
+    elif [[ "${DBSelect}" =~ ^([6789]|10)$ ]]; then
         Mariadb_Version=$(echo ${Mariadb_Ver} | cut -d- -f2)
         if [ "${Bin}" = "y" ]; then
             MariaDB_FileName="${Mariadb_Ver}-linux-systemd-${DB_ARCH}"
@@ -234,10 +234,10 @@ Install_Database()
     fi
     TempMycnf_Clean
 
-    if [[ "${DBSelect}" =~ ^[6789]|10$ ]]; then
+    if [[ "${DBSelect}" =~ ^([6789]|10)$ ]]; then
         StartUp mariadb
         StartOrStop start mariadb
-    elif [[ "${DBSelect}" =~ ^[12345]|11$ ]]; then
+    elif [[ "${DBSelect}" =~ ^([12345]|11)$ ]]; then
         StartUp mysql
         StartOrStop start mysql
     fi
@@ -245,10 +245,10 @@ Install_Database()
     Clean_DB_Src_Dir
     Check_DB_Files
     if [[ "${isDB}" = "ok" ]]; then
-        if [[ "${DBSelect}" =~ ^[12345]|11$ ]]; then
+        if [[ "${DBSelect}" =~ ^([12345]|11)$ ]]; then
             Echo_Green "MySQL root password: ${DB_Root_Password}"
             Echo_Green "Install ${Mysql_Ver} completed! enjoy it."
-        elif [[ "${DBSelect}" =~ ^[6789]|10$ ]]; then
+        elif [[ "${DBSelect}" =~ ^([6789]|10)$ ]]; then
             Echo_Green "MariaDB root password: ${DB_Root_Password}"
             Echo_Green "Install ${Mariadb_Ver} completed! enjoy it."
         fi
@@ -261,9 +261,9 @@ Install_Only_Database()
     echo "+-----------------------------------------------------------------------+"
     echo "|      Install MySQL/MariaDB database for LNMP, Written by Licess       |"
     echo "+-----------------------------------------------------------------------+"
-    echo "|               A tool to install MySQL/MariaDB for LNMP                |"
+    echo "|            A tool to install MySQL/MariaDB for LNMP                   |"
     echo "+-----------------------------------------------------------------------+"
-    echo "|           For more information please visit https://lnmp.org          |"
+    echo "|        For more information please visit https://www.getlnmp.com      |"
     echo "+-----------------------------------------------------------------------+"
 
     Get_Dist_Name

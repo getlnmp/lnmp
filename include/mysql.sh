@@ -9,9 +9,9 @@ MySQL_ARM_Patch()
 
 MySQL_Gcc7_Patch()
 {
-    if gcc -dumpversion|grep -Eq "^[7-9]|10"; then
+    if gcc -dumpversion|grep -Eq "^([7-9]|10)"; then
         echo "gcc version: 7+"
-        if [ "${DBSelect}" = "1" ] || echo "${mysql_version}" | grep -Eqi '^5.1.'; then
+        if [ "${DBSelect}" = "1" ] || echo "${mysql_version}" | grep -Eqi '^5\.1.'; then
             patch -p1 < ${cur_dir}/src/patch/mysql-5.1-mysql-gcc7.patch
         fi
     fi
@@ -50,10 +50,10 @@ MySQL_Sec_Setting()
 user=root
 password=''
 EOF
-        if [ "${DBSelect}" = "4" ] || echo "${mysql_version}" | grep -Eqi '^5.7.'; then
+        if [ "${DBSelect}" = "4" ] || echo "${mysql_version}" | grep -Eqi '^5\.7\.'; then
             /usr/local/mysql/bin/mysql --defaults-file=~/.emptymy.cnf -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('${DB_Root_Password}');"
             [ $? -eq 0 ] && echo "Set password Sucessfully." || echo "Set password failed!"
-        elif [ "${DBSelect}" = "5" ] || echo "${mysql_version}" | grep -Eqi '^8.'; then
+        elif [ "${DBSelect}" = "5" ] || echo "${mysql_version}" | grep -Eqi '^8\.'; then
             /usr/local/mysql/bin/mysql --defaults-file=~/.emptymy.cnf -e "SET PASSWORD FOR 'root'@'localhost' = '${DB_Root_Password}';"
             [ $? -eq 0 ] && echo "Set password Sucessfully." || echo "Set password failed!"
         else
@@ -72,9 +72,9 @@ EOF
         echo "OK, MySQL root password correct."
     fi
     echo "Update root password..."
-    if [ "${DBSelect}" = "4" ] || echo "${mysql_version}" | grep -Eqi '^5.7.'; then
+    if [ "${DBSelect}" = "4" ] || echo "${mysql_version}" | grep -Eqi '^5\.7\.'; then
         Do_Query "UPDATE mysql.user SET authentication_string=PASSWORD('${DB_Root_Password}') WHERE User='root';"
-    elif [ "${DBSelect}" = "5" ] || echo "${mysql_version}" | grep -Eqi '^8.0.'; then
+    elif [ "${DBSelect}" = "5" ] || echo "${mysql_version}" | grep -Eqi '^8\.0\.'; then
         Do_Query "SET PASSWORD FOR 'root'@'localhost' = '${DB_Root_Password}';"
     else
         Do_Query "UPDATE mysql.user SET Password=PASSWORD('${DB_Root_Password}') WHERE User='root';"
@@ -307,7 +307,7 @@ Install_MySQL_55()
         fi
         Tar_Cd ${Mysql_Ver}.tar.gz ${Mysql_Ver}
         MySQL_ARM_Patch
-        if  g++ -dM -E -x c++ /dev/null | grep -F __cplusplus | cut -d' ' -f3 | grep -Eqi "^2017|202[0-9]"; then
+        if  g++ -dM -E -x c++ /dev/null | grep -F __cplusplus | cut -d' ' -f3 | grep -Eqi "^(2017|202[0-9])"; then
             sed -i '1s/^/set(CMAKE_CXX_STANDARD 11)\n/' CMakeLists.txt
         fi
         if echo "${Rocky_Version}" | grep -Eqi "^9"; then
@@ -425,7 +425,7 @@ Install_MySQL_56()
             MySQL_WITH_SSL=''
         fi
         Tar_Cd ${Mysql_Ver}.tar.gz ${Mysql_Ver}
-        if  g++ -dM -E -x c++ /dev/null | grep -F __cplusplus | cut -d' ' -f3 | grep -Eqi "^2017|202[0-9]"; then
+        if  g++ -dM -E -x c++ /dev/null | grep -F __cplusplus | cut -d' ' -f3 | grep -Eqi "^(2017|202[0-9])"; then
             sed -i '1s/^/set(CMAKE_CXX_STANDARD 11)\n/' CMakeLists.txt
         fi
         if echo "${Rocky_Version}" | grep -Eqi "^9"; then

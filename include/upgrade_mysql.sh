@@ -18,7 +18,7 @@ Backup_MySQL()
     if [ "${MySQL_Data_Dir}" != "/usr/local/mysql/var" ]; then
         mv ${MySQL_Data_Dir} ${MySQL_Data_Dir}${Upgrade_Date}
     fi
-    if echo "${mysql_version}" | grep -Eqi '^5.5.' &&  echo "${cur_mysql_version}" | grep -Eqi '^5.6.';then
+    if echo "${mysql_version}" | grep -Eqi '^5\.5\.' &&  echo "${cur_mysql_version}" | grep -Eqi '^5\.6\.';then
         sed -i 's/STATS_PERSISTENT=0//g' /root/mysql_all_backup${Upgrade_Date}.sql
     fi
 }
@@ -754,7 +754,7 @@ Upgrade_MySQL()
 
     Verify_DB_Password
 
-    cur_mysql_version=`/usr/local/mysql/bin/mysql_config --version`
+    cur_mysql_version=$(/usr/local/mysql/bin/mysql_config --version)
     mysql_version=""
     echo "Current MYSQL Version:${cur_mysql_version}"
     echo "You can get version number from http://dev.mysql.com/downloads/mysql/"
@@ -770,7 +770,7 @@ Upgrade_MySQL()
         exit 1
     fi
 
-    if [[ "${DB_ARCH}" = "x86_64" || "${DB_ARCH}" = "i686" ]] && echo "${mysql_version}" | grep -Eqi '^5.[5-7].';then
+    if [[ "${DB_ARCH}" = "x86_64" || "${DB_ARCH}" = "i686" ]] && echo "${mysql_version}" | grep -Eqi '^5\.[5-7].';then
         read -p "Using Generic Binaries [y/n]: " Bin
         case "${Bin}" in
         [yY][eE][sS]|[yY])
@@ -786,7 +786,7 @@ Upgrade_MySQL()
             Bin="y"
             ;;
         esac
-    elif [[ "${DB_ARCH}" = "x86_64" || "${DB_ARCH}" = "i686" || "${DB_ARCH}" = "aarch64" ]] && echo "${mysql_version}" | grep -Eqi '^8.';then
+    elif [[ "${DB_ARCH}" = "x86_64" || "${DB_ARCH}" = "i686" || "${DB_ARCH}" = "aarch64" ]] && echo "${mysql_version}" | grep -Eqi '^8\.';then
         read -p "Using Generic Binaries [y/n]: " Bin
         case "${Bin}" in
         [yY][eE][sS]|[yY])
@@ -828,7 +828,7 @@ Upgrade_MySQL()
         ;;
     esac
 
-    mysql_short_version=`echo ${mysql_version} | cut -d. -f1-2`
+    mysql_short_version=$(echo ${mysql_version} | cut -d. -f1-2)
 
     echo "=================================================="
     echo "You will upgrade MySQL Version to ${mysql_version}"
@@ -854,7 +854,7 @@ Upgrade_MySQL()
         mysql_src="mysql-${mysql_version}-linux-glibc${mysql8_glibc_ver}-${DB_ARCH}.tar.xz"
     elif [[ "${Bin}" = "y" && "${mysql_short_version}" = "8.4" ]]; then
         mysql_src="mysql-${mysql_version}-linux-glibc2.17-${DB_ARCH}.tar.xz"
-    elif [[ "${Bin}" = "y" && "${mysql_short_version}" =~ ^5.[5-7]$ ]]; then
+    elif [[ "${Bin}" = "y" && "${mysql_short_version}" =~ ^5\.[5-7]$ ]]; then
         mysql_src="mysql-${mysql_version}-linux-glibc2.12-${DB_ARCH}.tar.gz"
     else
         if [[ "${mysql_short_version}" = "5.7" || "${mysql_short_version}" = "8.0" ]]; then

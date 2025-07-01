@@ -29,27 +29,27 @@ Install_Opcache()
 
     Addons_Get_PHP_Ext_Dir
     zend_ext="${zend_ext_dir}opcache.so"
-    if echo "${Cur_PHP_Version}" | grep -Eqi '^5.[234].'; then
+    if echo "${Cur_PHP_Version}" | grep -Eqi '^5\.[234].'; then
         if [ -s "${zend_ext}" ]; then
             rm -f "${zend_ext}"
         fi
     fi
 
-    if echo "${Cur_PHP_Version}" | grep -Eqi '^5.2.'; then
+    if echo "${Cur_PHP_Version}" | grep -Eqi '^5\.2\.'; then
         echo "Zend Opcache do NOT SUPPORT PHP 5.2.* and lower version of php 5.3"
         sleep 1
         exit 1
-    elif echo "${Cur_PHP_Version}" | grep -Eqi '^5.3.'; then
-        if echo ${Cur_PHP_Version} | grep -vEqi '^5.3.2[0-9]';then
+    elif echo "${Cur_PHP_Version}" | grep -Eqi '^5\.3\.'; then
+        if echo ${Cur_PHP_Version} | grep -vEqi '^5\.3\.2[0-9]';then
             echo "If PHP under version 5.3.20, we do not recommend install opcache, it maybe cause 502 Bad Gateway error!"
             sleep 3
             exit 1
         fi
         Install_Old_Opcache
-    elif echo "${Cur_PHP_Version}" | grep -Eqi '^5.4.'; then
+    elif echo "${Cur_PHP_Version}" | grep -Eqi '^5\.4\.'; then
         echo "${Cur_PHP_Version}"
         Install_Old_Opcache
-    elif echo "${Cur_PHP_Version}" | grep -Eqi '^5.[56].' || echo "${Cur_PHP_Version}" | grep -Eqi '^7.'; then
+    elif echo "${Cur_PHP_Version}" | grep -Eqi '^5\.[56]\.' || echo "${Cur_PHP_Version}" | grep -Eqi '^7\.'; then
         cat >${PHP_Path}/conf.d/004-opcache.ini<<EOF
 [Zend Opcache]
 zend_extension="opcache.so"
@@ -60,7 +60,7 @@ opcache.revalidate_freq=60
 opcache.fast_shutdown=1
 opcache.enable_cli=1
 EOF
-    elif echo "${Cur_PHP_Version}" | grep -Eqi '^8.'; then
+    elif echo "${Cur_PHP_Version}" | grep -Eqi '^8\.'; then
         cat >${PHP_Path}/conf.d/004-opcache.ini<<EOF
 [Zend Opcache]
 zend_extension="opcache.so"

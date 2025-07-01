@@ -33,17 +33,17 @@ PHP_with_curl()
 PHP_with_openssl()
 {
     if openssl version | grep -Eqi "OpenSSL 1.1.*|OpenSSL 3.*"; then
-        if ( [ "${PHPSelect}" != "" ] &&  echo "${PHPSelect}" | grep -Eqi "^[1-5]$" ) || ( [ "${php_version}" != "" ] && echo "${php_version}" | grep -Eqi '^5.' ) || echo "${Php_Ver}" | grep -Eqi "php-5."; then
+        if ( [ "${PHPSelect}" != "" ] &&  echo "${PHPSelect}" | grep -Eqi "^[1-5]$" ) || ( [ "${php_version}" != "" ] && echo "${php_version}" | grep -Eqi '^5\.' ) || echo "${Php_Ver}" | grep -Eqi "php-5\."; then
             UseOldOpenssl='y'
         fi
     fi
-    if echo "${PHPSelect}" | grep -Eqi "^[1-2]$" || echo "${php_version}" | grep -Eqi '^5.[2,3].*' || echo "${Php_Ver}" | grep -Eqi "php-5.[2,3].*"; then
+    if echo "${PHPSelect}" | grep -Eqi "^[1-2]$" || echo "${php_version}" | grep -Eqi '^5\.[2,3]\.*' || echo "${Php_Ver}" | grep -Eqi "php-5\.[2,3]\.*"; then
         UseOldOpenssl='y'
     fi
     if openssl version | grep -Eqi "OpenSSL 3.*"; then
-        if echo "${PHPSelect}" | grep -Eqi "^6$" || echo "${php_version}" | grep -Eqi '^7.0.*' || echo "${Php_Ver}" | grep -Eqi "php-7.0.*"; then
+        if echo "${PHPSelect}" | grep -Eqi "^6$" || echo "${php_version}" | grep -Eqi '^7\.0\.*' || echo "${Php_Ver}" | grep -Eqi "php-7\.0\.*"; then
             UseOldOpenssl='y'
-        elif echo "${PHPSelect}" | grep -Eqi "^(7|8|9|10|11)$" || echo "${php_version}" | grep -Eqi '^7.[1-4].*|^8.0.*' || echo "${Php_Ver}" | grep -Eqi "php-7.[1-4].*|php-8.0.*"; then
+        elif echo "${PHPSelect}" | grep -Eqi "^(7|8|9|10|11)$" || echo "${php_version}" | grep -Eqi '^7\.[1-4]\.*|^8\.0\.*' || echo "${Php_Ver}" | grep -Eqi "php-7\.[1-4]\.*|php-8\.0\.*"; then
             UseNewOpenssl='y'
         fi
     fi
@@ -127,7 +127,7 @@ PHP_with_Sodium()
         elif [ "$PM" = "apt" ]; then
             apt-get install -y libsodium-dev
         fi
-        if echo "${PHPSelect}" | grep -Eqi "^[8-9]|1[0-2]$" || echo "${php_version}" | grep -Eqi '^7.[2-4].*|8.*' || echo "${Php_Ver}" | grep -Eqi "php-7.[2-4].*|php-8.*"; then
+        if echo "${PHPSelect}" | grep -Eqi "^([8-9]|1[0-4])$" || echo "${php_version}" | grep -Eqi '^7\.[2-4]\.*|8\.*' || echo "${Php_Ver}" | grep -Eqi "php-7\.[2-4]\.*|php-8\.*"; then
             with_sodium='--with-sodium'
         else
             Echo_Red 'Below PHP 7.2 please use " . /addons.sh install sodium " to install the PHP Sodium module.'
@@ -168,30 +168,30 @@ PHP_with_Imap()
 PHP_with_Intl()
 {
 #    if echo "${Ubuntu_Version}" | grep -Eqi "^19|2[0-7]\." || echo "${Debian_Version}" | grep -Eqi "^1[0-9]" || echo "${Raspbian_Version}" | grep -Eqi "^1[0-9]" || echo "${Deepin_Version}" | grep -Eqi "^2[0-9]" || echo "${UOS_Version}" | grep -Eqi "^2[0-9]" || echo "${Amazon_Version}" | grep -Eqi "^202[3-9]" || echo "${Kali_Version}" | grep -Eqi "^202[2-9]" || echo "${Fedora_Version}" | grep -Eqi "^3[7-9]|4[0-9]" || echo "${openEuler_Version}" | grep -Eqi "^2[2-9]" || echo "${Mint_Version}" | grep -Eqi "^2[0-9]" || echo "${Kylin_Version}" | grep -Eq "^v1[0-9]"; then
-    if echo "${php_version}" | grep -Eqi '^5.[4-6].*' || echo "${Php_Ver}" | grep -Eqi "php-5.[4-6].*"; then
+    if echo "${php_version}" | grep -Eqi '^5\.[4-6]\.*' || echo "${Php_Ver}" | grep -Eqi "php-5\.[4-6]\.*"; then
         Install_Icu522
         with_icu_dir='--with-icu-dir=/usr/local/icu522'
     fi
-    if echo "${php_version}" | grep -Eqi '^7.[0-1].*' || echo "${Php_Ver}" | grep -Eqi "php-7.[0-1].*"; then
+    if echo "${php_version}" | grep -Eqi '^7\.[0-1]\.*' || echo "${Php_Ver}" | grep -Eqi "php-7\.[0-1]\.*"; then
         Install_Icu571
         with_icu_dir='--with-icu-dir=/usr/local/icu571'
     fi
-    if echo "${php_version}" | grep -Eqi '^7.[2-3].*' || echo "${Php_Ver}" | grep -Eqi "php-7.[2-3].*"; then
+    if echo "${php_version}" | grep -Eqi '^7\.[2-3]\.*' || echo "${Php_Ver}" | grep -Eqi "php-7\.[2-3]\.*"; then
         Install_Icu631
         with_icu_dir='--with-icu-dir=/usr/local/icu631'
     fi
-    if echo "${php_version}" | grep -Eqi '^7.4.*|8.0.*' || echo "${Php_Ver}" | grep -Eqi "php-7.4.*|php-8.0.*"; then
+    if echo "${php_version}" | grep -Eqi '^(7\.4\.*|8\.0\.*)' || echo "${Php_Ver}" | grep -Eqi "(php-7\.4\.*|php-8\.0\.*)"; then
         Install_Icu671
         with_icu_dir='--with-icu-dir=/usr/local/icu671'
     fi
-    if echo "${php_version}" | grep -Eqi '^8.[1-4].*' || echo "${Php_Ver}" | grep -Eqi "php-8.[1-4].*"; then
+    if echo "${php_version}" | grep -Eqi '^8\.[1-4]\.*' || echo "${Php_Ver}" | grep -Eqi "php-8\.[1-4]\.*"; then
         if ! (pkg-config --modversion icu-i18n | grep -Eqi '^7[0-9]'); then
             Install_Icu721
             with_icu_dir='--with-icu-dir=/usr/local/icu721'
         fi
     fi
 #    fi
-    if pkg-config --modversion icu-i18n | grep -Eqi '^6[89]|7[0-9]'; then
+    if pkg-config --modversion icu-i18n | grep -Eqi '^(6[89]|7[0-9])'; then
         export CXX="g++ -DTRUE=1 -DFALSE=0"
         export  CC="gcc -DTRUE=1 -DFALSE=0"
     fi
@@ -233,7 +233,7 @@ Install_Composer()
 {
     if [ "${CheckMirror}" != "n" ]; then
         echo "Downloading Composer..."
-        if echo "${PHPSelect}" | grep -Eqi '^[1-14]' || echo "${php_version}" | grep -Eqi '^5.[2-6].*|7.[0-4].*|8.[0-4].*' || echo "${Php_Ver}" | grep -Eqi "php-5.[2-6].*|php-7.[0-2].*|php-8.[0-4].*"; then
+        if echo "${PHPSelect}" | grep -Eqi '^[1-14]' || echo "${php_version}" | grep -Eqi '^(5\.[2-6]\.*|7\.[0-4]\.*|8\.[0-4]\.*)' || echo "${Php_Ver}" | grep -Eqi "(php-5\.[2-6]\.*|php-7\.[0-2]\.*|php-8\.[0-4]\.*)"; then
             curl -sS --connect-timeout 30 -m 60 https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
             if [ $? -eq 0 ]; then
                 echo "Composer install successfully."
