@@ -33,7 +33,7 @@ Install_Nginx_Lua()
         Download_O_Files ${LuaRestyCore_DL} ${LuaRestyCore}.tar.gz
         Download_O_Files ${LuaRestyLrucache_DL} ${LuaRestyLrucache}.tar.gz
 
-        Echo_Blue "[+] Installing ${Luajit_Ver}... "
+        Echo_Blue "[+] Installing Luajit... "
         tar zxf ${LuaNginxModule}.tar.gz
         tar zxf ${NgxDevelKit}.tar.gz
         cd luajit
@@ -68,15 +68,15 @@ EOF
 
         Nginx_Ver_Com=$(${cur_dir}/include/version_compare 1.21.5 ${Nginx_Version})
         if [[  "${Nginx_Ver_Com}" == "1" ]]; then
-            Nginx_Module_Lua="--with-ld-opt=-Wl,-rpath,/usr/local/luajit/lib --add-module=${cur_dir}/src/${LuaNginxModule} --add-module=${cur_dir}/src/${NgxDevelKit}"
+            Nginx_Module_Lua="--with-ld-opt='-Wl,-rpath,/usr/local/luajit/lib' --add-module=${cur_dir}/src/${LuaNginxModule} --add-module=${cur_dir}/src/${NgxDevelKit}"
         else
             if [ "${Nginx_With_Pcre}" = "" ]; then
-                Nginx_Module_Lua="--with-ld-opt=-Wl,-rpath,/usr/local/luajit/lib --add-module=${cur_dir}/src/${LuaNginxModule} --add-module=${cur_dir}/src/${NgxDevelKit} --with-pcre=${cur_dir}/src/${Pcre_Ver} --with-pcre-jit"
+                Nginx_Module_Lua="--with-ld-opt='-Wl,-rpath,/usr/local/luajit/lib' --add-module=${cur_dir}/src/${LuaNginxModule} --add-module=${cur_dir}/src/${NgxDevelKit} --with-pcre=${cur_dir}/src/${Pcre_Ver} --with-pcre-jit"
                 cd ${cur_dir}/src
                 Download_Files ${Pcre_DL} ${Pcre_Ver}.tar.bz2
                 Tar_Cd ${Pcre_Ver}.tar.bz2
             else
-                Nginx_Module_Lua="--with-ld-opt=-Wl,-rpath,/usr/local/luajit/lib --add-module=${cur_dir}/src/${LuaNginxModule} --add-module=${cur_dir}/src/${NgxDevelKit}"
+                Nginx_Module_Lua="--with-ld-opt='-Wl,-rpath,/usr/local/luajit/lib' --add-module=${cur_dir}/src/${LuaNginxModule} --add-module=${cur_dir}/src/${NgxDevelKit}"
             fi
         fi
     fi
