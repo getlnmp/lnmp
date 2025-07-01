@@ -706,10 +706,10 @@ Install_TCMalloc()
 Install_Icu4c()
 {
     if command -v icu-config >/dev/null 2>&1 && icu-config --version | grep -Eq "^3."; then
-        Echo_Blue "[+] Installing ${Libicu4c_Ver}"
+        Echo_Blue "[+] Installing icu4c-58_3..."
         cd ${cur_dir}/src
-        Download_Files ${Libicu4c_DL} ${Libicu4c_Ver}-src.tgz
-        Tar_Cd ${Libicu4c_Ver}-src.tgz icu/source
+        Download_Files ${Libicu4c_DL} icu4c-58_3-src.tgz
+        Tar_Cd icu4c-58_3-src.tgz icu/source
         ./configure --prefix=/usr
         if [ ! -s /usr/include/xlocale.h ]; then
             ln -s /usr/include/locale.h /usr/include/xlocale.h
@@ -720,18 +720,122 @@ Install_Icu4c()
     fi
 }
 
-Install_Icu60()
+Install_Icu522()
 {
-    if [ ! -s /usr/local/icu/bin/icu-config ]; then
+    if [ ! -s /usr/local/icu522/bin/icu-config ]; then
+        Echo_Blue "[+] Installing icu4c-52_2..."
+        cd ${cur_dir}/src
+        Download_Files ${Libicu4c_52_2_DL} icu4c-52_2-src.tgz
+        Tar_Cd icu4c-52_2-src.tgz icu/source
+        ./configure --prefix=/usr/local/icu522
+        Make_Install
+        cd ${cur_dir}/src/
+        rm -rf ${cur_dir}/src/icu
+        if [ -s /etc/ld.so.conf.d/icu.conf ]; then
+            rm -rf /etc/ld.so.conf.d/icu.conf
+        fi
+
+        echo "/usr/local/icu522/lib" > /etc/ld.so.conf.d/icu.conf
+        ldconfig
+    fi
+}
+
+Install_Icu571()
+{
+    if [ ! -s /usr/local/icu571/bin/icu-config ]; then
+        Echo_Blue "[+] Installing icu4c-57_1..."
+        cd ${cur_dir}/src
+        Download_Files ${Libicu4c_57_1_DL} icu4c-57_1-src.tgz
+        Tar_Cd icu4c-57_1-src.tgz icu/source
+        ./configure --prefix=/usr/local/icu571
+        Make_Install
+        cd ${cur_dir}/src/
+        rm -rf ${cur_dir}/src/icu
+        if [ -s /etc/ld.so.conf.d/icu.conf ]; then
+            rm -rf /etc/ld.so.conf.d/icu.conf
+        fi
+
+        echo "/usr/local/icu571/lib" > /etc/ld.so.conf.d/icu.conf
+        ldconfig
+    fi
+}
+
+Install_Icu603()
+{
+    if [ ! -s /usr/local/icu603/bin/icu-config ]; then
         Echo_Blue "[+] Installing icu4c-60_3..."
         cd ${cur_dir}/src
         Download_Files ${Libicu4c_60_3_DL} icu4c-60_3-src.tgz
         Tar_Cd icu4c-60_3-src.tgz icu/source
-        ./configure --prefix=/usr/local/icu
+        ./configure --prefix=/usr/local/icu603
         Make_Install
         cd ${cur_dir}/src/
+        rm -rf ${cur_dir}/src/icu
+        if [ -s /etc/ld.so.conf.d/icu.conf ]; then
+            rm -rf /etc/ld.so.conf.d/icu.conf
+        fi
 
-        echo "/usr/local/icu/lib" > /etc/ld.so.conf.d/icu.conf
+        echo "/usr/local/icu603/lib" > /etc/ld.so.conf.d/icu.conf
+        ldconfig
+    fi
+}
+
+Install_Icu631()
+{
+    if [ ! -s /usr/local/icu631/bin/icu-config ]; then
+        Echo_Blue "[+] Installing icu4c-63_1..."
+        cd ${cur_dir}/src
+        Download_Files ${Libicu4c_63_1_DL} icu4c-63_1-src.tgz
+        Tar_Cd icu4c-63_1-src.tgz icu/source
+        ./configure --prefix=/usr/local/icu631
+        Make_Install
+        cd ${cur_dir}/src/
+        rm -rf ${cur_dir}/src/icu
+        if [ -s /etc/ld.so.conf.d/icu.conf ]; then
+            rm -rf /etc/ld.so.conf.d/icu.conf
+        fi
+
+        echo "/usr/local/icu631/lib" > /etc/ld.so.conf.d/icu.conf
+        ldconfig
+    fi
+}
+
+Install_Icu671()
+{
+    if [ ! -s /usr/local/icu671/bin/icu-config ]; then
+        Echo_Blue "[+] Installing icu4c-67_1..."
+        cd ${cur_dir}/src
+        Download_Files ${Libicu4c_67_1_DL} icu4c-67_1-src.tgz
+        Tar_Cd icu4c-67_1-src.tgz icu/source
+        ./configure --prefix=/usr/local/icu671
+        Make_Install
+        cd ${cur_dir}/src/
+        rm -rf ${cur_dir}/src/icu
+        if [ -s /etc/ld.so.conf.d/icu.conf ]; then
+            rm -rf /etc/ld.so.conf.d/icu.conf
+        fi
+
+        echo "/usr/local/icu671/lib" > /etc/ld.so.conf.d/icu.conf
+        ldconfig
+    fi
+}
+
+Install_Icu721()
+{
+    if [ ! -s /usr/local/icu721/bin/icu-config ]; then
+        Echo_Blue "[+] Installing icu4c-72_1..."
+        cd ${cur_dir}/src
+        Download_Files ${Libicu4c_72_1_DL} icu4c-72_1-src.tgz
+        Tar_Cd icu4c-72_1-src.tgz icu/source
+        ./configure --prefix=/usr/local/icu721
+        Make_Install
+        cd ${cur_dir}/src/
+        rm -rf ${cur_dir}/src/icu
+        if [ -s /etc/ld.so.conf.d/icu.conf ]; then
+            rm -rf /etc/ld.so.conf.d/icu.conf
+        fi
+
+        echo "/usr/local/icu721/lib" > /etc/ld.so.conf.d/icu.conf
         ldconfig
     fi
 }
