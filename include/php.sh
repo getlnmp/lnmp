@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-Export_PHP_Autoconf()
-{
+Export_PHP_Autoconf() {
     if [[ -s /usr/local/autoconf-2.13/bin/autoconf && -s /usr/local/autoconf-2.13/bin/autoheader ]]; then
         Echo_Green "Autconf 2.13...ok"
     else
@@ -11,8 +10,7 @@ Export_PHP_Autoconf()
     export PHP_AUTOHEADER=/usr/local/autoconf-2.13/bin/autoheader
 }
 
-Check_Curl()
-{
+Check_Curl() {
     if [ -s /usr/local/curl/bin/curl ]; then
         Echo_Green "Curl ...ok"
     else
@@ -20,9 +18,8 @@ Check_Curl()
     fi
 }
 
-PHP_with_curl()
-{
-    if [[ "${DISTRO}" = "CentOS" && "${Is_ARM}" = "y" ]] || [[ "${UseOldOpenssl}" = "y" ]] || [[ "${UseNewOpenssl}" = "y" ]];then
+PHP_with_curl() {
+    if [[ "${DISTRO}" = "CentOS" && "${Is_ARM}" = "y" ]] || [[ "${UseOldOpenssl}" = "y" ]] || [[ "${UseNewOpenssl}" = "y" ]]; then
         Check_Curl
         with_curl='--with-curl=/usr/local/curl'
     else
@@ -30,36 +27,55 @@ PHP_with_curl()
     fi
 }
 
-PHP_with_openssl()
-{
-    if openssl version | grep -Eqi "OpenSSL 1.1.*|OpenSSL 3.*"; then
-        if ( [ "${PHPSelect}" != "" ] &&  echo "${PHPSelect}" | grep -Eqi "^[1-5]$" ) || ( [ "${php_version}" != "" ] && echo "${php_version}" | grep -Eqi '^5\.' ) || echo "${Php_Ver}" | grep -Eqi "php-5\."; then
-            UseOldOpenssl='y'
-        fi
-    fi
-    if echo "${PHPSelect}" | grep -Eqi "^[1-2]$" || echo "${php_version}" | grep -Eqi '^5\.[2,3]\.*' || echo "${Php_Ver}" | grep -Eqi "php-5\.[2,3]\.*"; then
+PHP_with_openssl() {
+    #    if openssl version | grep -Eqi "OpenSSL 1.1.*|OpenSSL 3.*"; then
+    if [[ -n "${PHPSelect}" && "${PHPSelect}" =~ ^[1-6]$ ]] || [[ "${php_version}" =~ ^(5\.|7\.0\.) ]] || [[ "${Php_Ver}" =~ (php-5\.|php-7\.0\.) ]]; then
         UseOldOpenssl='y'
     fi
+    #    fi
+    #    if echo "${PHPSelect}" | grep -Eqi "^[1-2]$" || echo "${php_version}" | grep -Eqi '^5\.[2,3]\.*' || echo "${Php_Ver}" | grep -Eqi "php-5\.[2,3]\.*"; then
+    #        UseOldOpenssl='y'
+    #    fi
+    if openssl version | grep -Eqi "OpenSSL 1.1.*"; then
+        if [[ "${PHPSelect}" =~ ^(12|13|14|15)$ ]] || [[ "${php_version}" =~ ^8\.[1-4]\. ]] || [[ "${Php_Ver}" =~ php-8\.[1-4]\. ]]; then
+            UseOpenssl3='y'
+        fi
+    fi
     if openssl version | grep -Eqi "OpenSSL 3.*"; then
-        if echo "${PHPSelect}" | grep -Eqi "^6$" || echo "${php_version}" | grep -Eqi '^7\.0\.*' || echo "${Php_Ver}" | grep -Eqi "php-7\.0\.*"; then
-            UseOldOpenssl='y'
-        elif echo "${PHPSelect}" | grep -Eqi "^(7|8|9|10|11)$" || echo "${php_version}" | grep -Eqi '^7\.[1-4]\.*|^8\.0\.*' || echo "${Php_Ver}" | grep -Eqi "php-7\.[1-4]\.*|php-8\.0\.*"; then
+        if echo "${PHPSelect}" | grep -Eqi "^(7|8|9|10|11)$" || echo "${php_version}" | grep -Eqi '^7\.[1-4]\.*|^8\.0\.*' || echo "${Php_Ver}" | grep -Eqi "php-7\.[1-4]\.*|php-8\.0\.*"; then
             UseNewOpenssl='y'
         fi
     fi
     if [ "${UseOldOpenssl}" = "y" ]; then
-            Install_Openssl
-            with_openssl='--with-openssl=/usr/local/openssl'
+        Install_Openssl
+        with_openssl='--with-openssl=/usr/local/openssl'
     elif [ "${UseNewOpenssl}" = "y" ]; then
-            Install_Openssl_New
-            with_openssl='--with-openssl=/usr/local/openssl1.1.1'
+        Install_Openssl_New
+        with_openssl='--with-openssl=/usr/local/openssl1.1.1'
+        PHP_Openssl_Export
+    elif [ "${UseOpenssl3}" = "y" ]; then
+        Install_Openssl3
+        with_openssl='--with-openssl=/usr/local/openssl3'
+        PHP_Openssl_Export
     else
         with_openssl='--with-openssl'
     fi
 }
 
-PHP_with_fileinfo()
-{
+PHP_Openssl_Export() {
+    if echo "${php_version}" | grep -Eqi '^7\.4\.*|^8\.0\.*' || echo "${Php_Ver}" | grep -Eqi "php-7\.4\.*|php-8\.0\.*"; then
+        export PKG_CONFIG_PATH=/usr/local/openssl-1.1.1/lib/pkgconfig
+        export CPPFLAGS="-I/usr/local/openssl-1.1.1/include"
+        export LDFLAGS="-L/usr/local/openssl-1.1.1/lib"
+    fi
+    if echo "${php_version}" | grep -Eqi '^8\.[1-4]\.*' || echo "${Php_Ver}" | grep -Eqi "php-8\.[1-4]\.*"; then
+        export PKG_CONFIG_PATH=/usr/local/openssl3/lib/pkgconfig
+        export CPPFLAGS="-I/usr/local/openssl3/include"
+        export LDFLAGS="-L/usr/local/openssl3/lib"
+    fi
+}
+
+PHP_with_fileinfo() {
     if [ "${Enable_PHP_Fileinfo}" = "n" ]; then
         if [[ $(awk '/MemTotal/ {printf( "%d\n", $2 / 1024 )}' /proc/meminfo) -lt 1024 ]]; then
             with_fileinfo='--disable-fileinfo'
@@ -71,8 +87,7 @@ PHP_with_fileinfo()
     fi
 }
 
-PHP_with_Exif()
-{
+PHP_with_Exif() {
     if [ "${Enable_PHP_Exif}" = "n" ]; then
         with_exif=''
     else
@@ -80,8 +95,7 @@ PHP_with_Exif()
     fi
 }
 
-PHP_with_Ldap()
-{
+PHP_with_Ldap() {
     if [ "${Enable_PHP_Ldap}" = "n" ]; then
         with_ldap=''
     else
@@ -102,8 +116,7 @@ PHP_with_Ldap()
     fi
 }
 
-PHP_with_Bz2()
-{
+PHP_with_Bz2() {
     if [ "${Enable_PHP_Bz2}" = "n" ]; then
         with_bz2=''
     else
@@ -112,8 +125,7 @@ PHP_with_Bz2()
     fi
 }
 
-PHP_with_Sodium()
-{
+PHP_with_Sodium() {
     if [ "${Enable_PHP_Sodium}" = "n" ]; then
         with_sodium=''
     else
@@ -135,8 +147,7 @@ PHP_with_Sodium()
     fi
 }
 
-PHP_with_Imap()
-{
+PHP_with_Imap() {
     if [ "${Enable_PHP_Imap}" = "n" ]; then
         with_imap=''
     else
@@ -165,9 +176,8 @@ PHP_with_Imap()
     fi
 }
 
-PHP_with_Intl()
-{
-#    if echo "${Ubuntu_Version}" | grep -Eqi "^19|2[0-7]\." || echo "${Debian_Version}" | grep -Eqi "^1[0-9]" || echo "${Raspbian_Version}" | grep -Eqi "^1[0-9]" || echo "${Deepin_Version}" | grep -Eqi "^2[0-9]" || echo "${UOS_Version}" | grep -Eqi "^2[0-9]" || echo "${Amazon_Version}" | grep -Eqi "^202[3-9]" || echo "${Kali_Version}" | grep -Eqi "^202[2-9]" || echo "${Fedora_Version}" | grep -Eqi "^3[7-9]|4[0-9]" || echo "${openEuler_Version}" | grep -Eqi "^2[2-9]" || echo "${Mint_Version}" | grep -Eqi "^2[0-9]" || echo "${Kylin_Version}" | grep -Eq "^v1[0-9]"; then
+PHP_with_Intl() {
+    #    if echo "${Ubuntu_Version}" | grep -Eqi "^19|2[0-7]\." || echo "${Debian_Version}" | grep -Eqi "^1[0-9]" || echo "${Raspbian_Version}" | grep -Eqi "^1[0-9]" || echo "${Deepin_Version}" | grep -Eqi "^2[0-9]" || echo "${UOS_Version}" | grep -Eqi "^2[0-9]" || echo "${Amazon_Version}" | grep -Eqi "^202[3-9]" || echo "${Kali_Version}" | grep -Eqi "^202[2-9]" || echo "${Fedora_Version}" | grep -Eqi "^3[7-9]|4[0-9]" || echo "${openEuler_Version}" | grep -Eqi "^2[2-9]" || echo "${Mint_Version}" | grep -Eqi "^2[0-9]" || echo "${Kylin_Version}" | grep -Eq "^v1[0-9]"; then
     if echo "${php_version}" | grep -Eqi '^5\.[4-6]\.*' || echo "${Php_Ver}" | grep -Eqi "php-5\.[4-6]\.*"; then
         Install_Icu522
         with_icu_dir='--with-icu-dir=/usr/local/icu522'
@@ -190,15 +200,14 @@ PHP_with_Intl()
             with_icu_dir='--with-icu-dir=/usr/local/icu721'
         fi
     fi
-#    fi
+    #    fi
     if pkg-config --modversion icu-i18n | grep -Eqi '^(6[89]|7[0-9])'; then
         export CXX="g++ -DTRUE=1 -DFALSE=0"
-        export  CC="gcc -DTRUE=1 -DFALSE=0"
+        export CC="gcc -DTRUE=1 -DFALSE=0"
     fi
 }
 
-Check_PHP_Option()
-{
+Check_PHP_Option() {
     PHP_with_openssl
     PHP_with_curl
     PHP_with_fileinfo
@@ -211,8 +220,7 @@ Check_PHP_Option()
     PHP_Buildin_Option="${with_exif} ${with_ldap} ${with_bz2} ${with_sodium} ${with_imap} ${with_icu_dir}"
 }
 
-Ln_PHP_Bin()
-{
+Ln_PHP_Bin() {
     ln -sf /usr/local/php/bin/php /usr/bin/php
     ln -sf /usr/local/php/bin/phpize /usr/bin/phpize
     ln -sf /usr/local/php/bin/pear /usr/bin/pear
@@ -223,14 +231,12 @@ Ln_PHP_Bin()
     rm -f /usr/local/php/conf.d/*
 }
 
-Pear_Pecl_Set()
-{
+Pear_Pecl_Set() {
     pear config-set php_ini /usr/local/php/etc/php.ini
     pecl config-set php_ini /usr/local/php/etc/php.ini
 }
 
-Install_Composer()
-{
+Install_Composer() {
     if [ "${CheckMirror}" != "n" ]; then
         echo "Downloading Composer..."
         if echo "${PHPSelect}" | grep -Eqi '^[1-14]' || echo "${php_version}" | grep -Eqi '^(5\.[2-6]\.*|7\.[0-4]\.*|8\.[0-4]\.*)' || echo "${Php_Ver}" | grep -Eqi "(php-5\.[2-6]\.*|php-7\.[0-2]\.*|php-8\.[0-4]\.*)"; then
@@ -253,13 +259,12 @@ Install_Composer()
             fi
         fi
         #if [ "${country}" = "CN" ]; then
-            #composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/
+        #composer config -g repo.packagist composer https://mirrors.aliyun.com/composer/
         #fi
     fi
 }
 
-PHP_Openssl3_Patch()
-{
+PHP_Openssl3_Patch() {
     if [ "${isOpenSSL3}" = "y" ]; then
         if [ "${Php_Ver}" != "" ]; then
             PHP_Short_Ver="$(echo ${Php_Ver} | cut -d- -f2 | cut -d. -f1-2)"
@@ -267,12 +272,11 @@ PHP_Openssl3_Patch()
             PHP_Short_Ver="$(echo ${php_version} | cut -d. -f1-2)"
         fi
         echo "OpenSSL 3.0, apply a patch to PHP ${PHP_Short_Ver}..."
-        patch -p1 < ${cur_dir}/src/patch/php-${PHP_Short_Ver}-openssl3.0.patch
+        patch -p1 <${cur_dir}/src/patch/php-${PHP_Short_Ver}-openssl3.0.patch
     fi
 }
 
-PHP_ICU70_Patch()
-{
+PHP_ICU70_Patch() {
     if pkg-config --modversion icu-i18n | grep -Eqi '^[7-9][0-9]'; then
         if [ "${Php_Ver}" != "" ]; then
             PHP_Short_Ver="$(echo ${Php_Ver} | cut -d- -f2 | cut -d. -f1-2)"
@@ -280,12 +284,11 @@ PHP_ICU70_Patch()
             PHP_Short_Ver="$(echo ${php_version} | cut -d. -f1-2)"
         fi
         echo "icu 7x+, apply a patch to PHP ${PHP_Short_Ver}..."
-        patch -p1 < ${cur_dir}/src/patch/php-${PHP_Short_Ver}-icu70.patch
+        patch -p1 <${cur_dir}/src/patch/php-${PHP_Short_Ver}-icu70.patch
     fi
 }
 
-Install_PHP_52()
-{
+Install_PHP_52() {
     Echo_Blue "[+] Installing ${Php_Ver}..."
     Check_Curl
     Export_PHP_Autoconf
@@ -295,10 +298,10 @@ Install_PHP_52()
         gzip -cd ${Php_Ver}-fpm-0.5.14.diff.gz | patch -d ${Php_Ver} -p1
     fi
     cd ${Php_Ver}/
-    patch -p1 < ${cur_dir}/src/patch/php-5.2.17-max-input-vars.patch
-    patch -p0 < ${cur_dir}/src/patch/php-5.2.17-xml.patch
-    patch -p1 < ${cur_dir}/src/patch/debian_patches_disable_SSLv2_for_openssl_1_0_0.patch
-    patch -p1 < ${cur_dir}/src/patch/php-5.2-multipart-form-data.patch
+    patch -p1 <${cur_dir}/src/patch/php-5.2.17-max-input-vars.patch
+    patch -p0 <${cur_dir}/src/patch/php-5.2.17-xml.patch
+    patch -p1 <${cur_dir}/src/patch/debian_patches_disable_SSLv2_for_openssl_1_0_0.patch
+    patch -p1 <${cur_dir}/src/patch/php-5.2-multipart-form-data.patch
     ./buildconf --force
     if [ "${Stack}" = "lnmp" ]; then
         ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --with-mysql=${MySQL_Dir} --with-mysqli=${MySQL_Config} --with-pdo-mysql=${MySQL_Dir} --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr --enable-xml --enable-discard-path --enable-magic-quotes --enable-safe-mode --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-fastcgi --enable-fpm --enable-force-cgi-redirect --enable-mbstring --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext --with-mime-magic ${PHP_Buildin_Option} ${PHP_Modules_Options}
@@ -333,7 +336,7 @@ Install_PHP_52()
         mkdir -p /usr/local/zend/
         \cp ZendOptimizer-3.3.9-linux-glibc23-${ARCH}/data/5_2_x_comp/ZendOptimizer.so /usr/local/zend/
 
-        cat >/usr/local/php/conf.d/002-zendoptimizer.ini<<EOF
+        cat >/usr/local/php/conf.d/002-zendoptimizer.ini <<EOF
 [Zend Optimizer]
 zend_optimizer.optimization_level=1
 zend_extension="/usr/local/zend/ZendOptimizer.so"
@@ -348,12 +351,11 @@ EOF
     fi
 }
 
-Install_PHP_53()
-{
+Install_PHP_53() {
     Echo_Blue "[+] Installing ${Php_Ver}..."
     Check_Curl
     Tar_Cd ${Php_Ver}.tar.bz2 ${Php_Ver}
-    patch -p1 < ${cur_dir}/src/patch/php-5.3-multipart-form-data.patch
+    patch -p1 <${cur_dir}/src/patch/php-5.3-multipart-form-data.patch
     if [ "${Stack}" = "lnmp" ]; then
         ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --enable-fpm --with-fpm-user=www --with-fpm-group=www --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-magic-quotes --enable-safe-mode --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} ${PHP_Buildin_Option} ${PHP_Modules_Options}
     else
@@ -391,7 +393,7 @@ Install_PHP_53()
         \cp ZendGuardLoader-php-5.3-linux-glibc23-${ARCH}/php-5.3.x/ZendGuardLoader.so /usr/local/zend/
 
         echo "Write ZendGuardLoader to php.ini..."
-        cat >/usr/local/php/conf.d/002-zendguardloader.ini<<EOF
+        cat >/usr/local/php/conf.d/002-zendguardloader.ini <<EOF
 [Zend ZendGuard Loader]
 zend_extension=/usr/local/zend/ZendGuardLoader.so
 zend_loader.enable=1
@@ -405,9 +407,9 @@ EOF
         fi
     fi
 
-if [ "${Stack}" = "lnmp" ]; then
-    echo "Creating new php-fpm configure file..."
-    cat >/usr/local/php/etc/php-fpm.conf<<EOF
+    if [ "${Stack}" = "lnmp" ]; then
+        echo "Creating new php-fpm configure file..."
+        cat >/usr/local/php/etc/php-fpm.conf <<EOF
 [global]
 pid = /usr/local/php/var/run/php-fpm.pid
 error_log = /usr/local/php/var/log/php-fpm.log
@@ -434,15 +436,14 @@ request_slowlog_timeout = 0
 slowlog = var/log/slow.log
 EOF
 
-    echo "Copy php-fpm init.d file..."
-    \cp ${cur_dir}/src/${Php_Ver}/sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
-    \cp ${cur_dir}/init.d/php-fpm.service /etc/systemd/system/php-fpm.service
-    chmod +x /etc/init.d/php-fpm
-fi
+        echo "Copy php-fpm init.d file..."
+        \cp ${cur_dir}/src/${Php_Ver}/sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
+        \cp ${cur_dir}/init.d/php-fpm.service /etc/systemd/system/php-fpm.service
+        chmod +x /etc/init.d/php-fpm
+    fi
 }
 
-Install_PHP_54()
-{
+Install_PHP_54() {
     Echo_Blue "[+] Installing ${Php_Ver}..."
     Tar_Cd ${Php_Ver}.tar.bz2 ${Php_Ver}
     if [ "${Stack}" = "lnmp" ]; then
@@ -480,7 +481,7 @@ Install_PHP_54()
         \cp ZendGuardLoader-70429-PHP-5.4-linux-glibc23-${ARCH}/php-5.4.x/ZendGuardLoader.so /usr/local/zend/
 
         echo "Write ZendGuardLoader to php.ini..."
-        cat >/usr/local/php/conf.d/002-zendguardloader.ini<<EOF
+        cat >/usr/local/php/conf.d/002-zendguardloader.ini <<EOF
 [Zend ZendGuard Loader]
 zend_extension=/usr/local/zend/ZendGuardLoader.so
 zend_loader.enable=1
@@ -494,9 +495,9 @@ EOF
         fi
     fi
 
-if [ "${Stack}" = "lnmp" ]; then
-    echo "Creating new php-fpm configure file..."
-    cat >/usr/local/php/etc/php-fpm.conf<<EOF
+    if [ "${Stack}" = "lnmp" ]; then
+        echo "Creating new php-fpm configure file..."
+        cat >/usr/local/php/etc/php-fpm.conf <<EOF
 [global]
 pid = /usr/local/php/var/run/php-fpm.pid
 error_log = /usr/local/php/var/log/php-fpm.log
@@ -523,25 +524,24 @@ request_slowlog_timeout = 0
 slowlog = var/log/slow.log
 EOF
 
-    echo "Copy php-fpm init.d file..."
-    \cp ${cur_dir}/src/${Php_Ver}/sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
-    \cp ${cur_dir}/init.d/php-fpm.service /etc/systemd/system/php-fpm.service
-    chmod +x /etc/init.d/php-fpm
-    chmod +x /etc/systemd/system/php-fpm.service
-fi
+        echo "Copy php-fpm init.d file..."
+        \cp ${cur_dir}/src/${Php_Ver}/sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
+        \cp ${cur_dir}/init.d/php-fpm.service /etc/systemd/system/php-fpm.service
+        chmod +x /etc/init.d/php-fpm
+        chmod +x /etc/systemd/system/php-fpm.service
+    fi
 }
 
-Install_PHP_55()
-{
+Install_PHP_55() {
     Echo_Blue "[+] Installing ${Php_Ver}..."
     Tar_Cd ${Php_Ver}.tar.bz2 ${Php_Ver}
     if [ "${ARCH}" = "aarch64" ]; then
-        patch -p1 < ${cur_dir}/src/patch/php-5.5-5.6-asm-aarch64.patch
+        patch -p1 <${cur_dir}/src/patch/php-5.5-5.6-asm-aarch64.patch
     fi
     if [ "${Stack}" = "lnmp" ]; then
         ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --enable-fpm --with-fpm-user=www --with-fpm-group=www --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --enable-intl --with-xsl ${PHP_Buildin_Option} ${PHP_Modules_Options}
     else
-       ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --with-apxs2=/usr/local/apache/bin/apxs --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --enable-intl --with-xsl ${PHP_Buildin_Option} ${PHP_Modules_Options}
+        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --with-apxs2=/usr/local/apache/bin/apxs --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --enable-intl --with-xsl ${PHP_Buildin_Option} ${PHP_Modules_Options}
     fi
 
     PHP_Make_Install
@@ -573,7 +573,7 @@ Install_PHP_55()
         \cp zend-loader-php5.5-linux-${ARCH}/ZendGuardLoader.so /usr/local/zend/
 
         echo "Write ZendGuardLoader to php.ini..."
-        cat >/usr/local/php/conf.d/002-zendguardloader.ini<<EOF
+        cat >/usr/local/php/conf.d/002-zendguardloader.ini <<EOF
 [Zend ZendGuard Loader]
 zend_extension=/usr/local/zend/ZendGuardLoader.so
 zend_loader.enable=1
@@ -587,9 +587,9 @@ EOF
         fi
     fi
 
-if [ "${Stack}" = "lnmp" ]; then
-    echo "Creating new php-fpm configure file..."
-    cat >/usr/local/php/etc/php-fpm.conf<<EOF
+    if [ "${Stack}" = "lnmp" ]; then
+        echo "Creating new php-fpm configure file..."
+        cat >/usr/local/php/etc/php-fpm.conf <<EOF
 [global]
 pid = /usr/local/php/var/run/php-fpm.pid
 error_log = /usr/local/php/var/log/php-fpm.log
@@ -616,24 +616,23 @@ request_slowlog_timeout = 0
 slowlog = var/log/slow.log
 EOF
 
-    echo "Copy php-fpm init.d file..."
-    \cp ${cur_dir}/src/${Php_Ver}/sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
-    \cp ${cur_dir}/init.d/php-fpm.service /etc/systemd/system/php-fpm.service
-    chmod +x /etc/init.d/php-fpm
-    chmod +x /etc/systemd/system/php-fpm.service
-fi
+        echo "Copy php-fpm init.d file..."
+        \cp ${cur_dir}/src/${Php_Ver}/sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
+        \cp ${cur_dir}/init.d/php-fpm.service /etc/systemd/system/php-fpm.service
+        chmod +x /etc/init.d/php-fpm
+        chmod +x /etc/systemd/system/php-fpm.service
+    fi
 }
 
-Install_PHP_56()
-{
+Install_PHP_56() {
     Echo_Blue "[+] Installing ${Php_Ver}"
     Tar_Cd ${Php_Ver}.tar.bz2 ${Php_Ver}
     if [ "${ARCH}" = "aarch64" ]; then
-        patch -p1 < ${cur_dir}/src/patch/php-5.5-5.6-asm-aarch64.patch
+        patch -p1 <${cur_dir}/src/patch/php-5.5-5.6-asm-aarch64.patch
     fi
-#    if command -v pkg-config >/dev/null 2>&1 && pkg-config --modversion icu-i18n | grep -Eqi '^6[1-9]|[7-9][0-9]'; then
-#        patch -p1 < ${cur_dir}/src/patch/php-5.6-intl.patch
-#    fi
+    #    if command -v pkg-config >/dev/null 2>&1 && pkg-config --modversion icu-i18n | grep -Eqi '^6[1-9]|[7-9][0-9]'; then
+    #        patch -p1 < ${cur_dir}/src/patch/php-5.6-intl.patch
+    #    fi
     if [ "${Stack}" = "lnmp" ]; then
         ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --enable-fpm --with-fpm-user=www --with-fpm-group=www --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --enable-intl --with-xsl ${PHP_Buildin_Option} ${PHP_Modules_Options}
     else
@@ -669,7 +668,7 @@ Install_PHP_56()
         \cp zend-loader-php5.6-linux-${ARCH}/ZendGuardLoader.so /usr/local/zend/
 
         echo "Write ZendGuardLoader to php.ini..."
-        cat >/usr/local/php/conf.d/002-zendguardloader.ini<<EOF
+        cat >/usr/local/php/conf.d/002-zendguardloader.ini <<EOF
 [Zend ZendGuard Loader]
 zend_extension=/usr/local/zend/ZendGuardLoader.so
 zend_loader.enable=1
@@ -683,9 +682,9 @@ EOF
         fi
     fi
 
-if [ "${Stack}" = "lnmp" ]; then
-    echo "Creating new php-fpm configure file..."
-    cat >/usr/local/php/etc/php-fpm.conf<<EOF
+    if [ "${Stack}" = "lnmp" ]; then
+        echo "Creating new php-fpm configure file..."
+        cat >/usr/local/php/etc/php-fpm.conf <<EOF
 [global]
 pid = /usr/local/php/var/run/php-fpm.pid
 error_log = /usr/local/php/var/log/php-fpm.log
@@ -712,20 +711,19 @@ request_slowlog_timeout = 0
 slowlog = var/log/slow.log
 EOF
 
-    echo "Copy php-fpm init.d file..."
-    \cp ${cur_dir}/src/${Php_Ver}/sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
-    \cp ${cur_dir}/init.d/php-fpm.service /etc/systemd/system/php-fpm.service
-    chmod +x /etc/init.d/php-fpm
-fi
+        echo "Copy php-fpm init.d file..."
+        \cp ${cur_dir}/src/${Php_Ver}/sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
+        \cp ${cur_dir}/init.d/php-fpm.service /etc/systemd/system/php-fpm.service
+        chmod +x /etc/init.d/php-fpm
+    fi
 }
 
-Install_PHP_7()
-{
+Install_PHP_7() {
     Echo_Blue "[+] Installing ${Php_Ver}"
     Tar_Cd ${Php_Ver}.tar.bz2 ${Php_Ver}
-#    if command -v pkg-config >/dev/null 2>&1 && pkg-config --modversion icu-i18n | grep -Eqi '^6[1-9]|[7-9][0-9]'; then
-#        patch -p1 < ${cur_dir}/src/patch/php-7.0-intl.patch
-#    fi
+    #    if command -v pkg-config >/dev/null 2>&1 && pkg-config --modversion icu-i18n | grep -Eqi '^6[1-9]|[7-9][0-9]'; then
+    #        patch -p1 < ${cur_dir}/src/patch/php-7.0-intl.patch
+    #    fi
     if [ "${Stack}" = "lnmp" ]; then
         ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --enable-fpm --with-fpm-user=www --with-fpm-group=www --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --enable-intl --enable-pcntl --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --with-xsl ${PHP_Buildin_Option} ${PHP_Modules_Options}
     else
@@ -756,9 +754,9 @@ Install_PHP_7()
     echo "Install ZendGuardLoader for PHP 7.0..."
     echo "unavailable now."
 
-if [ "${Stack}" = "lnmp" ]; then
-    echo "Creating new php-fpm configure file..."
-    cat >/usr/local/php/etc/php-fpm.conf<<EOF
+    if [ "${Stack}" = "lnmp" ]; then
+        echo "Creating new php-fpm configure file..."
+        cat >/usr/local/php/etc/php-fpm.conf <<EOF
 [global]
 pid = /usr/local/php/var/run/php-fpm.pid
 error_log = /usr/local/php/var/log/php-fpm.log
@@ -785,19 +783,18 @@ request_slowlog_timeout = 0
 slowlog = var/log/slow.log
 EOF
 
-    echo "Copy php-fpm init.d file..."
-    \cp ${cur_dir}/src/${Php_Ver}/sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
-    \cp ${cur_dir}/init.d/php-fpm.service /etc/systemd/system/php-fpm.service
-    chmod +x /etc/init.d/php-fpm
-fi
+        echo "Copy php-fpm init.d file..."
+        \cp ${cur_dir}/src/${Php_Ver}/sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
+        \cp ${cur_dir}/init.d/php-fpm.service /etc/systemd/system/php-fpm.service
+        chmod +x /etc/init.d/php-fpm
+    fi
 }
 
-Install_PHP_71()
-{
+Install_PHP_71() {
     Echo_Blue "[+] Installing ${Php_Ver}"
     Tar_Cd ${Php_Ver}.tar.bz2 ${Php_Ver}
-#    PHP_Openssl3_Patch
-#    PHP_ICU70_Patch
+    #    PHP_Openssl3_Patch
+    #    PHP_ICU70_Patch
     if [ "${Stack}" = "lnmp" ]; then
         ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --enable-fpm --with-fpm-user=www --with-fpm-group=www --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --enable-intl --enable-pcntl --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --with-xsl ${PHP_Buildin_Option} ${PHP_Modules_Options}
     else
@@ -828,9 +825,9 @@ Install_PHP_71()
     echo "Install ZendGuardLoader for PHP 7.1..."
     echo "unavailable now."
 
-if [ "${Stack}" = "lnmp" ]; then
-    echo "Creating new php-fpm configure file..."
-    cat >/usr/local/php/etc/php-fpm.conf<<EOF
+    if [ "${Stack}" = "lnmp" ]; then
+        echo "Creating new php-fpm configure file..."
+        cat >/usr/local/php/etc/php-fpm.conf <<EOF
 [global]
 pid = /usr/local/php/var/run/php-fpm.pid
 error_log = /usr/local/php/var/log/php-fpm.log
@@ -857,19 +854,18 @@ request_slowlog_timeout = 0
 slowlog = var/log/slow.log
 EOF
 
-    echo "Copy php-fpm init.d file..."
-    \cp ${cur_dir}/src/${Php_Ver}/sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
-    \cp ${cur_dir}/init.d/php-fpm.service /etc/systemd/system/php-fpm.service
-    chmod +x /etc/init.d/php-fpm
-fi
+        echo "Copy php-fpm init.d file..."
+        \cp ${cur_dir}/src/${Php_Ver}/sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
+        \cp ${cur_dir}/init.d/php-fpm.service /etc/systemd/system/php-fpm.service
+        chmod +x /etc/init.d/php-fpm
+    fi
 }
 
-Install_PHP_72()
-{
+Install_PHP_72() {
     Echo_Blue "[+] Installing ${Php_Ver}"
     Tar_Cd ${Php_Ver}.tar.bz2 ${Php_Ver}
-#    PHP_Openssl3_Patch
-#    PHP_ICU70_Patch
+    #    PHP_Openssl3_Patch
+    #    PHP_ICU70_Patch
     if [ "${Stack}" = "lnmp" ]; then
         ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --enable-fpm --with-fpm-user=www --with-fpm-group=www --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --enable-intl --enable-pcntl --enable-ftp --with-gd ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --with-xsl ${PHP_Buildin_Option} ${PHP_Modules_Options}
     else
@@ -900,9 +896,9 @@ Install_PHP_72()
     echo "Install ZendGuardLoader for PHP 7.2..."
     echo "unavailable now."
 
-if [ "${Stack}" = "lnmp" ]; then
-    echo "Creating new php-fpm configure file..."
-    cat >/usr/local/php/etc/php-fpm.conf<<EOF
+    if [ "${Stack}" = "lnmp" ]; then
+        echo "Creating new php-fpm configure file..."
+        cat >/usr/local/php/etc/php-fpm.conf <<EOF
 [global]
 pid = /usr/local/php/var/run/php-fpm.pid
 error_log = /usr/local/php/var/log/php-fpm.log
@@ -929,19 +925,18 @@ request_slowlog_timeout = 0
 slowlog = var/log/slow.log
 EOF
 
-    echo "Copy php-fpm init.d file..."
-    \cp ${cur_dir}/src/${Php_Ver}/sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
-    \cp ${cur_dir}/init.d/php-fpm.service /etc/systemd/system/php-fpm.service
-    chmod +x /etc/init.d/php-fpm
-fi
+        echo "Copy php-fpm init.d file..."
+        \cp ${cur_dir}/src/${Php_Ver}/sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
+        \cp ${cur_dir}/init.d/php-fpm.service /etc/systemd/system/php-fpm.service
+        chmod +x /etc/init.d/php-fpm
+    fi
 }
 
-Install_PHP_73()
-{
+Install_PHP_73() {
     Echo_Blue "[+] Installing ${Php_Ver}"
     Tar_Cd ${Php_Ver}.tar.bz2 ${Php_Ver}
-#    PHP_Openssl3_Patch
-#    PHP_ICU70_Patch
+    #    PHP_Openssl3_Patch
+    #    PHP_ICU70_Patch
     if [ "${Stack}" = "lnmp" ]; then
         ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --enable-fpm --with-fpm-user=www --with-fpm-group=www --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --enable-intl --enable-pcntl --enable-ftp --with-gd ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --without-libzip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --with-xsl --with-pear ${PHP_Buildin_Option} ${PHP_Modules_Options}
     else
@@ -972,9 +967,9 @@ Install_PHP_73()
     echo "Install ZendGuardLoader for PHP 7.3..."
     echo "unavailable now."
 
-if [ "${Stack}" = "lnmp" ]; then
-    echo "Creating new php-fpm configure file..."
-    cat >/usr/local/php/etc/php-fpm.conf<<EOF
+    if [ "${Stack}" = "lnmp" ]; then
+        echo "Creating new php-fpm configure file..."
+        cat >/usr/local/php/etc/php-fpm.conf <<EOF
 [global]
 pid = /usr/local/php/var/run/php-fpm.pid
 error_log = /usr/local/php/var/log/php-fpm.log
@@ -1001,19 +996,18 @@ request_slowlog_timeout = 0
 slowlog = var/log/slow.log
 EOF
 
-    echo "Copy php-fpm init.d file..."
-    \cp ${cur_dir}/src/${Php_Ver}/sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
-    \cp ${cur_dir}/init.d/php-fpm.service /etc/systemd/system/php-fpm.service
-    chmod +x /etc/init.d/php-fpm
-fi
+        echo "Copy php-fpm init.d file..."
+        \cp ${cur_dir}/src/${Php_Ver}/sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
+        \cp ${cur_dir}/init.d/php-fpm.service /etc/systemd/system/php-fpm.service
+        chmod +x /etc/init.d/php-fpm
+    fi
 }
 
-Install_PHP_74()
-{
+Install_PHP_74() {
     Install_Libzip
     Echo_Blue "[+] Installing ${Php_Ver}"
     Tar_Cd ${Php_Ver}.tar.bz2 ${Php_Ver}
-#    PHP_Openssl3_Patch
+    #    PHP_Openssl3_Patch
     if [ "${Stack}" = "lnmp" ]; then
         ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --enable-fpm --with-fpm-user=www --with-fpm-group=www --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype=/usr/local/freetype --with-jpeg --with-png --with-zlib --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --enable-intl --enable-pcntl --enable-ftp --enable-gd ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --with-zip --without-libzip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --with-xsl --with-pear --with-webp ${PHP_Buildin_Option} ${PHP_Modules_Options}
     else
@@ -1044,9 +1038,9 @@ Install_PHP_74()
     echo "Install ZendGuardLoader for PHP 7.4..."
     echo "unavailable now."
 
-if [ "${Stack}" = "lnmp" ]; then
-    echo "Creating new php-fpm configure file..."
-    cat >/usr/local/php/etc/php-fpm.conf<<EOF
+    if [ "${Stack}" = "lnmp" ]; then
+        echo "Creating new php-fpm configure file..."
+        cat >/usr/local/php/etc/php-fpm.conf <<EOF
 [global]
 pid = /usr/local/php/var/run/php-fpm.pid
 error_log = /usr/local/php/var/log/php-fpm.log
@@ -1073,19 +1067,18 @@ request_slowlog_timeout = 0
 slowlog = var/log/slow.log
 EOF
 
-    echo "Copy php-fpm init.d file..."
-    \cp ${cur_dir}/src/${Php_Ver}/sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
-    \cp ${cur_dir}/init.d/php-fpm.service /etc/systemd/system/php-fpm.service
-    chmod +x /etc/init.d/php-fpm
-fi
+        echo "Copy php-fpm init.d file..."
+        \cp ${cur_dir}/src/${Php_Ver}/sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
+        \cp ${cur_dir}/init.d/php-fpm.service /etc/systemd/system/php-fpm.service
+        chmod +x /etc/init.d/php-fpm
+    fi
 }
 
-Install_PHP_80()
-{
+Install_PHP_80() {
     Install_Libzip
     Echo_Blue "[+] Installing ${Php_Ver}"
     Tar_Cd ${Php_Ver}.tar.bz2 ${Php_Ver}
-#    PHP_Openssl3_Patch
+    #    PHP_Openssl3_Patch
     if [ "${Stack}" = "lnmp" ]; then
         ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --enable-fpm --with-fpm-user=www --with-fpm-group=www --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv=/usr/local --with-freetype=/usr/local/freetype --with-jpeg --with-zlib --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem ${with_curl} --enable-mbregex --enable-mbstring --enable-intl --enable-pcntl --enable-ftp --enable-gd ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-zip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --with-xsl --with-pear --with-webp ${PHP_Buildin_Option} ${PHP_Modules_Options}
     else
@@ -1116,9 +1109,9 @@ Install_PHP_80()
     echo "Install ZendGuardLoader for PHP 8.0..."
     echo "unavailable now."
 
-if [ "${Stack}" = "lnmp" ]; then
-    echo "Creating new php-fpm configure file..."
-    cat >/usr/local/php/etc/php-fpm.conf<<EOF
+    if [ "${Stack}" = "lnmp" ]; then
+        echo "Creating new php-fpm configure file..."
+        cat >/usr/local/php/etc/php-fpm.conf <<EOF
 [global]
 pid = /usr/local/php/var/run/php-fpm.pid
 error_log = /usr/local/php/var/log/php-fpm.log
@@ -1145,15 +1138,14 @@ request_slowlog_timeout = 0
 slowlog = var/log/slow.log
 EOF
 
-    echo "Copy php-fpm init.d file..."
-    \cp ${cur_dir}/src/${Php_Ver}/sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
-    \cp ${cur_dir}/init.d/php-fpm.service /etc/systemd/system/php-fpm.service
-    chmod +x /etc/init.d/php-fpm
-fi
+        echo "Copy php-fpm init.d file..."
+        \cp ${cur_dir}/src/${Php_Ver}/sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
+        \cp ${cur_dir}/init.d/php-fpm.service /etc/systemd/system/php-fpm.service
+        chmod +x /etc/init.d/php-fpm
+    fi
 }
 
-Install_PHP_81()
-{
+Install_PHP_81() {
     Install_Libzip
     Echo_Blue "[+] Installing ${Php_Ver}"
     Tar_Cd ${Php_Ver}.tar.bz2 ${Php_Ver}
@@ -1187,9 +1179,9 @@ Install_PHP_81()
     echo "Install ZendGuardLoader for PHP 8.1..."
     echo "unavailable now."
 
-if [ "${Stack}" = "lnmp" ]; then
-    echo "Creating new php-fpm configure file..."
-    cat >/usr/local/php/etc/php-fpm.conf<<EOF
+    if [ "${Stack}" = "lnmp" ]; then
+        echo "Creating new php-fpm configure file..."
+        cat >/usr/local/php/etc/php-fpm.conf <<EOF
 [global]
 pid = /usr/local/php/var/run/php-fpm.pid
 error_log = /usr/local/php/var/log/php-fpm.log
@@ -1216,15 +1208,14 @@ request_slowlog_timeout = 0
 slowlog = var/log/slow.log
 EOF
 
-    echo "Copy php-fpm init.d file..."
-    \cp ${cur_dir}/src/${Php_Ver}/sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
-    \cp ${cur_dir}/init.d/php-fpm.service /etc/systemd/system/php-fpm.service
-    chmod +x /etc/init.d/php-fpm
-fi
+        echo "Copy php-fpm init.d file..."
+        \cp ${cur_dir}/src/${Php_Ver}/sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
+        \cp ${cur_dir}/init.d/php-fpm.service /etc/systemd/system/php-fpm.service
+        chmod +x /etc/init.d/php-fpm
+    fi
 }
 
-Install_PHP_82()
-{
+Install_PHP_82() {
     Install_Libzip
     Echo_Blue "[+] Installing ${Php_Ver}"
     Tar_Cd ${Php_Ver}.tar.bz2 ${Php_Ver}
@@ -1258,9 +1249,9 @@ Install_PHP_82()
     echo "Install ZendGuardLoader for PHP 8.2..."
     echo "unavailable now."
 
-if [ "${Stack}" = "lnmp" ]; then
-    echo "Creating new php-fpm configure file..."
-    cat >/usr/local/php/etc/php-fpm.conf<<EOF
+    if [ "${Stack}" = "lnmp" ]; then
+        echo "Creating new php-fpm configure file..."
+        cat >/usr/local/php/etc/php-fpm.conf <<EOF
 [global]
 pid = /usr/local/php/var/run/php-fpm.pid
 error_log = /usr/local/php/var/log/php-fpm.log
@@ -1287,15 +1278,14 @@ request_slowlog_timeout = 0
 slowlog = var/log/slow.log
 EOF
 
-    echo "Copy php-fpm init.d file..."
-    \cp ${cur_dir}/src/${Php_Ver}/sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
-    \cp ${cur_dir}/init.d/php-fpm.service /etc/systemd/system/php-fpm.service
-    chmod +x /etc/init.d/php-fpm
-fi
+        echo "Copy php-fpm init.d file..."
+        \cp ${cur_dir}/src/${Php_Ver}/sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
+        \cp ${cur_dir}/init.d/php-fpm.service /etc/systemd/system/php-fpm.service
+        chmod +x /etc/init.d/php-fpm
+    fi
 }
 
-Install_PHP_83()
-{
+Install_PHP_83() {
     Install_Libzip
     Echo_Blue "[+] Installing ${Php_Ver}"
     Tar_Cd ${Php_Ver}.tar.bz2 ${Php_Ver}
@@ -1329,9 +1319,9 @@ Install_PHP_83()
     echo "Install ZendGuardLoader for PHP 8.3..."
     echo "unavailable now."
 
-if [ "${Stack}" = "lnmp" ]; then
-    echo "Creating new php-fpm configure file..."
-    cat >/usr/local/php/etc/php-fpm.conf<<EOF
+    if [ "${Stack}" = "lnmp" ]; then
+        echo "Creating new php-fpm configure file..."
+        cat >/usr/local/php/etc/php-fpm.conf <<EOF
 [global]
 pid = /usr/local/php/var/run/php-fpm.pid
 error_log = /usr/local/php/var/log/php-fpm.log
@@ -1358,15 +1348,14 @@ request_slowlog_timeout = 0
 slowlog = var/log/slow.log
 EOF
 
-    echo "Copy php-fpm init.d file..."
-    \cp ${cur_dir}/src/${Php_Ver}/sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
-    \cp ${cur_dir}/init.d/php-fpm.service /etc/systemd/system/php-fpm.service
-    chmod +x /etc/init.d/php-fpm
-fi
+        echo "Copy php-fpm init.d file..."
+        \cp ${cur_dir}/src/${Php_Ver}/sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
+        \cp ${cur_dir}/init.d/php-fpm.service /etc/systemd/system/php-fpm.service
+        chmod +x /etc/init.d/php-fpm
+    fi
 }
 
-LNMP_PHP_Opt()
-{
+LNMP_PHP_Opt() {
     if [[ ${MemTotal} -gt 1024 && ${MemTotal} -le 2048 ]]; then
         sed -i "s#pm.max_children.*#pm.max_children = 20#" /usr/local/php/etc/php-fpm.conf
         sed -i "s#pm.start_servers.*#pm.start_servers = 10#" /usr/local/php/etc/php-fpm.conf
@@ -1390,10 +1379,9 @@ LNMP_PHP_Opt()
     fi
 }
 
-Creat_PHP_Tools()
-{
+Creat_PHP_Tools() {
     echo "Create PHP Info Tool..."
-    cat >${Default_Website_Dir}/phpinfo.php<<eof
+    cat >${Default_Website_Dir}/phpinfo.php <<eof
 <?php
 phpinfo();
 ?>
@@ -1401,7 +1389,7 @@ eof
 
     echo "Copy PHP Prober..."
     cd ${cur_dir}/src
-#    tar zxf p.tar.gz
+    #    tar zxf p.tar.gz
     \cp prober.php ${Default_Website_Dir}/prober.php
 
     \cp ${cur_dir}/conf/index.html ${Default_Website_Dir}/index.html

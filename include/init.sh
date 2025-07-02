@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
 
-Set_Timezone()
-{
+Set_Timezone() {
     Echo_Blue "Setting timezone..."
     rm -rf /etc/localtime
     ln -sf /usr/share/zoneinfo/America/New_York /etc/localtime
 }
 
-CentOS_InstallNTP()
-{
+CentOS_InstallNTP() {
     if [ "${CheckMirror}" != "n" ]; then
         if command -v ntpdate >/dev/null 2>&1; then
             ntpdate -u pool.ntp.org
@@ -31,8 +29,7 @@ CentOS_InstallNTP()
     start_time=$(date +%s)
 }
 
-Deb_InstallNTP()
-{
+Deb_InstallNTP() {
     if [ "${CheckMirror}" != "n" ]; then
         apt-get update -y
         [[ $? -ne 0 ]] && apt-get update --allow-releaseinfo-change -y
@@ -44,20 +41,19 @@ Deb_InstallNTP()
     start_time=$(date +%s)
 }
 
-CentOS_RemoveAMP()
-{
+CentOS_RemoveAMP() {
     Echo_Blue "[-] Yum remove packages..."
-    rpm -qa|grep httpd
+    rpm -qa | grep httpd
     rpm -e httpd httpd-tools --nodeps
     if [[ "${DBSelect}" != "0" ]]; then
         yum -y remove mysql-server mysql mysql-libs mariadb-server mariadb mariadb-libs
-        rpm -qa|grep mysql
+        rpm -qa | grep mysql
         if [ $? -ne 0 ]; then
             rpm -e mysql mysql-libs --nodeps
             rpm -e mariadb mariadb-libs --nodeps
         fi
     fi
-    rpm -qa|grep php
+    rpm -qa | grep php
     rpm -e php-mysql php-cli php-gd php-common php --nodeps
 
     Remove_Error_Libcurl
@@ -67,58 +63,51 @@ CentOS_RemoveAMP()
     yum clean all
 }
 
-Deb_RemoveAMP()
-{
+Deb_RemoveAMP() {
     Echo_Blue "[-] apt-get remove packages..."
     apt-get update -y
     [[ $? -ne 0 ]] && apt-get update --allow-releaseinfo-change -y
-    for removepackages in apache2 apache2-doc apache2-utils apache2.2-common apache2.2-bin apache2-mpm-prefork apache2-doc apache2-mpm-worker php5 php5-common php5-cgi php5-cli php5-mysql php5-curl php5-gd;
-    do apt-get purge -y $removepackages; done
+    for removepackages in apache2 apache2-doc apache2-utils apache2.2-common apache2.2-bin apache2-mpm-prefork apache2-doc apache2-mpm-worker php5 php5-common php5-cgi php5-cli php5-mysql php5-curl php5-gd; do apt-get purge -y $removepackages; done
     if [[ "${DBSelect}" != "0" ]]; then
         if echo "${Ubuntu_Version}" | grep -Eqi "^2[0-7]\."; then
-            dpkg -l |grep mysql
+            dpkg -l | grep mysql
             dpkg --force-all -P mysql-server
             dpkg --force-all -P mariadb-client mariadb-server mariadb-common libmariadbd-dev
             [[ -d "/etc/mysql" ]] && rm -rf /etc/mysql
-            for removepackages in mysql-server mariadb-server;
-            do apt-get purge -y $removepackages; done
+            for removepackages in mysql-server mariadb-server; do apt-get purge -y $removepackages; done
         else
-            dpkg -l |grep mysql
+            dpkg -l | grep mysql
             dpkg --force-all -P mysql-server mysql-common libmysqlclient15off libmysqlclient15-dev libmysqlclient18 libmysqlclient18-dev libmysqlclient20 libmysqlclient-dev libmysqlclient21
             dpkg --force-all -P mariadb-client mariadb-server mariadb-common libmariadbd-dev
-            for removepackages in mysql-client mysql-server mysql-common mysql-server-core-5.5 mysql-client-5.5 mariadb-client mariadb-server mariadb-common;
-            do apt-get purge -y $removepackages; done
+            for removepackages in mysql-client mysql-server mysql-common mysql-server-core-5.5 mysql-client-5.5 mariadb-client mariadb-server mariadb-common; do apt-get purge -y $removepackages; done
         fi
     fi
     killall apache2
-    dpkg -l |grep apache
+    dpkg -l | grep apache
     dpkg -P apache2 apache2-doc apache2-mpm-prefork apache2-utils apache2.2-common
-    dpkg -l |grep php
+    dpkg -l | grep php
     dpkg -P php5 php5-common php5-cli php5-cgi php5-mysql php5-curl php5-gd
     apt-get autoremove -y && apt-get clean
 }
 
-Disable_Selinux()
-{
+Disable_Selinux() {
     if [ -s /etc/selinux/config ]; then
         setenforce 0
         sed -i 's/^SELINUX=.*/SELINUX=disabled/g' /etc/selinux/config
     fi
 }
 
-Xen_Hwcap_Setting()
-{
+Xen_Hwcap_Setting() {
     if [ -s /etc/ld.so.conf.d/libc6-xen.conf ]; then
         sed -i 's/hwcap 1 nosegneg/hwcap 0 nosegneg/g' /etc/ld.so.conf.d/libc6-xen.conf
     fi
 }
 
-Check_Hosts()
-{
+Check_Hosts() {
     if grep -Eqi '^127.0.0.1[[:space:]]*localhost' /etc/hosts; then
         echo "Hosts: ok."
     else
-        echo "127.0.0.1 localhost.localdomain localhost" >> /etc/hosts
+        echo "127.0.0.1 localhost.localdomain localhost" >>/etc/hosts
     fi
     if [ "${CheckMirror}" != "n" ]; then
         pingresult=$(ping -c1 www.cloudflare.com 2>&1)
@@ -126,15 +115,14 @@ Check_Hosts()
         if echo "${pingresult}" | grep -q "unknown host"; then
             echo "DNS...fail"
             echo "Writing nameserver to /etc/resolv.conf ..."
-            echo -e "nameserver 8.8.8.8\nnameserver 1.1.1.1\nnameserver 8.8.4.4" > /etc/resolv.conf
+            echo -e "nameserver 8.8.8.8\nnameserver 1.1.1.1\nnameserver 8.8.4.4" >/etc/resolv.conf
         else
             echo "DNS...ok"
         fi
     fi
 }
 
-RHEL_Modify_Source()
-{
+RHEL_Modify_Source() {
     Get_RHEL_Version
     if [ "${RHELRepo}" = "local" ]; then
         echo "DO NOT change RHEL repository, use the repository you set."
@@ -164,8 +152,7 @@ RHEL_Modify_Source()
     sed -i "s/^enabled[ ]*=[ ]*1/enabled=0/" /etc/yum/pluginconf.d/subscription-manager.conf
 }
 
-Ubuntu_Modify_Source()
-{
+Ubuntu_Modify_Source() {
     if [ "${country}" = "CN" ]; then
         OldReleasesURL='http://mirrors.ustc.edu.cn/ubuntu-old-releases/'
     else
@@ -176,7 +163,7 @@ Ubuntu_Modify_Source()
         CodeName='maverick'
     elif grep -Eqi "11.04" /etc/*-release || echo "${Ubuntu_Version}" | grep -Eqi '^11.04'; then
         CodeName='natty'
-    elif  grep -Eqi "11.10" /etc/*-release || echo "${Ubuntu_Version}" | grep -Eqi '^11.10'; then
+    elif grep -Eqi "11.10" /etc/*-release || echo "${Ubuntu_Version}" | grep -Eqi '^11.10'; then
         CodeName='oneiric'
     elif grep -Eqi "12.10" /etc/*-release || echo "${Ubuntu_Version}" | grep -Eqi '^12.10'; then
         CodeName='quantal'
@@ -229,7 +216,7 @@ Ubuntu_Modify_Source()
     fi
     if [ "${CodeName}" != "" ]; then
         \cp /etc/apt/sources.list /etc/apt/sources.list.$(date +"%Y%m%d")
-        cat > /etc/apt/sources.list<<EOF
+        cat >/etc/apt/sources.list <<EOF
 deb ${OldReleasesURL} ${CodeName} main restricted universe multiverse
 deb ${OldReleasesURL} ${CodeName}-security main restricted universe multiverse
 deb ${OldReleasesURL} ${CodeName}-updates main restricted universe multiverse
@@ -244,52 +231,49 @@ EOF
     fi
 }
 
-Check_Old_Releases_URL()
-{
+Check_Old_Releases_URL() {
     OR_Status=$(wget --spider --server-response ${OldReleasesURL}/dists/$1/Release 2>&1 | awk '/^  HTTP/{print $2}')
     if [ "${OR_Status}" = "200" ]; then
-        echo "Ubuntu old-releases status: ${OR_Status}";
+        echo "Ubuntu old-releases status: ${OR_Status}"
         CodeName="$1"
     fi
 }
 
-Ubuntu_Deadline()
-{
+Ubuntu_Deadline() {
     trusty_deadline=$(date -d "2024-4-30 00:00:00" +%s)
     xenial_deadline=$(date -d "2026-4-30 00:00:00" +%s)
     bionic_deadline=$(date -d "2028-7-30 00:00:00" +%s)
     mantic_deadline=$(date -d "2024-7-30 00:00:00" +%s)
-    cur_time=$(date  +%s)
+    cur_time=$(date +%s)
     case "$1" in
-        trusty)
-            if [ ${cur_time} -gt ${trusty_deadline} ]; then
-                echo "${cur_time} > ${trusty_deadline}"
-                Check_Old_Releases_URL trusty
-            fi
-            ;;
-        xenial)
-            if [ ${cur_time} -gt ${xenial_deadline} ]; then
-                echo "${cur_time} > ${xenial_deadline}"
-                Check_Old_Releases_URL xenial
-            fi
-            ;;
-        bionic)
-            if [ ${cur_time} -gt ${bionic_deadline} ]; then
-                echo "${cur_time} > ${bionic_deadline}"
-                Check_Old_Releases_URL bionic
-            fi
-            ;;
-        mantic)
-            if [ ${cur_time} -gt ${mantic_deadline} ]; then
-                echo "${cur_time} > ${mantic_deadline}"
-                Check_Old_Releases_URL mantic
-            fi
-            ;;
+    trusty)
+        if [ ${cur_time} -gt ${trusty_deadline} ]; then
+            echo "${cur_time} > ${trusty_deadline}"
+            Check_Old_Releases_URL trusty
+        fi
+        ;;
+    xenial)
+        if [ ${cur_time} -gt ${xenial_deadline} ]; then
+            echo "${cur_time} > ${xenial_deadline}"
+            Check_Old_Releases_URL xenial
+        fi
+        ;;
+    bionic)
+        if [ ${cur_time} -gt ${bionic_deadline} ]; then
+            echo "${cur_time} > ${bionic_deadline}"
+            Check_Old_Releases_URL bionic
+        fi
+        ;;
+    mantic)
+        if [ ${cur_time} -gt ${mantic_deadline} ]; then
+            echo "${cur_time} > ${mantic_deadline}"
+            Check_Old_Releases_URL mantic
+        fi
+        ;;
     esac
 }
 
-CentOS6_Modify_Source()
-{
+CentOS6_Modify_Source() {
     if echo "${CentOS_Version}" | grep -Eqi "^6"; then
         Echo_Yellow "CentOS 6 is now end of life, use vault repository."
         mkdir /etc/yum.repos.d/backup
@@ -298,8 +282,7 @@ CentOS6_Modify_Source()
     fi
 }
 
-CentOS8_Modify_Source()
-{
+CentOS8_Modify_Source() {
     if echo "${CentOS_Version}" | grep -Eqi "^8" && [ "${isCentosStream}" != "y" ]; then
         Echo_Yellow "CentOS 8 is now end of life, use vault repository."
         if [ ! -s /etc/yum.repos.d/CentOS8-vault.repo ]; then
@@ -310,8 +293,7 @@ CentOS8_Modify_Source()
     fi
 }
 
-Modify_Source()
-{
+Modify_Source() {
     if [ "${DISTRO}" = "RHEL" ]; then
         if subscription-manager status; then
             Echo_Blue "RHEL subscription exists on the system, skip setting up third-party sources."
@@ -330,30 +312,26 @@ Modify_Source()
     fi
 }
 
-Check_PowerTools()
-{
-    if ! yum -v repolist all|grep "PowerTools"; then
+Check_PowerTools() {
+    if ! yum -v repolist all | grep "PowerTools"; then
         Echo_Red "PowerTools repository not found!"
     fi
-    repo_id=$(yum repolist all|grep -Ei "PowerTools"|head -n 1|awk '{print $1}')
+    repo_id=$(yum repolist all | grep -Ei "PowerTools" | head -n 1 | awk '{print $1}')
 }
 
-Check_Codeready()
-{
-    repo_id=$(yum repolist all|grep -E "CodeReady"|head -n 1|awk '{print $1}')
+Check_Codeready() {
+    repo_id=$(yum repolist all | grep -E "CodeReady" | head -n 1 | awk '{print $1}')
     [ -z "${repo_id}" ] && repo_id="ol8_codeready_builder"
 }
 
-CentOS_Dependent()
-{
+CentOS_Dependent() {
     if [ -s /etc/yum.conf ]; then
         \cp /etc/yum.conf /etc/yum.conf.lnmp
         sed -i 's:exclude=.*:exclude=:g' /etc/yum.conf
     fi
 
     Echo_Blue "[+] Yum installing dependent packages..."
-    for packages in make cmake gcc gcc-c++ gcc-g77 kernel-headers glibc-headers flex bison file libtool libtool-libs autoconf patch wget crontabs libjpeg libjpeg-devel libjpeg-turbo-devel libpng libpng-devel libpng10 libpng10-devel gd gd-devel libxml2 libxml2-devel zlib zlib-devel glib2 glib2-devel unzip tar bzip2 bzip2-devel libzip-devel libevent libevent-devel ncurses ncurses-devel curl curl-devel libcurl libcurl-devel e2fsprogs e2fsprogs-devel krb5 krb5-devel libidn libidn-devel openssl openssl-devel pcre-devel gettext gettext-devel ncurses-devel gmp-devel pspell-devel unzip libcap diffutils ca-certificates net-tools libc-client-devel psmisc libXpm-devel git-core c-ares-devel libicu-devel libxslt libxslt-devel xz expat-devel libaio-devel rpcgen libtirpc-devel perl cyrus-sasl-devel sqlite-devel oniguruma-devel lsof re2c pkg-config libarchive hostname ncurses-libs numactl-devel libxcrypt libwebp-devel gnutls-devel initscripts iproute libxcrypt-compat git;
-    do yum -y install $packages; done
+    for packages in make cmake gcc gcc-c++ gcc-g77 kernel-headers glibc-headers flex bison file libtool libtool-libs autoconf patch wget crontabs libjpeg libjpeg-devel libjpeg-turbo-devel libpng libpng-devel libpng10 libpng10-devel gd gd-devel libxml2 libxml2-devel zlib zlib-devel glib2 glib2-devel unzip tar bzip2 bzip2-devel libzip-devel libevent libevent-devel ncurses ncurses-devel curl curl-devel libcurl libcurl-devel e2fsprogs e2fsprogs-devel krb5 krb5-devel libidn libidn-devel openssl openssl-devel pcre-devel gettext gettext-devel ncurses-devel gmp-devel pspell-devel unzip libcap diffutils ca-certificates net-tools libc-client-devel psmisc libXpm-devel git-core c-ares-devel libicu-devel libxslt libxslt-devel xz expat-devel libaio-devel rpcgen libtirpc-devel perl cyrus-sasl-devel sqlite-devel oniguruma-devel lsof re2c pkg-config libarchive hostname ncurses-libs numactl-devel libxcrypt libwebp-devel gnutls-devel initscripts iproute libxcrypt-compat git; do yum -y install $packages; done
 
     yum -y update nss
 
@@ -361,8 +339,7 @@ CentOS_Dependent()
         Check_PowerTools
         if [ "${repo_id}" != "" ]; then
             echo "Installing packages in PowerTools repository..."
-            for c8packages in rpcgen re2c oniguruma-devel;
-            do dnf --enablerepo=${repo_id} install ${c8packages} -y; done
+            for c8packages in rpcgen re2c oniguruma-devel; do dnf --enablerepo=${repo_id} install ${c8packages} -y; done
         fi
         dnf install libarchive -y
 
@@ -374,7 +351,7 @@ CentOS_Dependent()
 
         if [[ ! -n "$crb_source_check" ]]; then
             echo "Add crb source..."
-            cat > /etc/yum.repos.d/centos-crb.repo << EOF
+            cat >/etc/yum.repos.d/centos-crb.repo <<EOF
 [CRB]
 name=CentOS-\$releasever - CRB - mirrors.ustc.edu.cn
 #failovermethod=priority
@@ -385,8 +362,7 @@ EOF
         fi
     fi
     if echo "${CentOS_Version}" | grep -Eqi "^9" || echo "${Alma_Version}" | grep -Eqi "^9" || echo "${Rocky_Version}" | grep -Eqi "^9"; then
-        for cs9packages in oniguruma-devel libzip-devel libtirpc-devel libxcrypt-compat;
-        do dnf --enablerepo=crb install ${cs9packages} -y; done
+        for cs9packages in oniguruma-devel libzip-devel libtirpc-devel libxcrypt-compat; do dnf --enablerepo=crb install ${cs9packages} -y; done
         if [[ "${Bin}" != "y" && "${DBSelect}" = "5" ]]; then
             dnf install gcc-toolset-12-gcc gcc-toolset-12-gcc-c++ gcc-toolset-12-binutils gcc-toolset-12-annobin-annocheck gcc-toolset-12-annobin-plugin-gcc -y
         fi
@@ -394,8 +370,7 @@ EOF
 
     if [ "${DISTRO}" = "Oracle" ] && echo "${Oracle_Version}" | grep -Eqi "^8"; then
         Check_Codeready
-        for o8packages in rpcgen re2c oniguruma-devel;
-        do dnf --enablerepo=${repo_id} install ${o8packages} -y; done
+        for o8packages in rpcgen re2c oniguruma-devel; do dnf --enablerepo=${repo_id} install ${o8packages} -y; done
         dnf install libarchive -y
     fi
 
@@ -407,7 +382,7 @@ EOF
         fi
     fi
 
-    if echo "${CentOS_Version}" | grep -Eqi "^7" || echo "${RHEL_Version}" | grep -Eqi "^7"  || echo "${Aliyun_Version}" | grep -Eqi "^2" || echo "${Alibaba_Version}" | grep -Eqi "^2" || echo "${Oracle_Version}" | grep -Eqi "^7" || echo "${Anolis_Version}" | grep -Eqi "^7"; then
+    if echo "${CentOS_Version}" | grep -Eqi "^7" || echo "${RHEL_Version}" | grep -Eqi "^7" || echo "${Aliyun_Version}" | grep -Eqi "^2" || echo "${Alibaba_Version}" | grep -Eqi "^2" || echo "${Oracle_Version}" | grep -Eqi "^7" || echo "${Anolis_Version}" | grep -Eqi "^7"; then
         if [ "${DISTRO}" = "Oracle" ]; then
             yum -y install oracle-epel-release
             yum -y --enablerepo=*EPEL* install oniguruma-devel
@@ -435,8 +410,7 @@ EOF
         Check_PowerTools
         if [ "${repo_id}" != "" ]; then
             echo "Installing packages in PowerTools repository..."
-            for uospackages in rpcgen re2c oniguruma-devel;
-            do dnf --enablerepo=${repo_id} install ${uospackages} -y; done
+            for uospackages in rpcgen re2c oniguruma-devel; do dnf --enablerepo=${repo_id} install ${uospackages} -y; done
         fi
     fi
 
@@ -445,8 +419,7 @@ EOF
     fi
 }
 
-Deb_Dependent()
-{
+Deb_Dependent() {
     Echo_Blue "[+] Apt-get installing dependent packages..."
     apt-get update -y
     [[ $? -ne 0 ]] && apt-get update --allow-releaseinfo-change -y
@@ -454,12 +427,10 @@ Deb_Dependent()
     apt-get -fy install
     export DEBIAN_FRONTEND=noninteractive
     apt-get --no-install-recommends install -y build-essential gcc g++ make
-    for packages in debian-keyring debian-archive-keyring build-essential gcc g++ make cmake autoconf automake re2c wget cron bzip2 libzip-dev libc6-dev bison file rcconf flex bison m4 gawk less cpp binutils diffutils unzip tar bzip2 libbz2-dev libncurses5 libncurses5-dev libtool libevent-dev openssl libssl-dev zlibc libsasl2-dev libltdl3-dev libltdl-dev zlib1g zlib1g-dev libbz2-1.0 libbz2-dev libglib2.0-0 libglib2.0-dev libpng3 libjpeg-dev libpng-dev libpng12-0 libpng12-dev libkrb5-dev curl libcurl3-gnutls libcurl4-gnutls-dev libcurl4-openssl-dev libpcre3-dev libpq-dev libpq5 gettext libpng12-dev libxml2-dev libcap-dev ca-certificates libc-client2007e-dev psmisc patch git libc-ares-dev libicu-dev e2fsprogs libxslt1.1 libxslt1-dev libc-client-dev xz-utils libexpat1-dev libaio-dev libtirpc-dev libsqlite3-dev libonig-dev lsof pkg-config libtinfo-dev libnuma-dev libwebp-dev gnutls-dev iproute2 xz-utils gzip;
-    do apt-get --no-install-recommends install -y $packages; done
+    for packages in debian-keyring debian-archive-keyring build-essential gcc g++ make cmake autoconf automake re2c wget cron bzip2 libzip-dev libc6-dev bison file rcconf flex bison m4 gawk less cpp binutils diffutils unzip tar bzip2 libbz2-dev libncurses5 libncurses5-dev libtool libevent-dev openssl libssl-dev zlibc libsasl2-dev libltdl3-dev libltdl-dev zlib1g zlib1g-dev libbz2-1.0 libbz2-dev libglib2.0-0 libglib2.0-dev libpng3 libjpeg-dev libpng-dev libpng12-0 libpng12-dev libkrb5-dev curl libcurl3-gnutls libcurl4-gnutls-dev libcurl4-openssl-dev libpcre3-dev libpq-dev libpq5 gettext libpng12-dev libxml2-dev libcap-dev ca-certificates libc-client2007e-dev psmisc patch git libc-ares-dev libicu-dev e2fsprogs libxslt1.1 libxslt1-dev libc-client-dev xz-utils libexpat1-dev libaio-dev libtirpc-dev libsqlite3-dev libonig-dev lsof pkg-config libtinfo-dev libnuma-dev libwebp-dev gnutls-dev iproute2 xz-utils gzip; do apt-get --no-install-recommends install -y $packages; done
 }
 
-Check_Download()
-{
+Check_Download() {
     Echo_Blue "[+] Downloading files..."
     cd ${cur_dir}/src
     Download_Files ${Libiconv_DL} ${Libiconv_Ver}.tar.gz
@@ -476,7 +447,7 @@ Check_Download()
         Download_Files ${Nginx_DL} ${Nginx_Ver}.tar.gz
     fi
     if [[ "${DBSelect}" =~ ^([12345]|11)$ ]]; then
- #       Mysql_Ver_Short=$(echo ${Mysql_Ver} | sed 's/mysql-//' | cut -d. -f1-2)
+        #       Mysql_Ver_Short=$(echo ${Mysql_Ver} | sed 's/mysql-//' | cut -d. -f1-2)
         if [[ "${Bin}" = "y" && "${DBSelect}" =~ ^[2-4]$ ]]; then
             Download_Files https://cdn.mysql.com/Downloads/MySQL-${Mysql_Ver_Short}/${Mysql_Ver}-linux-glibc2.12-${DB_ARCH}.tar.gz ${Mysql_Ver}-linux-glibc2.12-${DB_ARCH}.tar.gz
             if [ $? -ne 0 ]; then
@@ -500,7 +471,7 @@ Check_Download()
             fi
         fi
     elif [[ "${DBSelect}" =~ ^([6789]|10)$ ]]; then
-    #    Mariadb_Version=$(echo ${Mariadb_Ver} | cut -d- -f2)
+        #    Mariadb_Version=$(echo ${Mariadb_Ver} | cut -d- -f2)
         if [ "${Bin}" = "y" ]; then
             MariaDB_FileName="${Mariadb_Ver}-linux-systemd-${DB_ARCH}"
         else
@@ -514,8 +485,8 @@ Check_Download()
     fi
 
     if [ ${PHPSelect} = "1" ]; then
-    #    Download_Files ${Download_Mirror}/web/phpfpm/${Php_Ver}-fpm-0.5.14.diff.gz ${Php_Ver}-fpm-0.5.14.diff.gz
-         Download_Files https://php-fpm.org/downloads/${Php_Ver}-fpm-0.5.14.diff.gz ${Php_Ver}-fpm-0.5.14.diff.gz
+        #    Download_Files ${Download_Mirror}/web/phpfpm/${Php_Ver}-fpm-0.5.14.diff.gz ${Php_Ver}-fpm-0.5.14.diff.gz
+        Download_Files https://php-fpm.org/downloads/${Php_Ver}-fpm-0.5.14.diff.gz ${Php_Ver}-fpm-0.5.14.diff.gz
     fi
     Download_Files https://files.phpmyadmin.net/phpMyAdmin/${PhpMyAdmin_Ver_Short}/${PhpMyAdmin_Ver}.tar.xz ${PhpMyAdmin_Ver}.tar.xz
     Download_Files https://github.com/kmvan/x-prober/releases/download/8.20/prober.php prober.php
@@ -526,26 +497,23 @@ Check_Download()
     fi
 }
 
-Make_Install()
-{
-    make -j `grep 'processor' /proc/cpuinfo | wc -l`
+Make_Install() {
+    make -j $(grep 'processor' /proc/cpuinfo | wc -l)
     if [ $? -ne 0 ]; then
         make
     fi
     make install
 }
 
-PHP_Make_Install()
-{
-    make ZEND_EXTRA_LIBS='-liconv' -j `grep 'processor' /proc/cpuinfo | wc -l`
+PHP_Make_Install() {
+    make ZEND_EXTRA_LIBS='-liconv' -j $(grep 'processor' /proc/cpuinfo | wc -l)
     if [ $? -ne 0 ]; then
         make ZEND_EXTRA_LIBS='-liconv'
     fi
     make install
 }
 
-Install_Autoconf()
-{
+Install_Autoconf() {
     Echo_Blue "[+] Installing ${Autoconf_Ver}"
     cd ${cur_dir}/src
     Download_Files ${Autoconf_DL} ${Autoconf_Ver}.tar.gz
@@ -556,8 +524,7 @@ Install_Autoconf()
     rm -rf ${cur_dir}/src/${Autoconf_Ver}
 }
 
-Install_Libiconv()
-{
+Install_Libiconv() {
     Echo_Blue "[+] Installing ${Libiconv_Ver}"
     Tar_Cd ${Libiconv_Ver}.tar.gz ${Libiconv_Ver}
     ./configure --enable-static
@@ -566,8 +533,7 @@ Install_Libiconv()
     rm -rf ${cur_dir}/src/${Libiconv_Ver}
 }
 
-Install_Libmcrypt()
-{
+Install_Libmcrypt() {
     Echo_Blue "[+] Installing ${LibMcrypt_Ver}"
     Tar_Cd ${LibMcrypt_Ver}.tar.gz ${LibMcrypt_Ver}
     ./configure
@@ -585,8 +551,7 @@ Install_Libmcrypt()
     rm -rf ${cur_dir}/src/${LibMcrypt_Ver}
 }
 
-Install_Mcrypt()
-{
+Install_Mcrypt() {
     Echo_Blue "[+] Installing ${Mcypt_Ver}"
     Tar_Cd ${Mcypt_Ver}.tar.gz ${Mcypt_Ver}
     ./configure
@@ -595,8 +560,7 @@ Install_Mcrypt()
     rm -rf ${cur_dir}/src/${Mcypt_Ver}
 }
 
-Install_Mhash()
-{
+Install_Mhash() {
     Echo_Blue "[+] Installing ${Mhash_Ver}"
     Tar_Cd ${Mhash_Ver}.tar.bz2 ${Mhash_Ver}
     ./configure
@@ -611,8 +575,7 @@ Install_Mhash()
     rm -rf ${cur_dir}/src/${Mhash_Ver}
 }
 
-Install_Freetype()
-{
+Install_Freetype() {
     if echo "${Ubuntu_Version}" | grep -Eqi "^(1[89]\.|2[0-9]\.)" || echo "${Mint_Version}" | grep -Eqi "^(19|2[0-9])" || echo "${Deepin_Version}" | grep -Eqi "^(15\.[7-9]|15.1[0-9]|1[6-9]|2[0-9])" || echo "${Debian_Version}" | grep -Eqi "^(9|1[0-9])" || echo "${Raspbian_Version}" | grep -Eqi "^(9|1[0-9])" || echo "${Kali_Version}" | grep -Eqi "^202[0-9]" || echo "${UOS_Version}" | grep -Eqi "^2[0-9]" || echo "${CentOS_Version}" | grep -Eqi "^(8|9)" || echo "${RHEL_Version}" | grep -Eqi "^(8|9)" || echo "${Oracle_Version}" | grep -Eqi "^(8|9)" || echo "${Fedora_Version}" | grep -Eqi "^(3[0-9]|29)" || echo "${Rocky_Version}" | grep -Eqi "^(8|9)" || echo "${Alma_Version}" | grep -Eqi "^(8|9)" || echo "${openEuler_Version}" | grep -Eqi "^2[0-9]" || echo "${Anolis_Version}" | grep -Eqi "^(8|9)" || echo "${Kylin_Version}" | grep -Eqi "^V1[0-9]" || echo "${Amazon_Version}" | grep -Eqi "^202[3-9]" || echo "${OpenCloudOS_Version}" | grep -Eqi "^(8|9|23)" || echo "${HCE_Version}" | grep -Eqi "^2\.[0-9]"; then
         Download_Files ${Freetype_New_DL} ${Freetype_New_Ver}.tar.xz
         Echo_Blue "[+] Installing ${Freetype_New_Ver}"
@@ -627,7 +590,7 @@ Install_Freetype()
     Make_Install
 
     [[ -d /usr/lib/pkgconfig ]] && \cp /usr/local/freetype/lib/pkgconfig/freetype2.pc /usr/lib/pkgconfig/
-    cat > /etc/ld.so.conf.d/freetype.conf<<EOF
+    cat >/etc/ld.so.conf.d/freetype.conf <<EOF
 /usr/local/freetype/lib
 EOF
     ldconfig
@@ -636,8 +599,7 @@ EOF
     rm -rf ${cur_dir}/src/${Freetype_Ver}
 }
 
-Install_Curl()
-{
+Install_Curl() {
     if [[ ! -s /usr/local/curl/bin/curl || ! -s /usr/local/curl/lib/libcurl.so || ! -s /usr/local/curl/include/curl/curl.h ]]; then
         Echo_Blue "[+] Installing ${Curl_Ver}"
         cd ${cur_dir}/src
@@ -656,8 +618,7 @@ Install_Curl()
     Remove_Error_Libcurl
 }
 
-Install_Pcre()
-{
+Install_Pcre() {
     if ! command -v pcre-config >/dev/null 2>&1 || pcre-config --version | grep -vEqi '^8.'; then
         Echo_Blue "[+] Installing ${Pcre_Ver}"
         cd ${cur_dir}/src
@@ -667,8 +628,7 @@ Install_Pcre()
     fi
 }
 
-Install_Jemalloc()
-{
+Install_Jemalloc() {
     Echo_Blue "[+] Installing ${Jemalloc_Ver}"
     cd ${cur_dir}/src
     Tar_Cd ${Jemalloc_Ver}.tar.bz2 ${Jemalloc_Ver}
@@ -680,8 +640,7 @@ Install_Jemalloc()
     ln -sf /usr/local/lib/libjemalloc* /usr/lib/
 }
 
-Install_TCMalloc()
-{
+Install_TCMalloc() {
     Echo_Blue "[+] Installing ${TCMalloc_Ver}"
     if [ "${Is_64bit}" = "y" ]; then
         Tar_Cd ${Libunwind_Ver}.tar.gz ${Libunwind_Ver}
@@ -703,8 +662,7 @@ Install_TCMalloc()
     ln -sf /usr/local/lib/libtcmalloc* /usr/lib/
 }
 
-Install_Icu4c()
-{
+Install_Icu4c() {
     if command -v icu-config >/dev/null 2>&1 && icu-config --version | grep -Eq "^3."; then
         Echo_Blue "[+] Installing icu4c-58_3..."
         cd ${cur_dir}/src
@@ -720,8 +678,7 @@ Install_Icu4c()
     fi
 }
 
-Install_Icu522()
-{
+Install_Icu522() {
     if [ ! -s /usr/local/icu522/bin/icu-config ]; then
         Echo_Blue "[+] Installing icu4c-52_2..."
         cd ${cur_dir}/src
@@ -735,13 +692,12 @@ Install_Icu522()
             rm -rf /etc/ld.so.conf.d/icu.conf
         fi
 
-        echo "/usr/local/icu522/lib" > /etc/ld.so.conf.d/icu.conf
+        echo "/usr/local/icu522/lib" >/etc/ld.so.conf.d/icu.conf
         ldconfig
     fi
 }
 
-Install_Icu571()
-{
+Install_Icu571() {
     if [ ! -s /usr/local/icu571/bin/icu-config ]; then
         Echo_Blue "[+] Installing icu4c-57_1..."
         cd ${cur_dir}/src
@@ -755,13 +711,12 @@ Install_Icu571()
             rm -rf /etc/ld.so.conf.d/icu.conf
         fi
 
-        echo "/usr/local/icu571/lib" > /etc/ld.so.conf.d/icu.conf
+        echo "/usr/local/icu571/lib" >/etc/ld.so.conf.d/icu.conf
         ldconfig
     fi
 }
 
-Install_Icu603()
-{
+Install_Icu603() {
     if [ ! -s /usr/local/icu603/bin/icu-config ]; then
         Echo_Blue "[+] Installing icu4c-60_3..."
         cd ${cur_dir}/src
@@ -775,13 +730,12 @@ Install_Icu603()
             rm -rf /etc/ld.so.conf.d/icu.conf
         fi
 
-        echo "/usr/local/icu603/lib" > /etc/ld.so.conf.d/icu.conf
+        echo "/usr/local/icu603/lib" >/etc/ld.so.conf.d/icu.conf
         ldconfig
     fi
 }
 
-Install_Icu631()
-{
+Install_Icu631() {
     if [ ! -s /usr/local/icu631/bin/icu-config ]; then
         Echo_Blue "[+] Installing icu4c-63_1..."
         cd ${cur_dir}/src
@@ -795,13 +749,12 @@ Install_Icu631()
             rm -rf /etc/ld.so.conf.d/icu.conf
         fi
 
-        echo "/usr/local/icu631/lib" > /etc/ld.so.conf.d/icu.conf
+        echo "/usr/local/icu631/lib" >/etc/ld.so.conf.d/icu.conf
         ldconfig
     fi
 }
 
-Install_Icu671()
-{
+Install_Icu671() {
     if [ ! -s /usr/local/icu671/bin/icu-config ]; then
         Echo_Blue "[+] Installing icu4c-67_1..."
         cd ${cur_dir}/src
@@ -815,13 +768,12 @@ Install_Icu671()
             rm -rf /etc/ld.so.conf.d/icu.conf
         fi
 
-        echo "/usr/local/icu671/lib" > /etc/ld.so.conf.d/icu.conf
+        echo "/usr/local/icu671/lib" >/etc/ld.so.conf.d/icu.conf
         ldconfig
     fi
 }
 
-Install_Icu721()
-{
+Install_Icu721() {
     if [ ! -s /usr/local/icu721/bin/icu-config ]; then
         Echo_Blue "[+] Installing icu4c-72_1..."
         cd ${cur_dir}/src
@@ -835,13 +787,12 @@ Install_Icu721()
             rm -rf /etc/ld.so.conf.d/icu.conf
         fi
 
-        echo "/usr/local/icu721/lib" > /etc/ld.so.conf.d/icu.conf
+        echo "/usr/local/icu721/lib" >/etc/ld.so.conf.d/icu.conf
         ldconfig
     fi
 }
 
-Download_Boost()
-{
+Download_Boost() {
     Echo_Blue "[+] Download or use exist boost..."
     if [ "${DBSelect}" = "4" ] || echo "${mysql_version}" | grep -Eqi '^5\.7\.'; then
         if [ -s "${cur_dir}/src/${Boost_Ver}.tar.bz2" ]; then
@@ -856,7 +807,7 @@ Download_Boost()
             MySQL_WITH_BOOST="-DWITH_BOOST=${cur_dir}/src/${Boost_Ver}"
         fi
     elif [ "${DBSelect}" = "5" ] || echo "${mysql_version}" | grep -Eqi '^8\.'; then
-        Get_Boost_Ver=$(grep 'SET(BOOST_PACKAGE_NAME' cmake/boost.cmake |grep -oP '\d+(\_\d+){2}')
+        Get_Boost_Ver=$(grep 'SET(BOOST_PACKAGE_NAME' cmake/boost.cmake | grep -oP '\d+(\_\d+){2}')
         if [ -s "${cur_dir}/src/boost_${Get_Boost_Ver}.tar.bz2" ]; then
             [[ -d "${cur_dir}/src/boost_${Get_Boost_Ver}" ]] && rm -rf "${cur_dir}/src/boost_${Get_Boost_Ver}"
             tar jxf ${cur_dir}/src/boost_${Get_Boost_Ver}.tar.bz2 -C ${cur_dir}/src
@@ -867,8 +818,7 @@ Download_Boost()
     fi
 }
 
-Install_Boost()
-{
+Install_Boost() {
     Echo_Blue "[+] Download or use exist boost..."
     if [ "${DBSelect}" = "4" ] || [ "${DBSelect}" = "5" ]; then
         if [ -d "${cur_dir}/src/${Mysql_Ver}/boost" ]; then
@@ -885,8 +835,7 @@ Install_Boost()
     fi
 }
 
-Install_Openssl()
-{
+Install_Openssl() {
     if [ ! -s /usr/local/openssl/bin/openssl ] || /usr/local/openssl/bin/openssl version | grep -v 'OpenSSL 1.0.2'; then
         Echo_Blue "[+] Installing ${Openssl_Ver}"
         cd ${cur_dir}/src
@@ -901,32 +850,46 @@ Install_Openssl()
     fi
 }
 
-Install_Openssl_New()
-{
-    if openssl version | grep -vEqi "OpenSSL 1.1.1*"; then
-        if [ ! -s /usr/local/openssl1.1.1/bin/openssl ] || /usr/local/openssl1.1.1/bin/openssl version | grep -v 'OpenSSL 1.1.1'; then
-            Echo_Blue "[+] Installing ${Openssl_New_Ver}"
-            cd ${cur_dir}/src
-            Download_Files ${Openssl_New_DL} ${Openssl_New_Ver}.tar.gz
-            [[ -d "${Openssl_New_Ver}" ]] && rm -rf ${Openssl_New_Ver}
-            Tar_Cd ${Openssl_New_Ver}.tar.gz ${Openssl_New_Ver}
-            ./config enable-weak-ssl-ciphers -fPIC --prefix=/usr/local/openssl1.1.1 --openssldir=/usr/local/openssl1.1.1
-            make depend
-            Make_Install
-            ln -sf /usr/local/openssl1.1.1/lib/libcrypto.so.1.1 /usr/lib/
-            ln -sf /usr/local/openssl1.1.1/lib/libssl.so.1.1 /usr/lib/
-            cd ${cur_dir}/src/
-            rm -rf ${cur_dir}/src/${Openssl_New_Ver}
-        fi
-        ldconfig
+Install_Openssl_New() {
+
+    if [ ! -s /usr/local/openssl1.1.1/bin/openssl ] || /usr/local/openssl1.1.1/bin/openssl version | grep -v 'OpenSSL 1.1.1'; then
+        Echo_Blue "[+] Installing ${Openssl_New_Ver}"
+        cd ${cur_dir}/src
+        Download_Files ${Openssl_New_DL} ${Openssl_New_Ver}.tar.gz
+        [[ -d "${Openssl_New_Ver}" ]] && rm -rf ${Openssl_New_Ver}
+        Tar_Cd ${Openssl_New_Ver}.tar.gz ${Openssl_New_Ver}
+        ./config enable-weak-ssl-ciphers -fPIC --prefix=/usr/local/openssl1.1.1 --openssldir=/usr/local/openssl1.1.1
+        make depend
+        Make_Install
+        #            ln -sf /usr/local/openssl1.1.1/lib/libcrypto.so.1.1 /usr/lib/
+        #            ln -sf /usr/local/openssl1.1.1/lib/libssl.so.1.1 /usr/lib/
+        cd ${cur_dir}/src/
+        rm -rf ${cur_dir}/src/${Openssl_New_Ver}
+
+        #        ldconfig
         apache_with_ssl='--with-ssl=/usr/local/openssl1.1.1'
     else
         apache_with_ssl='--with-ssl'
     fi
 }
 
-Install_Nghttp2()
-{
+Install_Openssl3() {
+
+    if [ ! -s /usr/local/openssl3/bin/openssl ] || /usr/local/openssl3/bin/openssl version | grep -v 'OpenSSL 3.'; then
+        Echo_Blue "[+] Installing ${Openssl_3_Ver}"
+        cd ${cur_dir}/src
+        Download_Files ${Openssl_3_DL} ${Openssl_3_Ver}.tar.gz
+        [[ -d "${Openssl_3_Ver}" ]] && rm -rf ${Openssl_3_Ver}
+        Tar_Cd ${Openssl_3_Ver}.tar.gz ${Openssl_3_Ver}
+        ./config enable-weak-ssl-ciphers -fPIC --prefix=/usr/local/openssl3 --openssldir=/usr/local/openssl3
+        make depend
+        Make_Install
+        cd ${cur_dir}/src/
+        rm -rf ${cur_dir}/src/${Openssl_3_Ver}
+    fi
+}
+
+Install_Nghttp2() {
     if [[ ! -s /usr/local/nghttp2/lib/libnghttp2.so || ! -s /usr/local/nghttp2/include/nghttp2/nghttp2.h ]]; then
         Echo_Blue "[+] Installing ${Nghttp2_Ver}"
         cd ${cur_dir}/src
@@ -940,9 +903,8 @@ Install_Nghttp2()
     fi
 }
 
-Install_Libzip()
-{
-    if echo "${CentOS_Version}" | grep -Eqi "^7"  || echo "${RHEL_Version}" | grep -Eqi "^7"  || echo "${Aliyun_Version}" | grep -Eqi "^2" || echo "${Alibaba_Version}" | grep -Eqi "^2" || echo "${Oracle_Version}" | grep -Eqi "^7" || echo "${Anolis_Version}" | grep -Eqi "^7"; then
+Install_Libzip() {
+    if echo "${CentOS_Version}" | grep -Eqi "^7" || echo "${RHEL_Version}" | grep -Eqi "^7" || echo "${Aliyun_Version}" | grep -Eqi "^2" || echo "${Alibaba_Version}" | grep -Eqi "^2" || echo "${Oracle_Version}" | grep -Eqi "^7" || echo "${Anolis_Version}" | grep -Eqi "^7"; then
         if [ ! -s /usr/local/lib/libzip.so ]; then
             Echo_Blue "[+] Installing ${Libzip_Ver}"
             cd ${cur_dir}/src
@@ -958,42 +920,41 @@ Install_Libzip()
     fi
 }
 
-CentOS_Lib_Opt()
-{
-    if [ "${Is_64bit}" = "y" ] ; then
+CentOS_Lib_Opt() {
+    if [ "${Is_64bit}" = "y" ]; then
         ln -sf /usr/lib64/libpng.* /usr/lib/
         ln -sf /usr/lib64/libjpeg.* /usr/lib/
     fi
 
     ulimit -v unlimited
 
-    if [ `grep -L "/lib"    '/etc/ld.so.conf'` ]; then
-        echo "/lib" >> /etc/ld.so.conf
+    if [ $(grep -L "/lib" '/etc/ld.so.conf') ]; then
+        echo "/lib" >>/etc/ld.so.conf
     fi
 
-    if [ `grep -L '/usr/lib'    '/etc/ld.so.conf'` ]; then
-        echo "/usr/lib" >> /etc/ld.so.conf
+    if [ $(grep -L '/usr/lib' '/etc/ld.so.conf') ]; then
+        echo "/usr/lib" >>/etc/ld.so.conf
         #echo "/usr/lib/openssl/engines" >> /etc/ld.so.conf
     fi
 
-    if [ -d "/usr/lib64" ] && [ `grep -L '/usr/lib64'    '/etc/ld.so.conf'` ]; then
-        echo "/usr/lib64" >> /etc/ld.so.conf
+    if [ -d "/usr/lib64" ] && [ $(grep -L '/usr/lib64' '/etc/ld.so.conf') ]; then
+        echo "/usr/lib64" >>/etc/ld.so.conf
         #echo "/usr/lib64/openssl/engines" >> /etc/ld.so.conf
     fi
 
-    if [ `grep -L '/usr/local/lib'    '/etc/ld.so.conf'` ]; then
-        echo "/usr/local/lib" >> /etc/ld.so.conf
+    if [ $(grep -L '/usr/local/lib' '/etc/ld.so.conf') ]; then
+        echo "/usr/local/lib" >>/etc/ld.so.conf
     fi
 
     ldconfig
 
     if command -v systemd-detect-virt >/dev/null 2>&1 && [[ "$(systemd-detect-virt)" = "lxc" ]]; then
-        cat >>/etc/security/limits.conf<<eof
+        cat >>/etc/security/limits.conf <<eof
 * soft nofile 65535
 * hard nofile 65535
 eof
     else
-        cat >>/etc/security/limits.conf<<eof
+        cat >>/etc/security/limits.conf <<eof
 * soft nproc 65535
 * hard nproc 65535
 * soft nofile 65535
@@ -1001,7 +962,7 @@ eof
 eof
     fi
 
-    echo "fs.file-max=65535" >> /etc/sysctl.conf
+    echo "fs.file-max=65535" >>/etc/sysctl.conf
 
     if echo "${Fedora_Version}" | grep -Eqi "3[0-9]" && [ ! -d "/etc/init.d" ]; then
         ln -sf /etc/rc.d/init.d /etc/init.d
@@ -1020,8 +981,7 @@ eof
     fi
 }
 
-Deb_Lib_Opt()
-{
+Deb_Lib_Opt() {
     if [ "${Is_64bit}" = "y" ]; then
         ln -sf /usr/lib/x86_64-linux-gnu/libpng* /usr/lib/
         ln -sf /usr/lib/x86_64-linux-gnu/libjpeg* /usr/lib/
@@ -1039,20 +999,20 @@ Deb_Lib_Opt()
 
     ulimit -v unlimited
 
-    if [ `grep -L "/lib"    '/etc/ld.so.conf'` ]; then
-        echo "/lib" >> /etc/ld.so.conf
+    if [ $(grep -L "/lib" '/etc/ld.so.conf') ]; then
+        echo "/lib" >>/etc/ld.so.conf
     fi
 
-    if [ `grep -L '/usr/lib'    '/etc/ld.so.conf'` ]; then
-        echo "/usr/lib" >> /etc/ld.so.conf
+    if [ $(grep -L '/usr/lib' '/etc/ld.so.conf') ]; then
+        echo "/usr/lib" >>/etc/ld.so.conf
     fi
 
-    if [ -d "/usr/lib64" ] && [ `grep -L '/usr/lib64'    '/etc/ld.so.conf'` ]; then
-        echo "/usr/lib64" >> /etc/ld.so.conf
+    if [ -d "/usr/lib64" ] && [ $(grep -L '/usr/lib64' '/etc/ld.so.conf') ]; then
+        echo "/usr/lib64" >>/etc/ld.so.conf
     fi
 
-    if [ `grep -L '/usr/local/lib'    '/etc/ld.so.conf'` ]; then
-        echo "/usr/local/lib" >> /etc/ld.so.conf
+    if [ $(grep -L '/usr/local/lib' '/etc/ld.so.conf') ]; then
+        echo "/usr/local/lib" >>/etc/ld.so.conf
     fi
 
     if [ -d /usr/include/x86_64-linux-gnu/curl ]; then
@@ -1071,27 +1031,25 @@ Deb_Lib_Opt()
 
     ldconfig
 
-    cat >>/etc/security/limits.conf<<eof
+    cat >>/etc/security/limits.conf <<eof
 * soft nproc 65535
 * hard nproc 65535
 * soft nofile 65535
 * hard nofile 65535
 eof
 
-    echo "fs.file-max=65535" >> /etc/sysctl.conf
+    echo "fs.file-max=65535" >>/etc/sysctl.conf
 }
 
-Remove_Error_Libcurl()
-{
+Remove_Error_Libcurl() {
     if [ -s /usr/local/lib/libcurl.so ]; then
         rm -f /usr/local/lib/libcurl*
     fi
 }
 
-Add_Swap()
-{
+Add_Swap() {
 
-    Disk_Avail=$(($(df -mP /var | tail -1 | awk '{print $4}' | sed s/[[:space:]]//g)/1024))
+    Disk_Avail=$(($(df -mP /var | tail -1 | awk '{print $4}' | sed s/[[:space:]]//g) / 1024))
 
     DD_Count='1024'
     if [[ "${MemTotal}" -lt 1024 ]]; then
@@ -1130,7 +1088,7 @@ Add_Swap()
         /sbin/mkswap /var/swapfile
         /sbin/swapon /var/swapfile
         if [ $? -eq 0 ]; then
-            [ `grep -L '/var/swapfile'    '/etc/fstab'` ] && echo "/var/swapfile swap swap defaults 0 0" >>/etc/fstab
+            [ $(grep -L '/var/swapfile' '/etc/fstab') ] && echo "/var/swapfile swap swap defaults 0 0" >>/etc/fstab
             /sbin/swapon -s
         else
             rm -f /var/swapfile
