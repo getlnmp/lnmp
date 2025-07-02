@@ -12,7 +12,7 @@ Install_Nginx_Openssl() {
             tar zxf ${Openssl_Ver}.tar.gz
             Nginx_With_Openssl="--with-openssl=${cur_dir}/src/${Openssl_Ver}"
         else
-            if [[ "${Nginx_Ver_Com}" =~ ^1\.(2[5-9]|3[0-9])\. ]]; then
+            if [[ "${Nginx_Version}" =~ ^1\.(2[5-9]|3[0-9])\. ]]; then
                 Check_Openssl
                 if [[ "${isOpenSSL3}" = "y" ]]; then
                     Download_Files ${Openssl_3_DL} ${Openssl_3_Ver}.tar.gz
@@ -50,6 +50,7 @@ Install_Nginx_Lua() {
         echo "Installing Lua for Nginx..."
         cd ${cur_dir}/src
         #      Download_Files ${Luajit_DL} ${Luajit_Ver}.tar.gz
+        rm -rf luajit
         git clone https://luajit.org/git/luajit.git
         Download_O_Files ${LuaNginxModule_DL} ${LuaNginxModule}.tar.gz
         Download_O_Files ${NgxDevelKit_DL} ${NgxDevelKit}.tar.gz
