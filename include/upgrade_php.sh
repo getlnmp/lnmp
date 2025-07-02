@@ -562,10 +562,10 @@ EOF
 Upgrade_PHP_7() {
     Echo_Blue "[+] Installing ${php_version}"
     Tar_Cd php-${php_version}.tar.bz2 php-${php_version}
-    if echo "${php_version}" | grep -Eqi '^7\.1\.'; then
+#    if echo "${php_version}" | grep -Eqi '^7\.1\.'; then
         #    PHP_Openssl3_Patch
         #    PHP_ICU70_Patch
-    fi
+#    fi
     #    if echo "${php_version}" | grep -Eqi '^7.0.' && command -v pkg-config >/dev/null 2>&1 && pkg-config --modversion icu-i18n | grep -Eqi '^6[1-9]|[7-9][0-9]'; then
     #        patch -p1 < ${cur_dir}/src/patch/php-7.0-intl.patch
     #    fi
