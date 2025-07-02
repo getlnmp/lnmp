@@ -1,32 +1,55 @@
 #!/usr/bin/env bash
 
-Install_Nginx_Openssl()
-{
+Install_Nginx_Openssl() {
     if [ "${Enable_Nginx_Openssl}" = 'y' ]; then
         if [ ! -n "${Nginx_Version}" ]; then
             Nginx_Version=$(echo ${Nginx_Ver} | sed "s/nginx-//")
         fi
         Nginx_Ver_Com=$(${cur_dir}/include/version_compare 1.13.0 ${Nginx_Version})
-        if [[ "${Nginx_Ver_Com}" == "0" ||  "${Nginx_Ver_Com}" == "1" ]]; then
+        if [[ "${Nginx_Ver_Com}" == "0" || "${Nginx_Ver_Com}" == "1" ]]; then
             Download_Files ${Openssl_DL} ${Openssl_Ver}.tar.gz
             [[ -d "${Openssl_Ver}" ]] && rm -rf ${Openssl_Ver}
             tar zxf ${Openssl_Ver}.tar.gz
             Nginx_With_Openssl="--with-openssl=${cur_dir}/src/${Openssl_Ver}"
         else
-            Download_Files ${Openssl_New_DL} ${Openssl_New_Ver}.tar.gz
-            [[ -d "${Openssl_New_Ver}" ]] && rm -rf ${Openssl_New_Ver}
-            tar zxf ${Openssl_New_Ver}.tar.gz
-            Nginx_With_Openssl="--with-openssl=${cur_dir}/src/${Openssl_New_Ver} --with-openssl-opt=enable-weak-ssl-ciphers"
+            if [[ "${Nginx_Ver_Com}" =~ ^1\.(2[5-9]|3[0-9])\. ]]; then
+                Check_Openssl
+                if [[ "${isOpenSSL3}" = "y" ]]; then
+                    Download_Files ${Openssl_3_DL} ${Openssl_3_Ver}.tar.gz
+                    [[ -d "${Openssl_3_Ver}" ]] && rm -rf ${Openssl_3_Ver}
+                    tar zxf ${Openssl_3_Ver}.tar.gz
+                    Nginx_With_Openssl="--with-openssl=${cur_dir}/src/${Openssl_3_Ver} --with-openssl-opt=enable-weak-ssl-ciphers"
+                else
+                    Download_Files ${Openssl_New_DL} ${Openssl_New_Ver}.tar.gz
+                    [[ -d "${Openssl_New_Ver}" ]] && rm -rf ${Openssl_New_Ver}
+                    tar zxf ${Openssl_New_Ver}.tar.gz
+                    Nginx_With_Openssl="--with-openssl=${cur_dir}/src/${Openssl_New_Ver} --with-openssl-opt=enable-weak-ssl-ciphers"
+                fi
+            else
+                Download_Files ${Openssl_New_DL} ${Openssl_New_Ver}.tar.gz
+                [[ -d "${Openssl_New_Ver}" ]] && rm -rf ${Openssl_New_Ver}
+                tar zxf ${Openssl_New_Ver}.tar.gz
+                Nginx_With_Openssl="--with-openssl=${cur_dir}/src/${Openssl_New_Ver} --with-openssl-opt=enable-weak-ssl-ciphers"
+            fi
         fi
     fi
 }
 
-Install_Nginx_Lua()
-{
+Install_Nginx_Pcre() {
+    if [ "${Nginx_With_Pcre}" = "" ]; then
+        cd ${cur_dir}/src
+        Download_Files ${Pcre_DL} ${Pcre_Ver}.tar.bz2
+        rm -rf ${Pcre_Ver}
+        tar jxf ${Pcre_Ver}.tar.bz2
+        Nginx_With_Pcre="--with-pcre=${cur_dir}/src/${Pcre_Ver} --with-pcre-jit"
+    fi
+}
+
+Install_Nginx_Lua() {
     if [ "${Enable_Nginx_Lua}" = 'y' ]; then
         echo "Installing Lua for Nginx..."
         cd ${cur_dir}/src
- #      Download_Files ${Luajit_DL} ${Luajit_Ver}.tar.gz
+        #      Download_Files ${Luajit_DL} ${Luajit_Ver}.tar.gz
         git clone https://luajit.org/git/luajit.git
         Download_O_Files ${LuaNginxModule_DL} ${LuaNginxModule}.tar.gz
         Download_O_Files ${NgxDevelKit_DL} ${NgxDevelKit}.tar.gz
@@ -42,7 +65,7 @@ Install_Nginx_Lua()
         cd ${cur_dir}/src
         rm -rf ${cur_dir}/src/luajit
 
-        cat > /etc/ld.so.conf.d/luajit.conf<<EOF
+        cat >/etc/ld.so.conf.d/luajit.conf <<EOF
 /usr/local/luajit/lib
 EOF
         if [ "${Is_64bit}" = "y" ]; then
@@ -52,7 +75,7 @@ EOF
         fi
         ldconfig
 
-        cat >/etc/profile.d/luajit.sh<<EOF
+        cat >/etc/profile.d/luajit.sh <<EOF
 export LUAJIT_LIB=/usr/local/luajit/lib
 export LUAJIT_INC=/usr/local/luajit/include/luajit-2.1
 EOF
@@ -67,7 +90,7 @@ EOF
         cd -
 
         Nginx_Ver_Com=$(${cur_dir}/include/version_compare 1.21.5 ${Nginx_Version})
-        if [[  "${Nginx_Ver_Com}" == "1" ]]; then
+        if [[ "${Nginx_Ver_Com}" == "1" ]]; then
             Nginx_Module_Lua="--with-ld-opt='-Wl,-rpath,/usr/local/luajit/lib' --add-module=${cur_dir}/src/${LuaNginxModule} --add-module=${cur_dir}/src/${NgxDevelKit}"
         else
             if [ "${Nginx_With_Pcre}" = "" ]; then
@@ -82,8 +105,7 @@ EOF
     fi
 }
 
-Install_Ngx_FancyIndex()
-{
+Install_Ngx_FancyIndex() {
     if [ "${Enable_Ngx_FancyIndex}" = 'y' ]; then
         echo "Installing Ngx FancyIndex for Nginx..."
         cd ${cur_dir}/src
@@ -94,8 +116,7 @@ Install_Ngx_FancyIndex()
     fi
 }
 
-Install_Nginx()
-{
+Install_Nginx() {
     Echo_Blue "[+] Installing ${Nginx_Ver}... "
     groupadd www
     useradd -s /sbin/nologin -g www www
@@ -103,17 +124,18 @@ Install_Nginx()
     cd ${cur_dir}/src
     Install_Nginx_Openssl
     Install_Nginx_Lua
+    Install_Nginx_Pcre
     Install_Ngx_FancyIndex
     Tar_Cd ${Nginx_Ver}.tar.gz ${Nginx_Ver}
     if [[ "${DISTRO}" = "Fedora" && ${Fedora_Version} -ge 28 ]]; then
-        patch -p1 < ${cur_dir}/src/patch/nginx-libxcrypt.patch
+        patch -p1 <${cur_dir}/src/patch/nginx-libxcrypt.patch
     fi
     Nginx_Ver_Com=$(${cur_dir}/include/version_compare 1.14.2 ${Nginx_Version})
-    if gcc -dumpversion|grep -q "^[8]" && [ "${Nginx_Ver_Com}" == "1" ]; then
-        patch -p1 < ${cur_dir}/src/patch/nginx-gcc8.patch
+    if gcc -dumpversion | grep -q "^[8]" && [ "${Nginx_Ver_Com}" == "1" ]; then
+        patch -p1 <${cur_dir}/src/patch/nginx-gcc8.patch
     fi
     Nginx_Ver_Com=$(${cur_dir}/include/version_compare 1.9.4 ${Nginx_Version})
-    if [[ "${Nginx_Ver_Com}" == "0" ||  "${Nginx_Ver_Com}" == "1" ]]; then
+    if [[ "${Nginx_Ver_Com}" == "0" || "${Nginx_Ver_Com}" == "1" ]]; then
         ./configure --user=www --group=www --prefix=/usr/local/nginx --with-http_stub_status_module --with-http_ssl_module --with-http_spdy_module --with-http_gzip_static_module --with-ipv6 --with-http_sub_module --with-http_realip_module ${Nginx_With_Openssl} ${Nginx_With_Pcre} ${Nginx_Module_Lua} ${NginxMAOpt} ${Ngx_FancyIndex} ${Nginx_Modules_Options}
     else
         ./configure --user=www --group=www --prefix=/usr/local/nginx --with-http_stub_status_module --with-http_ssl_module --with-http_v2_module --with-http_v3_module --with-http_gzip_static_module --with-http_sub_module --with-stream --with-stream_ssl_module --with-stream_ssl_preread_module --with-http_realip_module ${Nginx_With_Openssl} ${Nginx_With_Pcre} ${Nginx_Module_Lua} ${NginxMAOpt} ${Ngx_FancyIndex} ${Nginx_Modules_Options}
@@ -165,12 +187,12 @@ Install_Nginx()
     fi
 
     if [ "${Stack}" = "lnmp" ]; then
-        cat >${Default_Website_Dir}/.user.ini<<EOF
+        cat >${Default_Website_Dir}/.user.ini <<EOF
 open_basedir=${Default_Website_Dir}:/tmp/:/proc/
 EOF
         chmod 644 ${Default_Website_Dir}/.user.ini
         chattr +i ${Default_Website_Dir}/.user.ini
-        cat >>/usr/local/nginx/conf/fastcgi.conf<<EOF
+        cat >>/usr/local/nginx/conf/fastcgi.conf <<EOF
 fastcgi_param PHP_ADMIN_VALUE "open_basedir=\$document_root/:/tmp/:/proc/";
 EOF
     fi
@@ -188,8 +210,8 @@ google_perftools_profiles /tmp/tcmalloc;' /usr/local/nginx/conf/nginx.conf
 
     if [ "${Stack}" != "lamp" ]; then
         uname_r=$(uname -r)
-        if echo $uname_r|grep -Eq "^3\.(9|1[0-9])*|^[4-9]\.*"; then
-            echo "3.9+";
+        if echo $uname_r | grep -Eq "^3\.(9|1[0-9])*|^[4-9]\.*"; then
+            echo "3.9+"
             sed -i 's/listen 80 default_server;/listen 80 default_server reuseport;/g' /usr/local/nginx/conf/nginx.conf
         fi
     fi
