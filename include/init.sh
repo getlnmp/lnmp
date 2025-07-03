@@ -600,21 +600,22 @@ EOF
 }
 
 Install_Curl() {
-    if [[ ! -s /usr/local/curl/bin/curl || ! -s /usr/local/curl/lib/libcurl.so || ! -s /usr/local/curl/include/curl/curl.h ]]; then
-        Echo_Blue "[+] Installing ${Curl_Ver}"
-        cd ${cur_dir}/src
-        Download_Files ${Curl_DL} ${Curl_Ver}.tar.bz2
-        Tar_Cd ${Curl_Ver}.tar.bz2 ${Curl_Ver}
-        if [ -s /usr/local/openssl/bin/openssl ] || /usr/local/openssl/bin/openssl version | grep -Eqi 'OpenSSL 1.0.2'; then
-            ./configure --prefix=/usr/local/curl --enable-ares --without-nss --with-zlib --with-ssl=/usr/local/openssl
-        else
-            ./configure --prefix=/usr/local/curl --enable-ares --without-nss --with-zlib --with-ssl
-        fi
-        Make_Install
-        cd ${cur_dir}/src/
-        rm -rf ${cur_dir}/src/${Curl_Ver}
-        ldconfig
+    if [ -d /usr/local/curl ]; then
+        rm -rf /usr/local/curl
     fi
+    Echo_Blue "[+] Installing ${Curl_Ver}"
+    cd ${cur_dir}/src
+    Download_Files ${Curl_DL} ${Curl_Ver}.tar.bz2
+    Tar_Cd ${Curl_Ver}.tar.bz2 ${Curl_Ver}
+    if [ -s ${Curl_Openssl_Path}/bin/openssl ] ; then
+         ./configure --prefix=/usr/local/curl --enable-ares --without-nss --with-zlib --with-ssl=${Curl_Openssl_Path}
+    else
+        ./configure --prefix=/usr/local/curl --enable-ares --without-nss --with-zlib --with-ssl
+    fi
+    Make_Install
+    cd ${cur_dir}/src/
+    rm -rf ${cur_dir}/src/${Curl_Ver}
+    ldconfig
     Remove_Error_Libcurl
 }
 

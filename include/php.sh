@@ -19,7 +19,7 @@ Check_Curl() {
 }
 
 PHP_with_curl() {
-    if [[ "${DISTRO}" = "CentOS" && "${Is_ARM}" = "y" ]] || [[ "${UseOldOpenssl}" = "y" ]] || [[ "${UseNewOpenssl}" = "y" ]]; then
+    if [[ "${DISTRO}" = "CentOS" && "${Is_ARM}" = "y" ]] || [[ "${UseOldOpenssl}" = "y" ]] || [[ "${UseNewOpenssl}" = "y" ]] || [[ "${UseOpenssl3}" = "y" ]]; then
         Check_Curl
         with_curl='--with-curl=/usr/local/curl'
     else
@@ -49,13 +49,16 @@ PHP_with_openssl() {
     if [ "${UseOldOpenssl}" = "y" ]; then
         Install_Openssl
         with_openssl='--with-openssl=/usr/local/openssl'
+        Curl_Openssl_Path="/usr/local/openssl"
     elif [ "${UseNewOpenssl}" = "y" ]; then
         Install_Openssl_New
         with_openssl='--with-openssl=/usr/local/openssl1.1.1'
+        Curl_Openssl_Path="/usr/local/openssl1.1.1"
         PHP_Openssl_Export
     elif [ "${UseOpenssl3}" = "y" ]; then
         Install_Openssl3
         with_openssl='--with-openssl=/usr/local/openssl3'
+        Curl_Openssl_Path="/usr/local/openssl3"
         PHP_Openssl_Export
     else
         with_openssl='--with-openssl'
@@ -193,11 +196,17 @@ PHP_with_Intl() {
     if echo "${php_version}" | grep -Eqi '^(7\.4\.*|8\.0\.*)' || echo "${Php_Ver}" | grep -Eqi "(php-7\.4\.*|php-8\.0\.*)"; then
         Install_Icu671
         with_icu_dir='--with-icu-dir=/usr/local/icu671'
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/openssl-1.1.1/lib/pkgconfig"
+        export CPPFLAGS="$CPPFLAGS -I/usr/local/icu671/include"
+        export LDFLAGS="$LDFLAGS -L/usr/local/icu671/lib"
     fi
     if echo "${php_version}" | grep -Eqi '^8\.[1-4]\.*' || echo "${Php_Ver}" | grep -Eqi "php-8\.[1-4]\.*"; then
         if ! (pkg-config --modversion icu-i18n | grep -Eqi '^7[0-9]'); then
             Install_Icu721
             with_icu_dir='--with-icu-dir=/usr/local/icu721'
+            export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/openssl-1.1.1/lib/pkgconfig"
+            export CPPFLAGS="$CPPFLAGS -I/usr/local/icu671/include"
+            export LDFLAGS="$LDFLAGS -L/usr/local/icu671/lib"
         fi
     fi
     #    fi
