@@ -67,9 +67,9 @@ PHP_with_openssl() {
 
 PHP_Openssl_Export() {
     if echo "${php_version}" | grep -Eqi '^7\.4\.*|^8\.0\.*' || echo "${Php_Ver}" | grep -Eqi "php-7\.4\.*|php-8\.0\.*"; then
-        export PKG_CONFIG_PATH=/usr/local/openssl-1.1.1/lib/pkgconfig
-        export CPPFLAGS="-I/usr/local/openssl-1.1.1/include"
-        export LDFLAGS="-L/usr/local/openssl-1.1.1/lib"
+        export PKG_CONFIG_PATH=/usr/local/openssl1.1.1/lib/pkgconfig
+        export CPPFLAGS="-I/usr/local/openssl1.1.1/include"
+        export LDFLAGS="-L/usr/local/openssl1.1.1/lib"
     fi
     if echo "${php_version}" | grep -Eqi '^8\.[1-4]\.*' || echo "${Php_Ver}" | grep -Eqi "php-8\.[1-4]\.*"; then
         export PKG_CONFIG_PATH=/usr/local/openssl3/lib/pkgconfig
