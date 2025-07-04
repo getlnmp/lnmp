@@ -907,21 +907,40 @@ Install_Nghttp2() {
     fi
 }
 
+# Prior to PHP 7.4.0, libzip was bundled with PHP, and to compile the extension one needed to use the --enable-zip configure option.
+# Building against the bundled libzip was discouraged as of PHP 7.3.0, but still possible by using the --without-libzip configure option.
+# startin php 7.4 , use --with-zip. A --with-libzip=DIR configure option has been added to use a system libzip installation.
 Install_Libzip() {
-    if echo "${CentOS_Version}" | grep -Eqi "^7" || echo "${RHEL_Version}" | grep -Eqi "^7" || echo "${Aliyun_Version}" | grep -Eqi "^2" || echo "${Alibaba_Version}" | grep -Eqi "^2" || echo "${Oracle_Version}" | grep -Eqi "^7" || echo "${Anolis_Version}" | grep -Eqi "^7"; then
-        if [ ! -s /usr/local/lib/libzip.so ]; then
-            Echo_Blue "[+] Installing ${Libzip_Ver}"
-            cd ${cur_dir}/src
-            Download_Files ${Libzip_DL} ${Libzip_Ver}.tar.xz
-            Tar_Cd ${Libzip_Ver}.tar.xz ${Libzip_Ver}
-            ./configure
-            Make_Install
-            cd ${cur_dir}/src/
-            rm -rf ${cur_dir}/src/${Libzip_Ver}
-        fi
-        export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
-        ldconfig
+    if [ -d /usr/local/libzip ]; then
+        rm -rf /usr/local/libzip
     fi
+
+    Echo_Blue "[+] Installing ${Libzip_Ver}"
+    cd ${cur_dir}/src
+    Download_Files ${Libzip_DL} ${Libzip_Ver}.tar.xz
+    Tar_Cd ${Libzip_Ver}.tar.xz ${Libzip_Ver}
+    mkdir -p build && cd build
+
+    # Configure with CMake
+    cmake .. \
+      -DCMAKE_INSTALL_PREFIX=/usr/local/libzip \
+      -DOPENSSL_ROOT_DIR="${Curl_Openssl_Path}" \
+      -DOPENSSL_INCLUDE_DIR="${Curl_Openssl_Path}/include" \
+      -DOPENSSL_CRYPTO_LIBRARY="${Curl_Openssl_Path}/lib/libcrypto.so" \
+      -DOPENSSL_SSL_LIBRARY="${Curl_Openssl_Path}/lib/libssl.so"
+
+    # Build and install
+    make -j"$(nproc)"
+    make install
+
+    cd ${cur_dir}/src/
+    rm -rf ${cur_dir}/src/${Libzip_Ver}
+
+    # export path so that php can find it
+    export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/libzip/pkgconfig"
+    export CPPFLAGS="$CPPFLAGS -I/usr/local/libzip/include"
+    export LDFLAGS="$LDFLAGS -L/usr/local/libzip/lib"
+
 }
 
 CentOS_Lib_Opt() {
