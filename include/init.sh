@@ -615,7 +615,10 @@ Install_Curl() {
     Make_Install
     cd ${cur_dir}/src/
     rm -rf ${cur_dir}/src/${Curl_Ver}
-    ldconfig
+    ## Set environment variables for PHP to find custom curl
+    export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/curl/lib/pkgconfig"
+    export CPPFLAGS="$CPPFLAGS -I/usr/local/curl/include"
+    export LDFLAGS="$LDFLAGS -L/usr/local/curl/lib"
     Remove_Error_Libcurl
 }
 
@@ -693,8 +696,8 @@ Install_Icu522() {
             rm -rf /etc/ld.so.conf.d/icu.conf
         fi
 
-        echo "/usr/local/icu522/lib" >/etc/ld.so.conf.d/icu.conf
-        ldconfig
+#        echo "/usr/local/icu522/lib" >/etc/ld.so.conf.d/icu.conf
+#        ldconfig
     fi
 }
 
@@ -712,8 +715,8 @@ Install_Icu571() {
             rm -rf /etc/ld.so.conf.d/icu.conf
         fi
 
-        echo "/usr/local/icu571/lib" >/etc/ld.so.conf.d/icu.conf
-        ldconfig
+#        echo "/usr/local/icu571/lib" >/etc/ld.so.conf.d/icu.conf
+#        ldconfig
     fi
 }
 
@@ -731,8 +734,8 @@ Install_Icu603() {
             rm -rf /etc/ld.so.conf.d/icu.conf
         fi
 
-        echo "/usr/local/icu603/lib" >/etc/ld.so.conf.d/icu.conf
-        ldconfig
+#        echo "/usr/local/icu603/lib" >/etc/ld.so.conf.d/icu.conf
+#        ldconfig
     fi
 }
 
@@ -750,8 +753,8 @@ Install_Icu631() {
             rm -rf /etc/ld.so.conf.d/icu.conf
         fi
 
-        echo "/usr/local/icu631/lib" >/etc/ld.so.conf.d/icu.conf
-        ldconfig
+#        echo "/usr/local/icu631/lib" >/etc/ld.so.conf.d/icu.conf
+#        ldconfig
     fi
 }
 
@@ -769,8 +772,8 @@ Install_Icu671() {
             rm -rf /etc/ld.so.conf.d/icu.conf
         fi
 
-        echo "/usr/local/icu671/lib" >/etc/ld.so.conf.d/icu.conf
-        ldconfig
+#        echo "/usr/local/icu671/lib" >/etc/ld.so.conf.d/icu.conf
+#        ldconfig
     fi
 }
 
@@ -788,8 +791,8 @@ Install_Icu721() {
             rm -rf /etc/ld.so.conf.d/icu.conf
         fi
 
-        echo "/usr/local/icu721/lib" >/etc/ld.so.conf.d/icu.conf
-        ldconfig
+#        echo "/usr/local/icu721/lib" >/etc/ld.so.conf.d/icu.conf
+#        ldconfig
     fi
 }
 

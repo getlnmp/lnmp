@@ -20,7 +20,7 @@ Check_Curl() {
 
 PHP_with_curl() {
     if [[ "${DISTRO}" = "CentOS" && "${Is_ARM}" = "y" ]] || [[ "${UseOldOpenssl}" = "y" ]] || [[ "${UseNewOpenssl}" = "y" ]] || [[ "${UseOpenssl3}" = "y" ]]; then
-        Check_Curl
+        Install_Curl
         with_curl='--with-curl=/usr/local/curl'
     else
         with_curl='--with-curl'
@@ -67,11 +67,13 @@ PHP_with_openssl() {
 
 PHP_Openssl_Export() {
     if echo "${php_version}" | grep -Eqi '^7\.4\.*|^8\.0\.*' || echo "${Php_Ver}" | grep -Eqi "php-7\.4\.*|php-8\.0\.*"; then
+    # export path so that php and curl compiler can find it
         export PKG_CONFIG_PATH=/usr/local/openssl1.1.1/lib/pkgconfig
         export CPPFLAGS="-I/usr/local/openssl1.1.1/include"
         export LDFLAGS="-L/usr/local/openssl1.1.1/lib"
     fi
     if echo "${php_version}" | grep -Eqi '^8\.[1-4]\.*' || echo "${Php_Ver}" | grep -Eqi "php-8\.[1-4]\.*"; then
+    # export path so that php and curl compiler can find it
         export PKG_CONFIG_PATH=/usr/local/openssl3/lib/pkgconfig
         export CPPFLAGS="-I/usr/local/openssl3/include"
         export LDFLAGS="-L/usr/local/openssl3/lib"
@@ -184,29 +186,38 @@ PHP_with_Intl() {
     if echo "${php_version}" | grep -Eqi '^5\.[4-6]\.*' || echo "${Php_Ver}" | grep -Eqi "php-5\.[4-6]\.*"; then
         Install_Icu522
         with_icu_dir='--with-icu-dir=/usr/local/icu522'
+        php_with_custom_icu='y'
     fi
     if echo "${php_version}" | grep -Eqi '^7\.[0-1]\.*' || echo "${Php_Ver}" | grep -Eqi "php-7\.[0-1]\.*"; then
         Install_Icu571
         with_icu_dir='--with-icu-dir=/usr/local/icu571'
+        php_with_custom_icu='y'
     fi
     if echo "${php_version}" | grep -Eqi '^7\.[2-3]\.*' || echo "${Php_Ver}" | grep -Eqi "php-7\.[2-3]\.*"; then
         Install_Icu631
         with_icu_dir='--with-icu-dir=/usr/local/icu631'
+        php_with_custom_icu='y'
     fi
     if echo "${php_version}" | grep -Eqi '^(7\.4\.*|8\.0\.*)' || echo "${Php_Ver}" | grep -Eqi "(php-7\.4\.*|php-8\.0\.*)"; then
         Install_Icu671
-        with_icu_dir='--with-intl=/usr/local/icu671'
+        with_icu_dir='--with-ic-dir=/usr/local/icu671'
+        php_with_custom_icu='y'
+    # export path so that php compiler can find it
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/icu671/lib/pkgconfig"
         export CPPFLAGS="$CPPFLAGS -I/usr/local/icu671/include"
         export LDFLAGS="$LDFLAGS -L/usr/local/icu671/lib"
+        export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/icu671/lib"
     fi
     if echo "${php_version}" | grep -Eqi '^8\.[1-4]\.*' || echo "${Php_Ver}" | grep -Eqi "php-8\.[1-4]\.*"; then
         if ! (pkg-config --modversion icu-i18n | grep -Eqi '^7[0-9]'); then
             Install_Icu721
-            with_icu_dir='--with-intl=/usr/local/icu721'
+            with_icu_dir='--with-icu-dir=/usr/local/icu721'
+            php_with_custom_icu='y'
+        # export path so that php compiler can find it
             export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/icu721/lib/pkgconfig"
             export CPPFLAGS="$CPPFLAGS -I/usr/local/icu721/include"
             export LDFLAGS="$LDFLAGS -L/usr/local/icu721/lib"
+            export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/icu721/lib"
         fi
     fi
     #    fi
@@ -214,6 +225,35 @@ PHP_with_Intl() {
         export CXX="g++ -DTRUE=1 -DFALSE=0"
         export CC="gcc -DTRUE=1 -DFALSE=0"
     fi
+}
+
+PHP_With_Libxml2() {
+    if [ "${php_with_custom_icu}" = "y" ]; then
+        Libxml2_check=$(find /usr/lib /lib /usr/local/lib -name 'libxml2.so.2' 2>/dev/null | head -n1)
+        echo "Checking ICU linkage in: ${Libxml2_check}"
+        if ldd "$Libxml2_check" | grep -qi icu; then
+            echo "ICU detected in system libxml2!"
+            Echo_Blue "[+] Installing ${Libxml2_Ver}"
+            cd ${cur_dir}/src
+            rm -rf
+            Download_Files ${Libxml2_DL} ${Libxml2_Ver}.tar.xz
+            Tar_Cd ${Libxml2_Ver}.tar.xz ${Libxml2_Ver}
+            ./configure --prefix=/usr/local/libxml2 --without-python --without-icu
+            Make_Install
+            cd ${cur_dir}/src/
+            rm -rf ${cur_dir}/src/${Libxml2_Ver}
+            with_libxml_dir="--with-libxml=/usr/local/libxml2"
+         # export path so that php compiler can find it
+            export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/libxml2/lib/pkgconfig"
+            export CPPFLAGS="$CPPFLAGS -I/usr/local/libxml2/include"
+            export LDFLAGS="$LDFLAGS -L/usr/local/libxml2/lib"
+        else
+            echo "System libxml2 is not linked to ICU. No build needed"
+        fi
+    else
+        echo "PHP isn't going to compile with custom ICU. No build needed"
+    fi
+    
 }
 
 Check_PHP_Option() {
@@ -226,7 +266,8 @@ Check_PHP_Option() {
     PHP_with_Sodium
     PHP_with_Imap
     PHP_with_Intl
-    PHP_Buildin_Option="${with_exif} ${with_ldap} ${with_bz2} ${with_sodium} ${with_imap} ${with_icu_dir}"
+    PHP_With_Libxml2
+    PHP_Buildin_Option="${with_exif} ${with_ldap} ${with_bz2} ${with_sodium} ${with_imap} ${with_icu_dir} ${with_libxml_dir}"
 }
 
 Ln_PHP_Bin() {
