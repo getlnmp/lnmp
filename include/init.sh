@@ -692,9 +692,9 @@ Install_Icu522() {
         Make_Install
         cd ${cur_dir}/src/
         rm -rf ${cur_dir}/src/icu
-        if [ -s /etc/ld.so.conf.d/icu.conf ]; then
-            rm -rf /etc/ld.so.conf.d/icu.conf
-        fi
+#        if [ -s /etc/ld.so.conf.d/icu.conf ]; then
+#            rm -rf /etc/ld.so.conf.d/icu.conf
+#        fi
 
 #        echo "/usr/local/icu522/lib" >/etc/ld.so.conf.d/icu.conf
 #        ldconfig
@@ -711,9 +711,9 @@ Install_Icu571() {
         Make_Install
         cd ${cur_dir}/src/
         rm -rf ${cur_dir}/src/icu
-        if [ -s /etc/ld.so.conf.d/icu.conf ]; then
-            rm -rf /etc/ld.so.conf.d/icu.conf
-        fi
+#        if [ -s /etc/ld.so.conf.d/icu.conf ]; then
+#            rm -rf /etc/ld.so.conf.d/icu.conf
+#        fi
 
 #        echo "/usr/local/icu571/lib" >/etc/ld.so.conf.d/icu.conf
 #        ldconfig
@@ -730,9 +730,9 @@ Install_Icu603() {
         Make_Install
         cd ${cur_dir}/src/
         rm -rf ${cur_dir}/src/icu
-        if [ -s /etc/ld.so.conf.d/icu.conf ]; then
-            rm -rf /etc/ld.so.conf.d/icu.conf
-        fi
+#        if [ -s /etc/ld.so.conf.d/icu.conf ]; then
+#            rm -rf /etc/ld.so.conf.d/icu.conf
+#        fi
 
 #        echo "/usr/local/icu603/lib" >/etc/ld.so.conf.d/icu.conf
 #        ldconfig
@@ -749,9 +749,9 @@ Install_Icu631() {
         Make_Install
         cd ${cur_dir}/src/
         rm -rf ${cur_dir}/src/icu
-        if [ -s /etc/ld.so.conf.d/icu.conf ]; then
-            rm -rf /etc/ld.so.conf.d/icu.conf
-        fi
+#        if [ -s /etc/ld.so.conf.d/icu.conf ]; then
+#            rm -rf /etc/ld.so.conf.d/icu.conf
+#        fi
 
 #        echo "/usr/local/icu631/lib" >/etc/ld.so.conf.d/icu.conf
 #        ldconfig
@@ -768,9 +768,9 @@ Install_Icu671() {
         Make_Install
         cd ${cur_dir}/src/
         rm -rf ${cur_dir}/src/icu
-        if [ -s /etc/ld.so.conf.d/icu.conf ]; then
-            rm -rf /etc/ld.so.conf.d/icu.conf
-        fi
+#        if [ -s /etc/ld.so.conf.d/icu.conf ]; then
+#            rm -rf /etc/ld.so.conf.d/icu.conf
+#        fi
 
 #        echo "/usr/local/icu671/lib" >/etc/ld.so.conf.d/icu.conf
 #        ldconfig
@@ -787,9 +787,9 @@ Install_Icu721() {
         Make_Install
         cd ${cur_dir}/src/
         rm -rf ${cur_dir}/src/icu
-        if [ -s /etc/ld.so.conf.d/icu.conf ]; then
-            rm -rf /etc/ld.so.conf.d/icu.conf
-        fi
+#        if [ -s /etc/ld.so.conf.d/icu.conf ]; then
+#            rm -rf /etc/ld.so.conf.d/icu.conf
+#        fi
 
 #        echo "/usr/local/icu721/lib" >/etc/ld.so.conf.d/icu.conf
 #        ldconfig
@@ -927,7 +927,8 @@ Install_Libzip() {
       -DOPENSSL_ROOT_DIR="${Curl_Openssl_Path}" \
       -DOPENSSL_INCLUDE_DIR="${Curl_Openssl_Path}/include" \
       -DOPENSSL_CRYPTO_LIBRARY="${Curl_Openssl_Path}/lib/libcrypto.so" \
-      -DOPENSSL_SSL_LIBRARY="${Curl_Openssl_Path}/lib/libssl.so"
+      -DOPENSSL_SSL_LIBRARY="${Curl_Openssl_Path}/lib/libssl.so" \
+      -DENABLE_BZIP2=ON
 
     # Build and install
     make -j"$(nproc)"
@@ -939,7 +940,7 @@ Install_Libzip() {
     # export path so that php can find it
     export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/libzip/pkgconfig"
     export CPPFLAGS="$CPPFLAGS -I/usr/local/libzip/include"
-    export LDFLAGS="$LDFLAGS -L/usr/local/libzip/lib"
+    export LDFLAGS="$LDFLAGS -L/usr/local/libzip/lib -Wl,-rpath=/usr/local/libzip/lib"
 
 }
 

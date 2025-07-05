@@ -30,7 +30,7 @@ PHP_with_curl() {
 PHP_with_Libzip() {
     if [ "${BuildOpenssl}" = "y" ]; then
         Install_Libzip
-        with_libzip="--with-libzip=/usr/local/libzip"
+        with_libzip="--with-zip=/usr/local/libzip"
     else
         with_libzip='--with-zip'
     fi
@@ -82,15 +82,15 @@ PHP_with_openssl() {
 PHP_Openssl_Export() {
     if echo "${php_version}" | grep -Eqi '^7\.4\.*|^8\.0\.*' || echo "${Php_Ver}" | grep -Eqi "php-7\.4\.*|php-8\.0\.*"; then
     # export path so that php and curl compiler can find it
-        export PKG_CONFIG_PATH=/usr/local/openssl1.1.1/lib/pkgconfig
-        export CPPFLAGS="-I/usr/local/openssl1.1.1/include"
-        export LDFLAGS="-L/usr/local/openssl1.1.1/lib"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/openssl1.1.1/lib/pkgconfig"
+        export CPPFLAGS="$CPPFLAGS -I/usr/local/openssl1.1.1/include"
+        export LDFLAGS="$LDFLAGS -L/usr/local/openssl1.1.1/lib -Wl,-rpath=/usr/local/openssl1.1.1/lib"
     fi
     if echo "${php_version}" | grep -Eqi '^8\.[1-4]\.*' || echo "${Php_Ver}" | grep -Eqi "php-8\.[1-4]\.*"; then
     # export path so that php and curl compiler can find it
-        export PKG_CONFIG_PATH=/usr/local/openssl3/lib/pkgconfig
-        export CPPFLAGS="-I/usr/local/openssl3/include"
-        export LDFLAGS="-L/usr/local/openssl3/lib"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/openssl3/lib/pkgconfig"
+        export CPPFLAGS="$CPPFLAGS -I/usr/local/openssl3/include"
+        export LDFLAGS="$LDFLAGS -L/usr/local/openssl3/lib -Wl,-rpath=/usr/local/openssl3/lib"
     fi
 }
 
@@ -219,8 +219,8 @@ PHP_with_Intl() {
     # export path so that php compiler can find it
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/icu671/lib/pkgconfig"
         export CPPFLAGS="$CPPFLAGS -I/usr/local/icu671/include"
-        export LDFLAGS="$LDFLAGS -L/usr/local/icu671/lib"
-        export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/icu671/lib"
+        export LDFLAGS="$LDFLAGS -L/usr/local/icu671/lib -Wl,-rpath=/usr/local/icu671/lib"
+
     fi
     if echo "${php_version}" | grep -Eqi '^8\.[1-4]\.*' || echo "${Php_Ver}" | grep -Eqi "php-8\.[1-4]\.*"; then
         if ! (pkg-config --modversion icu-i18n | grep -Eqi '^7[0-9]'); then
@@ -230,8 +230,8 @@ PHP_with_Intl() {
         # export path so that php compiler can find it
             export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/icu721/lib/pkgconfig"
             export CPPFLAGS="$CPPFLAGS -I/usr/local/icu721/include"
-            export LDFLAGS="$LDFLAGS -L/usr/local/icu721/lib"
-            export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/icu721/lib"
+            export LDFLAGS="$LDFLAGS -L/usr/local/icu721/lib -Wl,-rpath=/usr/local/icu721/lib"
+
         fi
     fi
     #    fi
@@ -249,7 +249,6 @@ PHP_With_Libxml2() {
             echo "ICU detected in system libxml2!"
             Echo_Blue "[+] Installing ${Libxml2_Ver}"
             cd ${cur_dir}/src
-            rm -rf
             Download_Files ${Libxml2_DL} ${Libxml2_Ver}.tar.xz
             Tar_Cd ${Libxml2_Ver}.tar.xz ${Libxml2_Ver}
             ./configure --prefix=/usr/local/libxml2 --without-python --without-icu
@@ -265,7 +264,7 @@ PHP_With_Libxml2() {
             echo "System libxml2 is not linked to ICU. No build needed"
         fi
     else
-        echo "PHP isn't going to compile with custom ICU. No build needed"
+        echo "PHP is using system ICU. No build needed"
     fi
     
 }
