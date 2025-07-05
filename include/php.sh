@@ -214,7 +214,7 @@ PHP_with_Intl() {
     fi
     if echo "${php_version}" | grep -Eqi '^(7\.4\.*|8\.0\.*)' || echo "${Php_Ver}" | grep -Eqi "(php-7\.4\.*|php-8\.0\.*)"; then
         Install_Icu671
-        with_icu_dir='--with-ic-dir=/usr/local/icu671'
+        with_icu_dir='--with-icu-dir=/usr/local/icu671'
         php_with_custom_icu='y'
     # export path so that php compiler can find it
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/icu671/lib/pkgconfig"
