@@ -668,13 +668,16 @@ Install_TCMalloc() {
 
 Install_Icu4c() {
     if command -v icu-config >/dev/null 2>&1 && icu-config --version | grep -Eq "^3."; then
+        if [ ! -s /usr/local/icu/bin/icu-config ]; then
+            rm -rf /usr/local/icu
+        fi
         Echo_Blue "[+] Installing icu4c-58_3..."
         cd ${cur_dir}/src
         Download_Files ${Libicu4c_DL} icu4c-58_3-src.tgz
         Tar_Cd icu4c-58_3-src.tgz icu/source
-        ./configure --prefix=/usr
+        ./configure --prefix=/usr/local/icu
         if [ ! -s /usr/include/xlocale.h ]; then
-            ln -s /usr/include/locale.h /usr/include/xlocale.h
+            ln -s /usr/local/icu/include/locale.h /usr/local/icu/include/xlocale.h
         fi
         Make_Install
         cd ${cur_dir}/src/
@@ -683,12 +686,14 @@ Install_Icu4c() {
 }
 
 Install_Icu522() {
-    if [ ! -s /usr/local/icu522/bin/icu-config ]; then
+    if [ ! -s /usr/local/icu/bin/icu-config ]; then
+        rm -rf /usr/local/icu
+    fi
         Echo_Blue "[+] Installing icu4c-52_2..."
         cd ${cur_dir}/src
         Download_Files ${Libicu4c_52_2_DL} icu4c-52_2-src.tgz
         Tar_Cd icu4c-52_2-src.tgz icu/source
-        ./configure --prefix=/usr/local/icu522
+        ./configure --prefix=/usr/local/icu
         Make_Install
         cd ${cur_dir}/src/
         rm -rf ${cur_dir}/src/icu
@@ -698,16 +703,17 @@ Install_Icu522() {
 
 #        echo "/usr/local/icu522/lib" >/etc/ld.so.conf.d/icu.conf
 #        ldconfig
-    fi
 }
 
 Install_Icu571() {
-    if [ ! -s /usr/local/icu571/bin/icu-config ]; then
+    if [ ! -s /usr/local/icu/bin/icu-config ]; then
+        rm -rf /usr/local/icu
+    fi
         Echo_Blue "[+] Installing icu4c-57_1..."
         cd ${cur_dir}/src
         Download_Files ${Libicu4c_57_1_DL} icu4c-57_1-src.tgz
         Tar_Cd icu4c-57_1-src.tgz icu/source
-        ./configure --prefix=/usr/local/icu571
+        ./configure --prefix=/usr/local/icu
         Make_Install
         cd ${cur_dir}/src/
         rm -rf ${cur_dir}/src/icu
@@ -717,16 +723,17 @@ Install_Icu571() {
 
 #        echo "/usr/local/icu571/lib" >/etc/ld.so.conf.d/icu.conf
 #        ldconfig
-    fi
 }
 
 Install_Icu603() {
-    if [ ! -s /usr/local/icu603/bin/icu-config ]; then
+    if [ ! -s /usr/local/icu/bin/icu-config ]; then
+        rm -rf /usr/local/icu
+    fi
         Echo_Blue "[+] Installing icu4c-60_3..."
         cd ${cur_dir}/src
         Download_Files ${Libicu4c_60_3_DL} icu4c-60_3-src.tgz
         Tar_Cd icu4c-60_3-src.tgz icu/source
-        ./configure --prefix=/usr/local/icu603
+        ./configure --prefix=/usr/local/icu
         Make_Install
         cd ${cur_dir}/src/
         rm -rf ${cur_dir}/src/icu
@@ -736,16 +743,17 @@ Install_Icu603() {
 
 #        echo "/usr/local/icu603/lib" >/etc/ld.so.conf.d/icu.conf
 #        ldconfig
-    fi
 }
 
 Install_Icu631() {
-    if [ ! -s /usr/local/icu631/bin/icu-config ]; then
+    if [ ! -s /usr/local/icu/bin/icu-config ]; then
+        rm -rf /usr/local/icu
+    fi
         Echo_Blue "[+] Installing icu4c-63_1..."
         cd ${cur_dir}/src
         Download_Files ${Libicu4c_63_1_DL} icu4c-63_1-src.tgz
         Tar_Cd icu4c-63_1-src.tgz icu/source
-        ./configure --prefix=/usr/local/icu631
+        ./configure --prefix=/usr/local/icu
         Make_Install
         cd ${cur_dir}/src/
         rm -rf ${cur_dir}/src/icu
@@ -755,16 +763,17 @@ Install_Icu631() {
 
 #        echo "/usr/local/icu631/lib" >/etc/ld.so.conf.d/icu.conf
 #        ldconfig
-    fi
 }
 
 Install_Icu671() {
-    if [ ! -s /usr/local/icu671/bin/icu-config ]; then
+    if [ ! -s /usr/local/icu/bin/icu-config ]; then
+        rm -rf /usr/local/icu
+    fi
         Echo_Blue "[+] Installing icu4c-67_1..."
         cd ${cur_dir}/src
         Download_Files ${Libicu4c_67_1_DL} icu4c-67_1-src.tgz
         Tar_Cd icu4c-67_1-src.tgz icu/source
-        ./configure --prefix=/usr/local/icu671
+        ./configure --prefix=/usr/local/icu
         Make_Install
         cd ${cur_dir}/src/
         rm -rf ${cur_dir}/src/icu
@@ -774,16 +783,17 @@ Install_Icu671() {
 
 #        echo "/usr/local/icu671/lib" >/etc/ld.so.conf.d/icu.conf
 #        ldconfig
-    fi
 }
 
 Install_Icu721() {
-    if [ ! -s /usr/local/icu721/bin/icu-config ]; then
+    if [ ! -s /usr/local/icu/bin/icu-config ]; then
+        rm -rf /usr/local/icu
+    fi
         Echo_Blue "[+] Installing icu4c-72_1..."
         cd ${cur_dir}/src
         Download_Files ${Libicu4c_72_1_DL} icu4c-72_1-src.tgz
         Tar_Cd icu4c-72_1-src.tgz icu/source
-        ./configure --prefix=/usr/local/icu721
+        ./configure --prefix=/usr/local/icu
         Make_Install
         cd ${cur_dir}/src/
         rm -rf ${cur_dir}/src/icu
@@ -793,7 +803,6 @@ Install_Icu721() {
 
 #        echo "/usr/local/icu721/lib" >/etc/ld.so.conf.d/icu.conf
 #        ldconfig
-    fi
 }
 
 Download_Boost() {
@@ -846,7 +855,7 @@ Install_Openssl() {
         Download_Files ${Openssl_DL} ${Openssl_Ver}.tar.gz
         [[ -d "${Openssl_Ver}" ]] && rm -rf ${Openssl_Ver}
         Tar_Cd ${Openssl_Ver}.tar.gz ${Openssl_Ver}
-        ./config -fPIC --prefix=/usr/local/openssl --openssldir=/usr/local/openssl
+        ./config -fPIC -Wl,-rpath=/usr/local/openssl/lib --prefix=/usr/local/openssl --openssldir=/usr/local/openssl
         make depend
         Make_Install
         cd ${cur_dir}/src/
@@ -862,7 +871,7 @@ Install_Openssl_New() {
         Download_Files ${Openssl_New_DL} ${Openssl_New_Ver}.tar.gz
         [[ -d "${Openssl_New_Ver}" ]] && rm -rf ${Openssl_New_Ver}
         Tar_Cd ${Openssl_New_Ver}.tar.gz ${Openssl_New_Ver}
-        ./config enable-weak-ssl-ciphers -fPIC --prefix=/usr/local/openssl1.1.1 --openssldir=/usr/local/openssl1.1.1
+        ./config enable-weak-ssl-ciphers -fPIC -Wl,-rpath=/usr/local/openssl1.1.1/lib --prefix=/usr/local/openssl1.1.1 --openssldir=/usr/local/openssl1.1.1
         make depend
         Make_Install
         #            ln -sf /usr/local/openssl1.1.1/lib/libcrypto.so.1.1 /usr/lib/
@@ -885,7 +894,7 @@ Install_Openssl3() {
         Download_Files ${Openssl_3_DL} ${Openssl_3_Ver}.tar.gz
         [[ -d "${Openssl_3_Ver}" ]] && rm -rf ${Openssl_3_Ver}
         Tar_Cd ${Openssl_3_Ver}.tar.gz ${Openssl_3_Ver}
-        ./config enable-weak-ssl-ciphers -fPIC --prefix=/usr/local/openssl3 --openssldir=/usr/local/openssl3
+        ./config enable-weak-ssl-ciphers -fPIC -Wl,-rpath=/usr/local/openssl3/lib --prefix=/usr/local/openssl3 --openssldir=/usr/local/openssl3
         make depend
         Make_Install
         cd ${cur_dir}/src/

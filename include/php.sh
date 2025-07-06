@@ -199,38 +199,38 @@ PHP_with_Intl() {
     #    if echo "${Ubuntu_Version}" | grep -Eqi "^19|2[0-7]\." || echo "${Debian_Version}" | grep -Eqi "^1[0-9]" || echo "${Raspbian_Version}" | grep -Eqi "^1[0-9]" || echo "${Deepin_Version}" | grep -Eqi "^2[0-9]" || echo "${UOS_Version}" | grep -Eqi "^2[0-9]" || echo "${Amazon_Version}" | grep -Eqi "^202[3-9]" || echo "${Kali_Version}" | grep -Eqi "^202[2-9]" || echo "${Fedora_Version}" | grep -Eqi "^3[7-9]|4[0-9]" || echo "${openEuler_Version}" | grep -Eqi "^2[2-9]" || echo "${Mint_Version}" | grep -Eqi "^2[0-9]" || echo "${Kylin_Version}" | grep -Eq "^v1[0-9]"; then
     if echo "${php_version}" | grep -Eqi '^5\.[4-6]\.*' || echo "${Php_Ver}" | grep -Eqi "php-5\.[4-6]\.*"; then
         Install_Icu522
-        with_icu_dir='--with-icu-dir=/usr/local/icu522'
+        with_icu_dir='--with-icu-dir=/usr/local/icu'
         php_with_custom_icu='y'
     fi
     if echo "${php_version}" | grep -Eqi '^7\.[0-1]\.*' || echo "${Php_Ver}" | grep -Eqi "php-7\.[0-1]\.*"; then
         Install_Icu571
-        with_icu_dir='--with-icu-dir=/usr/local/icu571'
+        with_icu_dir='--with-icu-dir=/usr/local/icu'
         php_with_custom_icu='y'
     fi
     if echo "${php_version}" | grep -Eqi '^7\.[2-3]\.*' || echo "${Php_Ver}" | grep -Eqi "php-7\.[2-3]\.*"; then
         Install_Icu631
-        with_icu_dir='--with-icu-dir=/usr/local/icu631'
+        with_icu_dir='--with-icu-dir=/usr/local/icu'
         php_with_custom_icu='y'
     fi
     if echo "${php_version}" | grep -Eqi '^(7\.4\.*|8\.0\.*)' || echo "${Php_Ver}" | grep -Eqi "(php-7\.4\.*|php-8\.0\.*)"; then
         Install_Icu671
-        with_icu_dir='--with-icu-dir=/usr/local/icu671'
+        with_icu_dir='--with-icu-dir=/usr/local/icu'
         php_with_custom_icu='y'
     # export path so that php compiler can find it
-        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/icu671/lib/pkgconfig"
-        export CPPFLAGS="$CPPFLAGS -I/usr/local/icu671/include"
-        export LDFLAGS="$LDFLAGS -L/usr/local/icu671/lib -Wl,-rpath=/usr/local/icu671/lib"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/icu/lib/pkgconfig"
+        export CPPFLAGS="$CPPFLAGS -I/usr/local/icu/include"
+        export LDFLAGS="$LDFLAGS -L/usr/local/icu/lib -Wl,-rpath=/usr/local/icu/lib"
 
     fi
     if echo "${php_version}" | grep -Eqi '^8\.[1-4]\.*' || echo "${Php_Ver}" | grep -Eqi "php-8\.[1-4]\.*"; then
         if ! (pkg-config --modversion icu-i18n | grep -Eqi '^7[0-9]'); then
             Install_Icu721
-            with_icu_dir='--with-icu-dir=/usr/local/icu721'
+            with_icu_dir='--with-icu-dir=/usr/local/icu'
             php_with_custom_icu='y'
         # export path so that php compiler can find it
-            export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/icu721/lib/pkgconfig"
-            export CPPFLAGS="$CPPFLAGS -I/usr/local/icu721/include"
-            export LDFLAGS="$LDFLAGS -L/usr/local/icu721/lib -Wl,-rpath=/usr/local/icu721/lib"
+            export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/icu/lib/pkgconfig"
+            export CPPFLAGS="$CPPFLAGS -I/usr/local/icu/include"
+            export LDFLAGS="$LDFLAGS -L/usr/local/icu/lib -Wl,-rpath=/usr/local/icu/lib"
 
         fi
     fi
