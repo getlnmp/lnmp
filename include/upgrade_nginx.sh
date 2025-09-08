@@ -21,7 +21,8 @@ Upgrade_Nginx()
         exit 1
     fi
     echo "+---------------------------------------------------------+"
-    echo "|    You will upgrade nginx version to ${Nginx_Version}"
+    echo "|        You will upgrade nginx version to ${Nginx_Version}         |"
+    echo "|   YOU MAY NEED TO MODIFY YOUR NGINX.CONF AFTER UPGRADE  |"  
     echo "+---------------------------------------------------------+"
 
     Press_Start
@@ -45,9 +46,10 @@ Upgrade_Nginx()
     echo "============================check files=================================="
 
     Install_Nginx_Openssl
-    Install_Nginx_Lua
     Install_Nginx_Pcre
+    Install_Nginx_Lua
     Install_Ngx_FancyIndex
+    rm -rf nginx-${Nginx_Version}
     Tar_Cd nginx-${Nginx_Version}.tar.gz nginx-${Nginx_Version}
     Get_Dist_Version
     if [[ "${DISTRO}" = "Fedora" && ${Fedora_Version} -ge 28 ]]; then
@@ -63,7 +65,7 @@ Upgrade_Nginx()
     else
         ./configure --user=www --group=www --prefix=/usr/local/nginx --with-http_stub_status_module --with-http_ssl_module --with-http_v2_module --with-http_v3_module --with-http_gzip_static_module --with-http_sub_module --with-stream --with-stream_ssl_module --with-stream_ssl_preread_module --with-http_realip_module ${Nginx_With_Openssl} ${Nginx_With_Pcre} ${Nginx_Module_Lua} ${NginxMAOpt} ${Ngx_FancyIndex} ${Nginx_Modules_Options}
     fi
-    make -j `grep 'processor' /proc/cpuinfo | wc -l`
+    make -j"$(nproc)"
     if [ $? -ne 0 ]; then
         make
     fi
@@ -75,7 +77,6 @@ Upgrade_Nginx()
     echo "upgrade..."
     make upgrade
 
-    cd ${cur_dir} && rm -rf ${cur_dir}/src/nginx-${Nginx_Version}
     if [ "${Enable_Nginx_Lua}" = 'y' ]; then
         if ! grep -q 'lua_package_path "/usr/local/nginx/lib/lua/?.lua";' /usr/local/nginx/conf/nginx.conf; then
             sed -i "/server_tokens off;/i\        lua_package_path \"/usr/local/nginx/lib/lua/?.lua\";\n" /usr/local/nginx/conf/nginx.conf
@@ -93,4 +94,18 @@ Upgrade_Nginx()
     else
         Echo_Red "Error: Nginx upgrade failed."
     fi
+
+    ## start cleaning
+    cd ${cur_dir}/src && rm -rf ${cur_dir}/src/${Nginx_Ver}
+    [[ -d "${Openssl_3_Ver}" ]] && rm -rf ${Openssl_3_Ver}
+    [[ -d "${Openssl_New_Ver}" ]] && rm -rf ${Openssl_New_Ver}
+    [[ -d "${Openssl_Ver}" ]] && rm -rf ${Openssl_Ver}
+    if [ "${Enable_Nginx_Lua}" = 'y' ]; then
+        rm -rf ${cur_dir}/src/luajit
+        rm -rf ${LuaNginxModule}
+        rm -rf ${NgxDevelKit}
+        rm -rf ${LuaRestyCore}
+        rm -rf ${LuaRestyLrucache}
+    fi
+    [[ -d "${NgxFancyIndex_Ver}" ]] && rm -rf ${NgxFancyIndex_Ver}
 }

@@ -478,6 +478,20 @@ Check_Download() {
             MariaDB_FileName="${Mariadb_Ver}"
         fi
         Download_Files https://downloads.mariadb.org/rest-api/mariadb/${Mariadb_Version}/${MariaDB_FileName}.tar.gz ${MariaDB_FileName}.tar.gz
+        if [ $? -ne 0 ]; then
+            if [ "${Bin}" = "y" ]; then
+                Download_Files https://archive.mariadb.org/mariadb-${Mariadb_Version}/bintar-linux-systemd-x86_64/${MariaDB_FileName}.tar.gz ${MariaDB_FileName}.tar.gz
+            else
+                Download_Files https://archive.mariadb.org/mariadb-${Mariadb_Version}/source/${MariaDB_FileName}.tar.gz ${MariaDB_FileName}.tar.gz
+            fi
+            if [ -s ${MariaDB_FileName}.tar.gz ]; then
+                echo "Download ${MariaDB_FileName}.tar.gz successfully!"
+            else
+                Echo_Red "Error! Unable to download MariaDB, please download it to src directory manually."
+                sleep 5
+                exit 1
+            fi
+        fi
     fi
     Download_Files ${Php_DL} ${Php_Ver}.tar.bz2
     if [ $? -ne 0 ]; then
@@ -616,9 +630,11 @@ Install_Curl() {
     cd ${cur_dir}/src/
     rm -rf ${cur_dir}/src/${Curl_Ver}
     ## Set environment variables for PHP to find custom curl
-    export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/curl/lib/pkgconfig"
-    export CPPFLAGS="$CPPFLAGS -I/usr/local/curl/include"
-    export LDFLAGS="$LDFLAGS -L/usr/local/curl/lib"
+    if [ "${PHP_Use_PKG}" = "y" ]; then
+        PKG_CONFIG_PATH_TEMP="$PKG_CONFIG_PATH_TEMP:/usr/local/curl/lib/pkgconfig"
+        CPPFLAGS_TEMP="$CPPFLAGS_TEMP -I/usr/local/curl/include"
+        LDFLAGS_TEMP="$LDFLAGS_TEMP -L/usr/local/curl/lib"
+    fi
     Remove_Error_Libcurl
 }
 
@@ -668,141 +684,181 @@ Install_TCMalloc() {
 
 Install_Icu4c() {
     if command -v icu-config >/dev/null 2>&1 && icu-config --version | grep -Eq "^3."; then
-        if [ ! -s /usr/local/icu/bin/icu-config ]; then
-            rm -rf /usr/local/icu
+        if [ ! -s /usr/local/icu583/bin/icu-config ]; then
+            rm -rf /usr/local/icu583
         fi
         Echo_Blue "[+] Installing icu4c-58_3..."
         cd ${cur_dir}/src
         Download_Files ${Libicu4c_DL} icu4c-58_3-src.tgz
         Tar_Cd icu4c-58_3-src.tgz icu/source
-        ./configure --prefix=/usr/local/icu
+        ./configure --prefix=/usr/local/icu583
         if [ ! -s /usr/include/xlocale.h ]; then
-            ln -s /usr/local/icu/include/locale.h /usr/local/icu/include/xlocale.h
+            ln -s /usr/include/locale.h /usr/include/xlocale.h
         fi
         Make_Install
         cd ${cur_dir}/src/
         rm -rf ${cur_dir}/src/icu
+
+        mkdir -p /usr/local/icu583/runtime
+        ln -sf /usr/local/icu583/lib/*.so.*.* /usr/local/icu583/runtime/
+
+        if [ -s /etc/ld.so.conf.d/icu583.conf ]; then
+            rm -rf /etc/ld.so.conf.d/icu583.conf
+        fi
+
+        echo "/usr/local/icu583/runtime" >/etc/ld.so.conf.d/icu583.conf
+        ldconfig
     fi
 }
 
 Install_Icu522() {
-    if [ ! -s /usr/local/icu/bin/icu-config ]; then
-        rm -rf /usr/local/icu
+    if [ -s /usr/local/icu522/bin/icu-config ]; then
+        rm -rf /usr/local/icu522
     fi
         Echo_Blue "[+] Installing icu4c-52_2..."
         cd ${cur_dir}/src
         Download_Files ${Libicu4c_52_2_DL} icu4c-52_2-src.tgz
         Tar_Cd icu4c-52_2-src.tgz icu/source
-        ./configure --prefix=/usr/local/icu
+        ./configure --prefix=/usr/local/icu522
+        if [ ! -s /usr/include/xlocale.h ]; then
+            ln -s /usr/include/locale.h /usr/include/xlocale.h
+        fi
         Make_Install
         cd ${cur_dir}/src/
         rm -rf ${cur_dir}/src/icu
-#        if [ -s /etc/ld.so.conf.d/icu.conf ]; then
-#            rm -rf /etc/ld.so.conf.d/icu.conf
-#        fi
 
-#        echo "/usr/local/icu522/lib" >/etc/ld.so.conf.d/icu.conf
-#        ldconfig
+        mkdir -p /usr/local/icu522/runtime
+        ln -sf /usr/local/icu522/lib/*.so.*.* /usr/local/icu522/runtime/
+
+        if [ -s /etc/ld.so.conf.d/icu522.conf ]; then
+            rm -rf /etc/ld.so.conf.d/icu522.conf
+        fi
+
+        echo "/usr/local/icu522/runtime" >/etc/ld.so.conf.d/icu522.conf
+        ldconfig
 }
 
-Install_Icu571() {
-    if [ ! -s /usr/local/icu/bin/icu-config ]; then
-        rm -rf /usr/local/icu
+Install_Icu582() {
+    if [ -s /usr/local/icu582/bin/icu-config ]; then
+        rm -rf /usr/local/icu582
     fi
-        Echo_Blue "[+] Installing icu4c-57_1..."
+        Echo_Blue "[+] Installing icu4c-58_2..."
         cd ${cur_dir}/src
-        Download_Files ${Libicu4c_57_1_DL} icu4c-57_1-src.tgz
-        Tar_Cd icu4c-57_1-src.tgz icu/source
-        ./configure --prefix=/usr/local/icu
+        Download_Files ${Libicu4c_58_2_DL} icu4c-58_2-src.tgz
+        Tar_Cd icu4c-58_2-src.tgz icu/source
+        ./configure --prefix=/usr/local/icu582
+        if [ ! -s /usr/include/xlocale.h ]; then
+            ln -s /usr/include/locale.h /usr/include/xlocale.h
+        fi
         Make_Install
         cd ${cur_dir}/src/
         rm -rf ${cur_dir}/src/icu
-#        if [ -s /etc/ld.so.conf.d/icu.conf ]; then
-#            rm -rf /etc/ld.so.conf.d/icu.conf
-#        fi
 
-#        echo "/usr/local/icu571/lib" >/etc/ld.so.conf.d/icu.conf
-#        ldconfig
+        mkdir -p /usr/local/icu582/runtime
+        ln -sf /usr/local/icu582/lib/*.so.*.* /usr/local/icu582/runtime/
+
+        if [ -s /etc/ld.so.conf.d/icu582.conf ]; then
+            rm -rf /etc/ld.so.conf.d/icu582.conf
+        fi
+
+        echo "/usr/local/icu582/runtime" >/etc/ld.so.conf.d/icu582.conf
+        ldconfig
 }
 
 Install_Icu603() {
-    if [ ! -s /usr/local/icu/bin/icu-config ]; then
-        rm -rf /usr/local/icu
+    if [ -s /usr/local/icu603/bin/icu-config ]; then
+        rm -rf /usr/local/icu603
     fi
         Echo_Blue "[+] Installing icu4c-60_3..."
         cd ${cur_dir}/src
         Download_Files ${Libicu4c_60_3_DL} icu4c-60_3-src.tgz
         Tar_Cd icu4c-60_3-src.tgz icu/source
-        ./configure --prefix=/usr/local/icu
+        ./configure --prefix=/usr/local/icu603
         Make_Install
         cd ${cur_dir}/src/
         rm -rf ${cur_dir}/src/icu
-#        if [ -s /etc/ld.so.conf.d/icu.conf ]; then
-#            rm -rf /etc/ld.so.conf.d/icu.conf
-#        fi
 
-#        echo "/usr/local/icu603/lib" >/etc/ld.so.conf.d/icu.conf
-#        ldconfig
+        mkdir -p /usr/local/icu603/runtime
+        ln -sf /usr/local/icu603/lib/*.so.*.* /usr/local/icu603/runtime/
+
+        if [ -s /etc/ld.so.conf.d/icu603.conf ]; then
+            rm -rf /etc/ld.so.conf.d/icu603.conf
+        fi
+
+        echo "/usr/local/icu603/runtime" >/etc/ld.so.conf.d/icu603.conf
+        ldconfig
 }
 
 Install_Icu631() {
-    if [ ! -s /usr/local/icu/bin/icu-config ]; then
-        rm -rf /usr/local/icu
+    if [ -s /usr/local/icu631/bin/icu-config ]; then
+        rm -rf /usr/local/icu631
     fi
         Echo_Blue "[+] Installing icu4c-63_1..."
         cd ${cur_dir}/src
         Download_Files ${Libicu4c_63_1_DL} icu4c-63_1-src.tgz
         Tar_Cd icu4c-63_1-src.tgz icu/source
-        ./configure --prefix=/usr/local/icu
+        ./configure --prefix=/usr/local/icu631
         Make_Install
         cd ${cur_dir}/src/
         rm -rf ${cur_dir}/src/icu
-#        if [ -s /etc/ld.so.conf.d/icu.conf ]; then
-#            rm -rf /etc/ld.so.conf.d/icu.conf
-#        fi
 
-#        echo "/usr/local/icu631/lib" >/etc/ld.so.conf.d/icu.conf
-#        ldconfig
+        mkdir -p /usr/local/icu631/runtime
+        ln -sf /usr/local/icu631/lib/*.so.*.* /usr/local/icu631/runtime/
+
+        if [ -s /etc/ld.so.conf.d/icu631.conf ]; then
+            rm -rf /etc/ld.so.conf.d/icu631.conf
+        fi
+
+        echo "/usr/local/icu631/runtime" >/etc/ld.so.conf.d/icu631.conf
+        ldconfig
 }
 
 Install_Icu671() {
-    if [ ! -s /usr/local/icu/bin/icu-config ]; then
-        rm -rf /usr/local/icu
+    if [ -s /usr/local/icu671/bin/icu-config ]; then
+        rm -rf /usr/local/icu671
     fi
         Echo_Blue "[+] Installing icu4c-67_1..."
         cd ${cur_dir}/src
         Download_Files ${Libicu4c_67_1_DL} icu4c-67_1-src.tgz
         Tar_Cd icu4c-67_1-src.tgz icu/source
-        ./configure --prefix=/usr/local/icu
+        ./configure --prefix=/usr/local/icu671
         Make_Install
         cd ${cur_dir}/src/
         rm -rf ${cur_dir}/src/icu
-#        if [ -s /etc/ld.so.conf.d/icu.conf ]; then
-#            rm -rf /etc/ld.so.conf.d/icu.conf
-#        fi
 
-#        echo "/usr/local/icu671/lib" >/etc/ld.so.conf.d/icu.conf
-#        ldconfig
+        mkdir -p /usr/local/icu671/runtime
+        ln -sf /usr/local/icu671/lib/*.so.*.* /usr/local/icu671/runtime/
+
+        if [ -s /etc/ld.so.conf.d/icu671.conf ]; then
+            rm -rf /etc/ld.so.conf.d/icu671.conf
+        fi
+
+        echo "/usr/local/icu671/runtime" >/etc/ld.so.conf.d/icu671.conf
+        ldconfig
 }
 
 Install_Icu721() {
-    if [ ! -s /usr/local/icu/bin/icu-config ]; then
-        rm -rf /usr/local/icu
+    if [ -s /usr/local/icu721/bin/icu-config ]; then
+        rm -rf /usr/local/icu721
     fi
         Echo_Blue "[+] Installing icu4c-72_1..."
         cd ${cur_dir}/src
         Download_Files ${Libicu4c_72_1_DL} icu4c-72_1-src.tgz
         Tar_Cd icu4c-72_1-src.tgz icu/source
-        ./configure --prefix=/usr/local/icu
+        ./configure --prefix=/usr/local/icu721
         Make_Install
         cd ${cur_dir}/src/
         rm -rf ${cur_dir}/src/icu
-#        if [ -s /etc/ld.so.conf.d/icu.conf ]; then
-#            rm -rf /etc/ld.so.conf.d/icu.conf
-#        fi
 
-#        echo "/usr/local/icu721/lib" >/etc/ld.so.conf.d/icu.conf
-#        ldconfig
+        mkdir -p /usr/local/icu721/runtime
+        ln -sf /usr/local/icu721/lib/*.so.*.* /usr/local/icu721/runtime/
+
+        if [ -s /etc/ld.so.conf.d/icu721.conf ]; then
+            rm -rf /etc/ld.so.conf.d/icu721.conf
+        fi
+
+        echo "/usr/local/icu721/runtime" >/etc/ld.so.conf.d/icu721.conf
+        ldconfig
 }
 
 Download_Boost() {
@@ -849,57 +905,88 @@ Install_Boost() {
 }
 
 Install_Openssl() {
-    if [ ! -s /usr/local/openssl/bin/openssl ] || /usr/local/openssl/bin/openssl version | grep -v 'OpenSSL 1.0.2'; then
+    if [ -s /usr/local/openssl/bin/openssl ] ; then
+        rm -rf /usr/local/openssl
+    fi
         Echo_Blue "[+] Installing ${Openssl_Ver}"
         cd ${cur_dir}/src
         Download_Files ${Openssl_DL} ${Openssl_Ver}.tar.gz
         [[ -d "${Openssl_Ver}" ]] && rm -rf ${Openssl_Ver}
         Tar_Cd ${Openssl_Ver}.tar.gz ${Openssl_Ver}
-        ./config -fPIC -Wl,-rpath=/usr/local/openssl/lib --prefix=/usr/local/openssl --openssldir=/usr/local/openssl
+        ./config -fPIC --prefix=/usr/local/openssl --openssldir=/usr/local/openssl
         make depend
         Make_Install
         cd ${cur_dir}/src/
         rm -rf ${cur_dir}/src/${Openssl_Ver}
-    fi
+
+        mkdir -p /usr/local/openssl/runtime
+        ln -sf /usr/local/openssl/lib/*.so.*.* /usr/local/openssl/runtime/
+
+        if [ -s /etc/ld.so.conf.d/openssl.conf ]; then
+            rm -rf /etc/ld.so.conf.d/openssl.conf
+        fi
+
+        echo "/usr/local/openssl/runtime" > /etc/ld.so.conf.d/openssl.conf
+        ldconfig
+
 }
 
 Install_Openssl_New() {
 
-    if [ ! -s /usr/local/openssl1.1.1/bin/openssl ] || /usr/local/openssl1.1.1/bin/openssl version | grep -v 'OpenSSL 1.1.1'; then
+    if [ -s /usr/local/openssl1.1.1/bin/openssl ] ; then
+        rm -rf /usr/local/openssl1.1.1
+    fi
         Echo_Blue "[+] Installing ${Openssl_New_Ver}"
         cd ${cur_dir}/src
         Download_Files ${Openssl_New_DL} ${Openssl_New_Ver}.tar.gz
         [[ -d "${Openssl_New_Ver}" ]] && rm -rf ${Openssl_New_Ver}
         Tar_Cd ${Openssl_New_Ver}.tar.gz ${Openssl_New_Ver}
-        ./config enable-weak-ssl-ciphers -fPIC -Wl,-rpath=/usr/local/openssl1.1.1/lib --prefix=/usr/local/openssl1.1.1 --openssldir=/usr/local/openssl1.1.1
+        ./config enable-weak-ssl-ciphers -fPIC --prefix=/usr/local/openssl1.1.1 --openssldir=/usr/local/openssl1.1.1
         make depend
         Make_Install
-        #            ln -sf /usr/local/openssl1.1.1/lib/libcrypto.so.1.1 /usr/lib/
-        #            ln -sf /usr/local/openssl1.1.1/lib/libssl.so.1.1 /usr/lib/
+
         cd ${cur_dir}/src/
         rm -rf ${cur_dir}/src/${Openssl_New_Ver}
 
-        #        ldconfig
+        mkdir -p /usr/local/openssl1.1.1/runtime
+        ln -sf /usr/local/openssl1.1.1/lib/*.so.*.* /usr/local/openssl1.1.1/runtime/
+
+        if [ -s /etc/ld.so.conf.d/openssl1.1.1.conf ]; then
+            rm -rf /etc/ld.so.conf.d/openssl1.1.1.conf
+        fi
+
+        echo "/usr/local/openssl1.1.1/runtime" > /etc/ld.so.conf.d/openssl1.1.1.conf
+        ldconfig
+
         apache_with_ssl='--with-ssl=/usr/local/openssl1.1.1'
-    else
-        apache_with_ssl='--with-ssl'
-    fi
 }
 
 Install_Openssl3() {
 
-    if [ ! -s /usr/local/openssl3/bin/openssl ] || /usr/local/openssl3/bin/openssl version | grep -v 'OpenSSL 3.'; then
+    if [ -s /usr/local/openssl3/bin/openssl ] ; then
+        rm -rf /usr/local/openssl3
+    fi
         Echo_Blue "[+] Installing ${Openssl_3_Ver}"
         cd ${cur_dir}/src
         Download_Files ${Openssl_3_DL} ${Openssl_3_Ver}.tar.gz
         [[ -d "${Openssl_3_Ver}" ]] && rm -rf ${Openssl_3_Ver}
         Tar_Cd ${Openssl_3_Ver}.tar.gz ${Openssl_3_Ver}
-        ./config enable-weak-ssl-ciphers -fPIC -Wl,-rpath=/usr/local/openssl3/lib --prefix=/usr/local/openssl3 --openssldir=/usr/local/openssl3
+        ./config enable-weak-ssl-ciphers -fPIC --prefix=/usr/local/openssl3 --openssldir=/usr/local/openssl3
         make depend
         Make_Install
         cd ${cur_dir}/src/
         rm -rf ${cur_dir}/src/${Openssl_3_Ver}
-    fi
+
+        mkdir -p /usr/local/openssl3/runtime
+        ln -sf /usr/local/openssl3/lib/*.so.*.* /usr/local/openssl3/runtime/
+
+        if [ -s /etc/ld.so.conf.d/openssl3.conf ]; then
+            rm -rf /etc/ld.so.conf.d/openssl3.conf
+        fi
+
+        echo "/usr/local/openssl3/runtime" > /etc/ld.so.conf.d/openssl3.conf
+        ldconfig
+
 }
 
 Install_Nghttp2() {
@@ -933,12 +1020,14 @@ Install_Libzip() {
     # Configure with CMake
     cmake .. \
       -DCMAKE_INSTALL_PREFIX=/usr/local/libzip \
+      -DCMAKE_PREFIX_PATH="${Curl_Openssl_Path}" \
       -DOPENSSL_ROOT_DIR="${Curl_Openssl_Path}" \
-      -DOPENSSL_INCLUDE_DIR="${Curl_Openssl_Path}/include" \
-      -DOPENSSL_CRYPTO_LIBRARY="${Curl_Openssl_Path}/lib/libcrypto.so" \
-      -DOPENSSL_SSL_LIBRARY="${Curl_Openssl_Path}/lib/libssl.so" \
-      -DENABLE_BZIP2=ON
+      -DCMAKE_BUILD_TYPE=Release \
+      -DENABLE_GNUTLS=OFF \
+      -DENABLE_OPENSSL=ON
 
+#      -DENABLE_BZIP2=ON 
+    
     # Build and install
     make -j"$(nproc)"
     make install
@@ -947,9 +1036,11 @@ Install_Libzip() {
     rm -rf ${cur_dir}/src/${Libzip_Ver}
 
     # export path so that php can find it
-    export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/libzip/pkgconfig"
-    export CPPFLAGS="$CPPFLAGS -I/usr/local/libzip/include"
-    export LDFLAGS="$LDFLAGS -L/usr/local/libzip/lib -Wl,-rpath=/usr/local/libzip/lib"
+    if [ "${PHP_Use_PKG}" = 'y' ]; then
+        PKG_CONFIG_PATH_TEMP="$PKG_CONFIG_PATH_TEMP:/usr/local/libzip/pkgconfig"
+        CPPFLAGS_TEMP="$CPPFLAGS_TEMP -I/usr/local/libzip/include"
+        LDFLAGS_TEMP="$LDFLAGS_TEMP -L/usr/local/libzip/lib -Wl,-rpath=/usr/local/libzip/lib"
+    fi
 
 }
 

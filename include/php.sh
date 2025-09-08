@@ -28,29 +28,26 @@ PHP_with_curl() {
 }
 
 PHP_with_Libzip() {
-    if [ "${BuildOpenssl}" = "y" ]; then
-        Install_Libzip
-        with_libzip="--with-zip=/usr/local/libzip"
-    else
-        with_libzip='--with-zip'
+    if [ "${PHP_Use_PKG}" = 'y' ]; then
+        if [ "${BuildOpenssl}" = "y" ]; then
+            Install_Libzip
+            with_libzip="--with-zip=/usr/local/libzip"
+        else
+            with_libzip='--with-zip'
+        fi
     fi
-    PHP_Buildin_Option="${PHP_Buildin_Option} ${with_libzip}"
-    Echo_Blue "PHP Building Options: ${PHP_Buildin_Option}"
 }
 
 PHP_with_openssl() {
-    #    if openssl version | grep -Eqi "OpenSSL 1.1.*|OpenSSL 3.*"; then
-    if [[ -n "${PHPSelect}" && "${PHPSelect}" =~ ^[1-6]$ ]] || [[ "${php_version}" =~ ^(5\.|7\.0\.) ]] || [[ "${Php_Ver}" =~ (php-5\.|php-7\.0\.) ]]; then
-        UseOldOpenssl='y'
-        BuildOpenssl='y'
+    if openssl version | grep -Eqi "OpenSSL 1.1.*|OpenSSL 3.*"; then
+        if [[ -n "${PHPSelect}" && "${PHPSelect}" =~ ^[1-6]$ ]] || [[ "${php_version}" =~ ^(5\.|7\.0\.) ]] || [[ "${Php_Ver}" =~ (php-5\.|php-7\.0\.) ]]; then
+            UseOldOpenssl='y'
+            BuildOpenssl='y'
+        fi
     fi
-    #    fi
-    #    if echo "${PHPSelect}" | grep -Eqi "^[1-2]$" || echo "${php_version}" | grep -Eqi '^5\.[2,3]\.*' || echo "${Php_Ver}" | grep -Eqi "php-5\.[2,3]\.*"; then
-    #        UseOldOpenssl='y'
-    #    fi
-    if openssl version | grep -Eqi "OpenSSL 1.1.*"; then
-        if [[ "${PHPSelect}" =~ ^(12|13|14|15)$ ]] || [[ "${php_version}" =~ ^8\.[1-4]\. ]] || [[ "${Php_Ver}" =~ php-8\.[1-4]\. ]]; then
-            UseOpenssl3='y'
+    if openssl version | grep -Eqi "OpenSSL 1.0.*"; then
+        if [[ "${PHPSelect}" =~ ^(7|8|9|10|11|12|13|14|15)$ ]] || [[ "${php_version}" =~ ^(7\.[1-4]\.|8\.[0-4]\.) ]] || [[ "${Php_Ver}" =~ (php-7\.[1-4]\.|php-8\.[0-4]\.) ]]; then
+            UseNewOpenssl='y'
             BuildOpenssl='y'
         fi
     fi
@@ -60,6 +57,7 @@ PHP_with_openssl() {
             BuildOpenssl='y'
         fi
     fi
+
     if [ "${UseOldOpenssl}" = "y" ]; then
         Install_Openssl
         with_openssl='--with-openssl=/usr/local/openssl'
@@ -69,29 +67,32 @@ PHP_with_openssl() {
         with_openssl='--with-openssl=/usr/local/openssl1.1.1'
         Curl_Openssl_Path="/usr/local/openssl1.1.1"
         PHP_Openssl_Export
-    elif [ "${UseOpenssl3}" = "y" ]; then
-        Install_Openssl3
-        with_openssl='--with-openssl=/usr/local/openssl3'
-        Curl_Openssl_Path="/usr/local/openssl3"
-        PHP_Openssl_Export
+    #elif [ "${UseOpenssl3}" = "y" ]; then
+    #    Install_Openssl3
+    #    with_openssl='--with-openssl=/usr/local/openssl3'
+    #    Curl_Openssl_Path="/usr/local/openssl3"
+    #    PHP_Openssl_Export
     else
         with_openssl='--with-openssl'
+        apache_with_ssl='--with-ssl'
     fi
 }
 
 PHP_Openssl_Export() {
-    if echo "${php_version}" | grep -Eqi '^7\.4\.*|^8\.0\.*' || echo "${Php_Ver}" | grep -Eqi "php-7\.4\.*|php-8\.0\.*"; then
-    # export path so that php and curl compiler can find it
-        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/openssl1.1.1/lib/pkgconfig"
-        export CPPFLAGS="$CPPFLAGS -I/usr/local/openssl1.1.1/include"
-        export LDFLAGS="$LDFLAGS -L/usr/local/openssl1.1.1/lib -Wl,-rpath=/usr/local/openssl1.1.1/lib"
+    if [ "${UseNewOpenssl}" = "y" ]; then
+        if [ "${PHP_Use_PKG}" = 'y' ]; then
+        # export path so that php and curl compiler can find it
+            PKG_CONFIG_PATH_TEMP="/usr/local/openssl1.1.1/lib/pkgconfig"
+            CPPFLAGS_TEMP="-I/usr/local/openssl1.1.1/include"
+            LDFLAGS_TEMP="-L/usr/local/openssl1.1.1/lib"
+        fi
     fi
-    if echo "${php_version}" | grep -Eqi '^8\.[1-4]\.*' || echo "${Php_Ver}" | grep -Eqi "php-8\.[1-4]\.*"; then
+    #if echo "${php_version}" | grep -Eqi '^8\.[1-4]\.*' || echo "${Php_Ver}" | grep -Eqi "php-8\.[1-4]\.*"; then
     # export path so that php and curl compiler can find it
-        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/openssl3/lib/pkgconfig"
-        export CPPFLAGS="$CPPFLAGS -I/usr/local/openssl3/include"
-        export LDFLAGS="$LDFLAGS -L/usr/local/openssl3/lib -Wl,-rpath=/usr/local/openssl3/lib"
-    fi
+    #    export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/openssl3/lib/pkgconfig"
+    #    export CPPFLAGS="$CPPFLAGS -I/usr/local/openssl3/include"
+    #    export LDFLAGS="$LDFLAGS -L/usr/local/openssl3/lib -Wl,-rpath=/usr/local/openssl3/lib"
+    #fi
 }
 
 PHP_with_fileinfo() {
@@ -167,9 +168,15 @@ PHP_with_Sodium() {
 }
 
 PHP_with_Imap() {
+    if echo "${php_version}" | grep -Eqi '^8\.4\.*' || echo "${Php_Ver}" | grep -Eqi "php-8\.4\.*"; then
+        # since php 8.4, IMAP is removed
+        with_imap=''
+        return 0
+    fi
+
     if [ "${Enable_PHP_Imap}" = "n" ]; then
         with_imap=''
-    else
+    elif [[ ! "${UseNewOpenssl}" = "y" ]]; then
         if [ "$PM" = "yum" ]; then
             if [ "${DISTRO}" = "Oracle" ]; then
                 yum -y install oracle-epel-release
@@ -192,52 +199,96 @@ PHP_with_Imap() {
             apt-get install -y libc-client-dev libkrb5-dev
         fi
         with_imap='--with-imap --with-imap-ssl --with-kerberos'
+    else
+        # build c-library manually
+        Echo_Blue "[+] Building UW IMAP"
+        cd ${cur_dir}/src
+        git clone https://github.com/uw-imap/imap.git
+        cd imap
+        make slx \
+          SSLTYPE=unix.nopwd \
+          SSLDIR="${Curl_Openssl_Path}" \
+          SSLLIB="${Curl_Openssl_Path}/lib" \
+          SSLCERTS="${Curl_Openssl_Path}/ssl/certs"
+
+        rm -rf /usr/local/imap-ssl
+        mkdir -p /usr/local/imap-ssl/include /usr/local/imap-ssl/lib
+        cp c-client/*.h /usr/local/imap-ssl/include/
+        cp c-client/c-client.a /usr/local/imap-ssl/lib/libc-client.a
+
+        with_imap="--with-imap=/usr/local/imap-ssl --with-imap-ssl=${Curl_Openssl_Path}"
+
+        # cleaning
+        rm -rf cd ${cur_dir}/src/imap
     fi
 }
 
 PHP_with_Intl() {
-    #    if echo "${Ubuntu_Version}" | grep -Eqi "^19|2[0-7]\." || echo "${Debian_Version}" | grep -Eqi "^1[0-9]" || echo "${Raspbian_Version}" | grep -Eqi "^1[0-9]" || echo "${Deepin_Version}" | grep -Eqi "^2[0-9]" || echo "${UOS_Version}" | grep -Eqi "^2[0-9]" || echo "${Amazon_Version}" | grep -Eqi "^202[3-9]" || echo "${Kali_Version}" | grep -Eqi "^202[2-9]" || echo "${Fedora_Version}" | grep -Eqi "^3[7-9]|4[0-9]" || echo "${openEuler_Version}" | grep -Eqi "^2[2-9]" || echo "${Mint_Version}" | grep -Eqi "^2[0-9]" || echo "${Kylin_Version}" | grep -Eq "^v1[0-9]"; then
-    if echo "${php_version}" | grep -Eqi '^5\.[4-6]\.*' || echo "${Php_Ver}" | grep -Eqi "php-5\.[4-6]\.*"; then
-        Install_Icu522
-        with_icu_dir='--with-icu-dir=/usr/local/icu'
-        php_with_custom_icu='y'
-    fi
-    if echo "${php_version}" | grep -Eqi '^7\.[0-1]\.*' || echo "${Php_Ver}" | grep -Eqi "php-7\.[0-1]\.*"; then
-        Install_Icu571
-        with_icu_dir='--with-icu-dir=/usr/local/icu'
-        php_with_custom_icu='y'
-    fi
-    if echo "${php_version}" | grep -Eqi '^7\.[2-3]\.*' || echo "${Php_Ver}" | grep -Eqi "php-7\.[2-3]\.*"; then
-        Install_Icu631
-        with_icu_dir='--with-icu-dir=/usr/local/icu'
-        php_with_custom_icu='y'
-    fi
-    if echo "${php_version}" | grep -Eqi '^(7\.4\.*|8\.0\.*)' || echo "${Php_Ver}" | grep -Eqi "(php-7\.4\.*|php-8\.0\.*)"; then
-        Install_Icu671
-        with_icu_dir='--with-icu-dir=/usr/local/icu'
-        php_with_custom_icu='y'
-    # export path so that php compiler can find it
-        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/icu/lib/pkgconfig"
-        export CPPFLAGS="$CPPFLAGS -I/usr/local/icu/include"
-        export LDFLAGS="$LDFLAGS -L/usr/local/icu/lib -Wl,-rpath=/usr/local/icu/lib"
-
-    fi
-    if echo "${php_version}" | grep -Eqi '^8\.[1-4]\.*' || echo "${Php_Ver}" | grep -Eqi "php-8\.[1-4]\.*"; then
-        if ! (pkg-config --modversion icu-i18n | grep -Eqi '^7[0-9]'); then
-            Install_Icu721
-            with_icu_dir='--with-icu-dir=/usr/local/icu'
+    Get_ICU_Version
+    echo "System ICU version is ${local_icu_version}, detected by ${detected_icu_method}"
+    if echo "${php_version}" | grep -Eqi '^5\.[4-6]\.' || echo "${Php_Ver}" | grep -Eqi "php-5\.[4-6]\."; then
+        if [[ "${local_icu_version}" -lt 50 ]]; then
+            Install_Icu522
+            with_icu_dir='--with-icu-dir=/usr/local/icu522'
             php_with_custom_icu='y'
-        # export path so that php compiler can find it
-            export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/icu/lib/pkgconfig"
-            export CPPFLAGS="$CPPFLAGS -I/usr/local/icu/include"
-            export LDFLAGS="$LDFLAGS -L/usr/local/icu/lib -Wl,-rpath=/usr/local/icu/lib"
-
         fi
     fi
-    #    fi
+    if echo "${php_version}" | grep -Eqi '^7\.[0-1]\.' || echo "${Php_Ver}" | grep -Eqi "php-7\.[0-1]\."; then
+        if [[ "${local_icu_version}" -lt 50 || "${local_icu_version}" -gt 60 ]]; then
+            Install_Icu582
+            with_icu_dir='--with-icu-dir=/usr/local/icu582'
+            php_with_custom_icu='y'
+        fi
+    fi
+    if echo "${php_version}" | grep -Eqi '^7\.2\.' || echo "${Php_Ver}" | grep -Eqi "php-7\.2\."; then
+        if [[ "${local_icu_version}" -lt 50 || "${local_icu_version}" -gt 67 ]]; then
+            Install_Icu603
+            with_icu_dir='--with-icu-dir=/usr/local/icu603'
+            php_with_custom_icu='y'
+        fi
+    fi
+    if echo "${php_version}" | grep -Eqi '^7\.3\.' || echo "${Php_Ver}" | grep -Eqi "php-7\.3\."; then
+        if [[ "${local_icu_version}" -lt 52 || "${local_icu_version}" -gt 67 ]]; then
+            Install_Icu671
+            with_icu_dir='--with-icu-dir=/usr/local/icu671'
+            php_with_custom_icu='y'
+        fi
+    fi
+    if echo "${php_version}" | grep -Eqi '^7\.4\.' || echo "${Php_Ver}" | grep -Eqi "php-7\.4\."; then
+    # for best performance
+    #   if [[ "${local_icu_version}" -lt 56 || "${local_icu_version}" -gt 69 ]]; then
+    # for best compatible
+        if [[ "${local_icu_version}" -lt 56 ]]; then
+            Install_Icu671
+    #      with_icu_dir='--with-icu-dir=/usr/local/icu'
+            php_with_custom_icu='y'
+    # export path so that php compiler can find it
+            PKG_CONFIG_PATH_TEMP="${PKG_CONFIG_PATH_TEMP:+$PKG_CONFIG_PATH_TEMP:}/usr/local/icu671/lib/pkgconfig"
+            CPPFLAGS_TEMP="${CPPFLAGS_TEMP:+$CPPFLAGS_TEMP:} -I/usr/local/icu671/include"
+            LDFLAGS_TEMP="${LDFLAGS_TEMP:+$LDFLAGS_TEMP:} -L/usr/local/icu671/lib"
+        fi
+
+    fi
+    if echo "${php_version}" | grep -Eqi '^8\.[0-4]\.' || echo "${Php_Ver}" | grep -Eqi "php-8\.[0-4]\."; then
+        if [[ "${local_icu_version}" -lt 67 ]]; then
+            Install_Icu721
+     #      with_icu_dir='--with-icu-dir=/usr/local/icu'
+            php_with_custom_icu='y'
+        # export path so that php compiler can find it
+            PKG_CONFIG_PATH_TEMP="${PKG_CONFIG_PATH_TEMP:+$PKG_CONFIG_PATH_TEMP:}/usr/local/icu721/lib/pkgconfig"
+            CPPFLAGS_TEMP="${CPPFLAGS_TEMP:+$CPPFLAGS_TEMP:} -I/usr/local/icu721/include"
+            LDFLAGS_TEMP="${LDFLAGS_TEMP:+$LDFLAGS_TEMP:} -L/usr/local/icu721/lib"
+        fi
+    fi
+
     if pkg-config --modversion icu-i18n | grep -Eqi '^(6[89]|7[0-9])'; then
-        export CXX="g++ -DTRUE=1 -DFALSE=0"
-        export CC="gcc -DTRUE=1 -DFALSE=0"
+        if ! echo "${php_version}" | grep -Eqi '^8\.[2-4]\.' && ! echo "${Php_Ver}" | grep -Eqi '^php-8\.[2-4]\.'; then
+            echo "Compiler flags need to be set"
+            export CXX="g++ -DTRUE=1 -DFALSE=0"
+            export CC="gcc -DTRUE=1 -DFALSE=0"
+        else
+            echo "Compiler flags does not to be set"
+        fi
     fi
 }
 
@@ -248,6 +299,7 @@ PHP_With_Libxml2() {
         if ldd "$Libxml2_check" | grep -qi icu; then
             echo "ICU detected in system libxml2!"
             Echo_Blue "[+] Installing ${Libxml2_Ver}"
+            rm -rf /usr/local/libxml2
             cd ${cur_dir}/src
             Download_Files ${Libxml2_DL} ${Libxml2_Ver}.tar.xz
             Tar_Cd ${Libxml2_Ver}.tar.xz ${Libxml2_Ver}
@@ -255,23 +307,69 @@ PHP_With_Libxml2() {
             Make_Install
             cd ${cur_dir}/src/
             rm -rf ${cur_dir}/src/${Libxml2_Ver}
-            with_libxml_dir="--with-libxml=/usr/local/libxml2"
+            
          # export path so that php compiler can find it
-            export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/usr/local/libxml2/lib/pkgconfig"
-            export CPPFLAGS="$CPPFLAGS -I/usr/local/libxml2/include"
-            export LDFLAGS="$LDFLAGS -L/usr/local/libxml2/lib"
+            if [ "${PHP_Use_PKG}" = "y" ]; then
+                PKG_CONFIG_PATH_TEMP="$PKG_CONFIG_PATH_TEMP:/usr/local/libxml2/lib/pkgconfig"
+                CPPFLAGS_TEMP="$CPPFLAGS_TEMP -I/usr/local/libxml2/include"
+                LDFLAGS_TEMP="$LDFLAGS_TEMP -L/usr/local/libxml2/lib"
+                with_libxml_dir="--with-libxml=/usr/local/libxml2"
+            else
+                with_libxml_dir="--with-libxml-dir=/usr/local/libxml2"
+            fi
         else
             echo "System libxml2 is not linked to ICU. No build needed"
         fi
     else
+        if [ "${PHP_Use_PKG}" = "y" ]; then
+            with_libxml_dir="--with-libxml"
+        fi
         echo "PHP is using system ICU. No build needed"
     fi
     
 }
 
+PHP_Check_PKG() {
+    if echo "${php_version}" | grep -Eqi '^(7\.4\.|8\.[0-4]\.)' || echo "${Php_Ver}" | grep -Eqi "(php-7\.4\.|php-8\.[0-4]\.)"; then
+        PHP_Use_PKG="y"
+    fi
+
+}
+
+PHP_ENV_UNSET() {
+    if [ "${PHP_Use_PKG}" = "y" ]; then
+        if [[ -n "${PKG_CONFIG_PATH}" ]]; then
+                echo "PKG_CONFIG_PATH has value and it's ${PKG_CONFIG_PATH}"
+                unset PKG_CONFIG_PATH CPPFLAGS LDFLAGS
+        fi
+    fi
+
+}
+
+PHP_ENV_SET() {
+    if [ "${PHP_Use_PKG}" = "y" ]; then
+        if [[ -n "${PKG_CONFIG_PATH_TEMP}" ]]; then
+            export PKG_CONFIG_PATH="${PKG_CONFIG_PATH_TEMP}"
+            export CPPFLAGS="${CPPFLAGS_TEMP}"
+            export LDFLAGS="${LDFLAGS_TEMP}"
+            echo "PKG Environment EXPORT finished."
+            echo "PKG_CONFIG_PATH is set to ${PKG_CONFIG_PATH}"
+            echo "CPPFLAGS is set to ${CPPFLAGS}"
+            echo "LDFLAGS is set to ${LDFLAGS}"
+        else
+            echo "No PKG Environment EXPORT required."
+        fi
+    else
+        echo "PHP's not using PKG as it's < 7.4"
+    fi
+}
+
 Check_PHP_Option() {
+    PHP_Check_PKG
+    PHP_ENV_UNSET
     PHP_with_openssl
     PHP_with_curl
+    PHP_with_Libzip
     PHP_with_fileinfo
     PHP_with_Exif
     PHP_with_Ldap
@@ -280,7 +378,8 @@ Check_PHP_Option() {
     PHP_with_Imap
     PHP_with_Intl
     PHP_With_Libxml2
-    PHP_Buildin_Option="${with_exif} ${with_ldap} ${with_bz2} ${with_sodium} ${with_imap} ${with_icu_dir} ${with_libxml_dir}"
+    PHP_Buildin_Option="${with_exif} ${with_ldap} ${with_bz2} ${with_sodium} ${with_imap} ${with_icu_dir} ${with_libxml_dir} ${with_libzip}"
+    PHP_ENV_SET
 }
 
 Ln_PHP_Bin() {
@@ -367,9 +466,9 @@ Install_PHP_52() {
     patch -p1 <${cur_dir}/src/patch/php-5.2-multipart-form-data.patch
     ./buildconf --force
     if [ "${Stack}" = "lnmp" ]; then
-        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --with-mysql=${MySQL_Dir} --with-mysqli=${MySQL_Config} --with-pdo-mysql=${MySQL_Dir} --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr --enable-xml --enable-discard-path --enable-magic-quotes --enable-safe-mode --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-fastcgi --enable-fpm --enable-force-cgi-redirect --enable-mbstring --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext --with-mime-magic ${PHP_Buildin_Option} ${PHP_Modules_Options}
+        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --with-mysql=${MySQL_Dir} --with-mysqli=${MySQL_Config} --with-pdo-mysql=${MySQL_Dir} --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --enable-xml --enable-discard-path --enable-magic-quotes --enable-safe-mode --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-fastcgi --enable-fpm --enable-force-cgi-redirect --enable-mbstring --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext --with-mime-magic ${PHP_Buildin_Option} ${PHP_Modules_Options}
     else
-        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --with-apxs2=/usr/local/apache/bin/apxs --with-mysql=${MySQL_Dir} --with-mysqli=${MySQL_Config} --with-pdo-mysql=${MySQL_Dir} --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr --enable-xml --enable-discard-path --enable-magic-quotes --enable-safe-mode --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext --with-mime-magic ${PHP_Buildin_Option} ${PHP_Modules_Options}
+        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --with-apxs2=/usr/local/apache/bin/apxs --with-mysql=${MySQL_Dir} --with-mysqli=${MySQL_Config} --with-pdo-mysql=${MySQL_Dir} --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --enable-xml --enable-discard-path --enable-magic-quotes --enable-safe-mode --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext --with-mime-magic ${PHP_Buildin_Option} ${PHP_Modules_Options}
     fi
     PHP_Make_Install
 
@@ -420,9 +519,9 @@ Install_PHP_53() {
     Tar_Cd ${Php_Ver}.tar.bz2 ${Php_Ver}
     patch -p1 <${cur_dir}/src/patch/php-5.3-multipart-form-data.patch
     if [ "${Stack}" = "lnmp" ]; then
-        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --enable-fpm --with-fpm-user=www --with-fpm-group=www --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-magic-quotes --enable-safe-mode --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} ${PHP_Buildin_Option} ${PHP_Modules_Options}
+        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --enable-fpm --with-fpm-user=www --with-fpm-group=www --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --enable-xml --disable-rpath --enable-magic-quotes --enable-safe-mode --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} ${PHP_Buildin_Option} ${PHP_Modules_Options}
     else
-        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --with-apxs2=/usr/local/apache/bin/apxs --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-magic-quotes --enable-safe-mode --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} ${PHP_Buildin_Option} ${PHP_Modules_Options}
+        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --with-apxs2=/usr/local/apache/bin/apxs --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --enable-xml --disable-rpath --enable-magic-quotes --enable-safe-mode --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} ${PHP_Buildin_Option} ${PHP_Modules_Options}
     fi
 
     PHP_Make_Install
@@ -510,9 +609,9 @@ Install_PHP_54() {
     Echo_Blue "[+] Installing ${Php_Ver}..."
     Tar_Cd ${Php_Ver}.tar.bz2 ${Php_Ver}
     if [ "${Stack}" = "lnmp" ]; then
-        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --enable-fpm --with-fpm-user=www --with-fpm-group=www --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} --enable-intl --with-xsl ${PHP_Buildin_Option} ${PHP_Modules_Options}
+        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --enable-fpm --with-fpm-user=www --with-fpm-group=www --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} --enable-intl --with-xsl ${PHP_Buildin_Option} ${PHP_Modules_Options}
     else
-        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --with-apxs2=/usr/local/apache/bin/apxs --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} --enable-intl --with-xsl ${PHP_Buildin_Option} ${PHP_Modules_Options}
+        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --with-apxs2=/usr/local/apache/bin/apxs --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} --enable-intl --with-xsl ${PHP_Buildin_Option} ${PHP_Modules_Options}
     fi
 
     PHP_Make_Install
@@ -602,9 +701,9 @@ Install_PHP_55() {
         patch -p1 <${cur_dir}/src/patch/php-5.5-5.6-asm-aarch64.patch
     fi
     if [ "${Stack}" = "lnmp" ]; then
-        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --enable-fpm --with-fpm-user=www --with-fpm-group=www --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --enable-intl --with-xsl ${PHP_Buildin_Option} ${PHP_Modules_Options}
+        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --enable-fpm --with-fpm-user=www --with-fpm-group=www --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --enable-intl --with-xsl ${PHP_Buildin_Option} ${PHP_Modules_Options}
     else
-        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --with-apxs2=/usr/local/apache/bin/apxs --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --enable-intl --with-xsl ${PHP_Buildin_Option} ${PHP_Modules_Options}
+        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --with-apxs2=/usr/local/apache/bin/apxs --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --enable-intl --with-xsl ${PHP_Buildin_Option} ${PHP_Modules_Options}
     fi
 
     PHP_Make_Install
@@ -697,9 +796,9 @@ Install_PHP_56() {
     #        patch -p1 < ${cur_dir}/src/patch/php-5.6-intl.patch
     #    fi
     if [ "${Stack}" = "lnmp" ]; then
-        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --enable-fpm --with-fpm-user=www --with-fpm-group=www --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --enable-intl --with-xsl ${PHP_Buildin_Option} ${PHP_Modules_Options}
+        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --enable-fpm --with-fpm-user=www --with-fpm-group=www --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --enable-intl --with-xsl ${PHP_Buildin_Option} ${PHP_Modules_Options}
     else
-        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --with-apxs2=/usr/local/apache/bin/apxs --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --enable-intl --with-xsl ${PHP_Buildin_Option} ${PHP_Modules_Options}
+        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --with-apxs2=/usr/local/apache/bin/apxs --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --enable-intl --with-xsl ${PHP_Buildin_Option} ${PHP_Modules_Options}
     fi
 
     PHP_Make_Install
@@ -788,9 +887,9 @@ Install_PHP_7() {
     #        patch -p1 < ${cur_dir}/src/patch/php-7.0-intl.patch
     #    fi
     if [ "${Stack}" = "lnmp" ]; then
-        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --enable-fpm --with-fpm-user=www --with-fpm-group=www --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --enable-intl --enable-pcntl --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --with-xsl ${PHP_Buildin_Option} ${PHP_Modules_Options}
+        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --enable-fpm --with-fpm-user=www --with-fpm-group=www --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --enable-intl --enable-pcntl --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --with-xsl ${PHP_Buildin_Option} ${PHP_Modules_Options}
     else
-        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --with-apxs2=/usr/local/apache/bin/apxs --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --enable-intl --enable-pcntl --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --with-xsl ${PHP_Buildin_Option} ${PHP_Modules_Options}
+        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --with-apxs2=/usr/local/apache/bin/apxs --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --enable-intl --enable-pcntl --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --with-xsl ${PHP_Buildin_Option} ${PHP_Modules_Options}
     fi
 
     PHP_Make_Install
@@ -859,9 +958,9 @@ Install_PHP_71() {
     #    PHP_Openssl3_Patch
     #    PHP_ICU70_Patch
     if [ "${Stack}" = "lnmp" ]; then
-        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --enable-fpm --with-fpm-user=www --with-fpm-group=www --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --enable-intl --enable-pcntl --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --with-xsl ${PHP_Buildin_Option} ${PHP_Modules_Options}
+        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --enable-fpm --with-fpm-user=www --with-fpm-group=www --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --enable-intl --enable-pcntl --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --with-xsl ${PHP_Buildin_Option} ${PHP_Modules_Options}
     else
-        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --with-apxs2=/usr/local/apache/bin/apxs --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --enable-intl --enable-pcntl --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --with-xsl ${PHP_Buildin_Option} ${PHP_Modules_Options}
+        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --with-apxs2=/usr/local/apache/bin/apxs --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --enable-intl --enable-pcntl --with-mcrypt --enable-ftp --with-gd --enable-gd-native-ttf ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --with-xsl ${PHP_Buildin_Option} ${PHP_Modules_Options}
     fi
 
     PHP_Make_Install
@@ -930,9 +1029,9 @@ Install_PHP_72() {
     #    PHP_Openssl3_Patch
     #    PHP_ICU70_Patch
     if [ "${Stack}" = "lnmp" ]; then
-        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --enable-fpm --with-fpm-user=www --with-fpm-group=www --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --enable-intl --enable-pcntl --enable-ftp --with-gd ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --with-xsl ${PHP_Buildin_Option} ${PHP_Modules_Options}
+        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --enable-fpm --with-fpm-user=www --with-fpm-group=www --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --enable-intl --enable-pcntl --enable-ftp --with-gd ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --with-xsl ${PHP_Buildin_Option} ${PHP_Modules_Options}
     else
-        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --with-apxs2=/usr/local/apache/bin/apxs --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --enable-intl --enable-pcntl --enable-ftp --with-gd ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --with-xsl ${PHP_Buildin_Option} ${PHP_Modules_Options}
+        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --with-apxs2=/usr/local/apache/bin/apxs --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --enable-intl --enable-pcntl --enable-ftp --with-gd ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --with-xsl ${PHP_Buildin_Option} ${PHP_Modules_Options}
     fi
 
     PHP_Make_Install
@@ -1001,9 +1100,9 @@ Install_PHP_73() {
     #    PHP_Openssl3_Patch
     #    PHP_ICU70_Patch
     if [ "${Stack}" = "lnmp" ]; then
-        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --enable-fpm --with-fpm-user=www --with-fpm-group=www --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --enable-intl --enable-pcntl --enable-ftp --with-gd ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --without-libzip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --with-xsl --with-pear ${PHP_Buildin_Option} ${PHP_Modules_Options}
+        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --enable-fpm --with-fpm-user=www --with-fpm-group=www --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --enable-intl --enable-pcntl --enable-ftp --with-gd ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --without-libzip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --with-xsl --with-pear ${PHP_Buildin_Option} ${PHP_Modules_Options}
     else
-        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --with-apxs2=/usr/local/apache/bin/apxs --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --enable-intl --enable-pcntl --enable-ftp --with-gd ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --without-libzip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --with-xsl --with-pear ${PHP_Buildin_Option} ${PHP_Modules_Options}
+        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --with-apxs2=/usr/local/apache/bin/apxs --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype-dir=/usr/local/freetype --with-jpeg-dir --with-png-dir --with-zlib --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --enable-intl --enable-pcntl --enable-ftp --with-gd ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-zip --without-libzip --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --with-xsl --with-pear ${PHP_Buildin_Option} ${PHP_Modules_Options}
     fi
 
     PHP_Make_Install
@@ -1067,14 +1166,13 @@ EOF
 }
 
 Install_PHP_74() {
-    PHP_with_Libzip
     Echo_Blue "[+] Installing ${Php_Ver}"
     Tar_Cd ${Php_Ver}.tar.bz2 ${Php_Ver}
     #    PHP_Openssl3_Patch
     if [ "${Stack}" = "lnmp" ]; then
-        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --enable-fpm --with-fpm-user=www --with-fpm-group=www --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype=/usr/local/freetype --with-jpeg --with-png --with-zlib --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --enable-intl --enable-pcntl --enable-ftp --enable-gd ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --with-xsl --with-pear --with-webp ${PHP_Buildin_Option} ${PHP_Modules_Options}
+        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --enable-fpm --with-fpm-user=www --with-fpm-group=www --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype=/usr/local/freetype --with-jpeg --with-zlib --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --enable-intl --enable-pcntl --enable-ftp --enable-gd ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --with-xsl --with-pear --with-webp ${PHP_Buildin_Option} ${PHP_Modules_Options}
     else
-        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --with-apxs2=/usr/local/apache/bin/apxs --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype=/usr/local/freetype --with-jpeg --with-png --with-zlib --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --enable-intl --enable-pcntl --enable-ftp --enable-gd ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --with-xsl --with-pear --with-webp ${PHP_Buildin_Option} ${PHP_Modules_Options}
+        ./configure --prefix=/usr/local/php --with-config-file-path=/usr/local/php/etc --with-config-file-scan-dir=/usr/local/php/conf.d --with-apxs2=/usr/local/apache/bin/apxs --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd --with-iconv-dir --with-freetype=/usr/local/freetype --with-jpeg --with-zlib --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-sysvsem --enable-inline-optimization ${with_curl} --enable-mbregex --enable-mbstring --enable-intl --enable-pcntl --enable-ftp --enable-gd ${with_openssl} --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-soap --with-gettext ${with_fileinfo} --enable-opcache --with-xsl --with-pear --with-webp ${PHP_Buildin_Option} ${PHP_Modules_Options}
     fi
 
     PHP_Make_Install
@@ -1138,7 +1236,6 @@ EOF
 }
 
 Install_PHP_80() {
-    PHP_with_Libzip
     Echo_Blue "[+] Installing ${Php_Ver}"
     Tar_Cd ${Php_Ver}.tar.bz2 ${Php_Ver}
     #    PHP_Openssl3_Patch
@@ -1209,7 +1306,6 @@ EOF
 }
 
 Install_PHP_81() {
-    PHP_with_Libzip
     Echo_Blue "[+] Installing ${Php_Ver}"
     Tar_Cd ${Php_Ver}.tar.bz2 ${Php_Ver}
     if [ "${Stack}" = "lnmp" ]; then
@@ -1279,7 +1375,6 @@ EOF
 }
 
 Install_PHP_82() {
-    PHP_with_Libzip
     Echo_Blue "[+] Installing ${Php_Ver}"
     Tar_Cd ${Php_Ver}.tar.bz2 ${Php_Ver}
     if [ "${Stack}" = "lnmp" ]; then
@@ -1349,7 +1444,6 @@ EOF
 }
 
 Install_PHP_83() {
-    PHP_with_Libzip
     Echo_Blue "[+] Installing ${Php_Ver}"
     Tar_Cd ${Php_Ver}.tar.bz2 ${Php_Ver}
     if [ "${Stack}" = "lnmp" ]; then

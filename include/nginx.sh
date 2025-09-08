@@ -8,26 +8,29 @@ Install_Nginx_Openssl() {
         Nginx_Ver_Com=$(${cur_dir}/include/version_compare 1.13.0 ${Nginx_Version})
         if [[ "${Nginx_Ver_Com}" == "0" || "${Nginx_Ver_Com}" == "1" ]]; then
             Download_Files ${Openssl_DL} ${Openssl_Ver}.tar.gz
-            [[ -d "${Openssl_Ver}" ]] && rm -rf ${Openssl_Ver}
+            rm -rf ${Openssl_Ver}          
             tar zxf ${Openssl_Ver}.tar.gz
             Nginx_With_Openssl="--with-openssl=${cur_dir}/src/${Openssl_Ver}"
         else
             if [[ "${Nginx_Version}" =~ ^1\.(2[5-9]|3[0-9])\. ]]; then
                 Check_Openssl
                 if [[ "${isOpenSSL3}" = "y" ]]; then
+                    echo "System's default openssl version is 3, compile nginx with openssl 3"
                     Download_Files ${Openssl_3_DL} ${Openssl_3_Ver}.tar.gz
-                    [[ -d "${Openssl_3_Ver}" ]] && rm -rf ${Openssl_3_Ver}
+                    rm -rf ${Openssl_3_Ver}
                     tar zxf ${Openssl_3_Ver}.tar.gz
                     Nginx_With_Openssl="--with-openssl=${cur_dir}/src/${Openssl_3_Ver} --with-openssl-opt=enable-weak-ssl-ciphers"
                 else
+                    echo "System's default openssl version is 1.1.1, compile nginx with openssl 1.1.1"
                     Download_Files ${Openssl_New_DL} ${Openssl_New_Ver}.tar.gz
-                    [[ -d "${Openssl_New_Ver}" ]] && rm -rf ${Openssl_New_Ver}
+                    rm -rf ${Openssl_New_Ver}                   
                     tar zxf ${Openssl_New_Ver}.tar.gz
                     Nginx_With_Openssl="--with-openssl=${cur_dir}/src/${Openssl_New_Ver} --with-openssl-opt=enable-weak-ssl-ciphers"
                 fi
             else
+                echo "Compile nginx with openssl 1.1.1"
                 Download_Files ${Openssl_New_DL} ${Openssl_New_Ver}.tar.gz
-                [[ -d "${Openssl_New_Ver}" ]] && rm -rf ${Openssl_New_Ver}
+                rm -rf ${Openssl_New_Ver} 
                 tar zxf ${Openssl_New_Ver}.tar.gz
                 Nginx_With_Openssl="--with-openssl=${cur_dir}/src/${Openssl_New_Ver} --with-openssl-opt=enable-weak-ssl-ciphers"
             fi
@@ -50,7 +53,6 @@ Install_Nginx_Lua() {
         echo "Installing Lua for Nginx..."
         cd ${cur_dir}/src
         #      Download_Files ${Luajit_DL} ${Luajit_Ver}.tar.gz
-        rm -rf luajit
         git clone https://luajit.org/git/luajit.git
         Download_O_Files ${LuaNginxModule_DL} ${LuaNginxModule}.tar.gz
         Download_O_Files ${NgxDevelKit_DL} ${NgxDevelKit}.tar.gz
@@ -64,7 +66,6 @@ Install_Nginx_Lua() {
         make
         make install PREFIX=/usr/local/luajit
         cd ${cur_dir}/src
-        rm -rf ${cur_dir}/src/luajit
 
         cat >/etc/ld.so.conf.d/luajit.conf <<EOF
 /usr/local/luajit/lib
@@ -111,7 +112,6 @@ Install_Ngx_FancyIndex() {
         echo "Installing Ngx FancyIndex for Nginx..."
         cd ${cur_dir}/src
         Download_Files ${NgxFancyIndex_DL} ${NgxFancyIndex_Ver}.tar.xz
-
         Tar_Cd ${NgxFancyIndex_Ver}.tar.xz
         Ngx_FancyIndex="--add-module=${cur_dir}/src/${NgxFancyIndex_Ver}"
     fi
@@ -124,9 +124,10 @@ Install_Nginx() {
 
     cd ${cur_dir}/src
     Install_Nginx_Openssl
-    Install_Nginx_Lua
     Install_Nginx_Pcre
+    Install_Nginx_Lua
     Install_Ngx_FancyIndex
+    rm -rf ${Nginx_Ver}
     Tar_Cd ${Nginx_Ver}.tar.gz ${Nginx_Ver}
     if [[ "${DISTRO}" = "Fedora" && ${Fedora_Version} -ge 28 ]]; then
         patch -p1 <${cur_dir}/src/patch/nginx-libxcrypt.patch
@@ -216,4 +217,20 @@ google_perftools_profiles /tmp/tcmalloc;' /usr/local/nginx/conf/nginx.conf
             sed -i 's/listen 80 default_server;/listen 80 default_server reuseport;/g' /usr/local/nginx/conf/nginx.conf
         fi
     fi
+
+    ## start cleaning
+    cd ${cur_dir}/src && rm -rf ${cur_dir}/src/${Nginx_Ver}
+    [[ -d "${Openssl_3_Ver}" ]] && rm -rf ${Openssl_3_Ver}
+    [[ -d "${Openssl_New_Ver}" ]] && rm -rf ${Openssl_New_Ver}
+    [[ -d "${Openssl_Ver}" ]] && rm -rf ${Openssl_Ver}
+    rm -rf ${Pcre_Ver}
+    if [ "${Enable_Nginx_Lua}" = 'y' ]; then
+        rm -rf ${cur_dir}/src/luajit
+        rm -rf ${LuaNginxModule}
+        rm -rf ${NgxDevelKit}
+        rm -rf ${LuaRestyCore}
+        rm -rf ${LuaRestyLrucache}
+    fi
+    [[ -d "${NgxFancyIndex_Ver}" ]] && rm -rf ${NgxFancyIndex_Ver}
+    
 }

@@ -62,6 +62,7 @@ if [ "${Use_Official}" = "y" ]; then
     Libicu4c_DL="https://github.com/unicode-org/icu/releases/download/release-58-3/icu4c-58_3-src.tgz"
     Libicu4c_52_2_DL="https://github.com/unicode-org/icu/releases/download/release-52-2/icu4c-52_2-src.tgz"
     Libicu4c_57_1_DL="https://github.com/unicode-org/icu/releases/download/release-57-1/icu4c-57_1-src.tgz"
+    Libicu4c_58_2_DL="https://github.com/unicode-org/icu/releases/download/release-58-2/icu4c-58_2-src.tgz"
     Libicu4c_60_3_DL="https://github.com/unicode-org/icu/releases/download/release-60-3/icu4c-60_3-src.tgz"
     Libicu4c_63_1_DL="https://github.com/unicode-org/icu/releases/download/release-63-1/icu4c-63_1-src.tgz"
     Libicu4c_67_1_DL="https://github.com/unicode-org/icu/releases/download/release-67-1/icu4c-67_1-src.tgz"

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 DB_Info=('MySQL 5.1.73' 'MySQL 5.5.62' 'MySQL 5.6.51' 'MySQL 5.7.44' 'MySQL 8.0.37' 'MariaDB 5.5.68' 'MariaDB 10.4.33' 'MariaDB 10.5.24' 'MariaDB 10.6.17' 'MariaDB 10.11.7' 'MySQL 8.4.0')
-PHP_Info=('PHP 5.2.17' 'PHP 5.3.29' 'PHP 5.4.45' 'PHP 5.5.38' 'PHP 5.6.40' 'PHP 7.0.33' 'PHP 7.1.33' 'PHP 7.2.34' 'PHP 7.3.33' 'PHP 7.4.33' 'PHP 8.0.30' 'PHP 8.1.28' 'PHP 8.2.19' 'PHP 8.3.7')
+PHP_Info=('PHP 5.2.17' 'PHP 5.3.29' 'PHP 5.4.45' 'PHP 5.5.38' 'PHP 5.6.40' 'PHP 7.0.33' 'PHP 7.1.33' 'PHP 7.2.34' 'PHP 7.3.33' 'PHP 7.4.33' 'PHP 8.0.30' 'PHP 8.1.33' 'PHP 8.2.29' 'PHP 8.3.24')
 Apache_Info=('Apache 2.2.34' 'Apache 2.4.57')
 
 Database_Selection()
@@ -1168,4 +1168,31 @@ Check_Openssl()
     if openssl version | grep -Eqi "OpenSSL 3.*"; then
         isOpenSSL3='y'
     fi
+}
+
+Get_ICU_Version()
+{
+    echo "Detecting system ICU version"
+    # step 1 pkg-config
+    if command -v pkg-config >/dev/null 2>&1 && pkg-config --exists icu-i18n; then
+        detected_icu=$(pkg-config --modversion icu-i18n)
+        detected_icu_method="pkg-config"
+    # Step 2: Try icu-config
+    elif command -v icu-config >/dev/null 2>&1; then
+        detected_icu=$(icu-config --version)
+        detected_micu_ethod="icu-config"
+    # Step 3: Try binary inspection via ldconfig and strings
+    else
+        icu_lib=$(ldconfig -p | grep libicuuc.so | head -n1 | awk '{print $NF}')
+        if [[ -n "$icu_lib" ]]; then
+            detected_icu=$(strings "$icu_lib" | grep -Eo '^ICU version [0-9]+\.[0-9]+' | head -n1 | awk '{print $3}')
+            detected_icu_method="ldconfig+strings"
+        else
+            detected_icu=""
+            detected_icu_method="none"
+        fi
+   fi
+
+   local_icu_version=${detected_icu%%.*}
+   local_icu_version=${local_icu_version:-0}
 }
